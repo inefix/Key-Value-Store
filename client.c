@@ -13,55 +13,60 @@
 #define ServerPort 7777
 #define SIZE 1024
 
-
-
-
-
 int main(int argc, char** argv) {
 
-    int srv_sock;
-    struct sockaddr_in serverAddr;
-    char text[SIZE],msg[SIZE],get_msg[SIZE];
+    int sock;
+    struct sockaddr_in srv;
+    char text[SIZE],msg[SIZE],reply[SIZE];
     int byte;
     //Create Socket
-    srv_sock = socket(AF_INET, SOCK_STREAM, 0);
-    if(srv_sock == -1)
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if(sock == -1)
         perror("Error on Socket");
 
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(ServerPort);
-    serverAddr.sin_addr.s_addr =inet_addr(ServerIP);
-    memset(&(serverAddr.sin_zero), '\0', 8);
+    srv.sin_family = AF_INET;
+    srv.sin_port = htons(ServerPort);
+    srv.sin_addr.s_addr =inet_addr(ServerIP);
+    memset(&(srv.sin_zero), '\0', 8);
 
     // Connect to server
-    if(connect(srv_sock, (struct sockaddr *)&serverAddr, sizeof(struct sockaddr)) == -1)
+    if(connect(sock, (struct sockaddr *)&srv, sizeof(struct sockaddr)) == -1)
         perror("Error on Connect");
+
     puts("Connected");
+
+    //comm with srv
     while(1)
     {
         //Get message
-        printf("type your msg >>> "); scanf("%s",msg);
+        printf("'q' to close session \n");
+        printf("type your msg >>> ");
+        scanf("%s",msg);
         //Edit message
-        if(msg == "close") //TODO : find way to close socket properly after testing
-            close(socket);
+        if(msg[0] == 'q'){
+            close(sock);
+            return 0;
+        }
+        else{
+            strcpy(text, "client :");
+            strcat(text, ": ");
+            strcat(text, msg);
 
-        strcpy(text, "client ");
-        strcat(text, ": ");
-        strcat(text, msg);
-        //Send message
-        byte = send(srv_sock, text, strlen(text), 0);
-        if(byte == -1)
-            perror("Error on Send");
-        else if(byte == 0)
-            printf("Connection've been closed");
-        //Get reply from server
-        recv(srv_sock, &get_msg, SIZE-1, 0);
-        printf("received message %s \n", get_msg);
+            //Send message
+            byte = send(sock, text, strlen(text), 0);
+            if(byte == -1)
+                perror("sending from client failed");
+            else if(byte == 0)
+                printf("Connection've been closed");
+
+            //Get reply from server
+            if (recv(sock, &reply, SIZE-1, 0)<0){
+                perror("recv failed");
+            };
+            printf("received message from srv : %s \n", reply);
+        }
     }
     //Close socket
-    close(srv_sock);
-
-
-
+    close(sock);
     return (EXIT_SUCCESS);
 }
