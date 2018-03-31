@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+
 //#define ServerIP "35.162.226.229"
 #define ServerIP "127.0.0.1"
 #define ServerPort 7777
@@ -17,7 +18,7 @@ int main(int argc, char** argv) {
 
     int sock;
     struct sockaddr_in srv;
-    char text[SIZE],msg[SIZE],reply[SIZE];
+    char text[SIZE], msg[SIZE],reply[SIZE];
     int byte;
     //Create Socket
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -38,32 +39,34 @@ int main(int argc, char** argv) {
     //comm with srv
     while(1)
     {
+        memset(msg, 0, SIZE);
+        memset(text, 0, SIZE);
+        memset(reply, 0, SIZE);
         //Get message
-        printf("'q' to close session \n");
+        printf("'q' to close session \n"); //TODO ajouter toutes les fonctions
         printf("type your msg >>> ");
-        scanf("%s",msg);
-        //Edit message
+        fgets(msg, SIZE+1, stdin); //lire tout le string
         if(msg[0] == 'q'){
             close(sock);
             return 0;
         }
         else{
-            strcpy(text, "client :");
-            strcat(text, ": ");
+            strcpy(text, "client: ");
             strcat(text, msg);
-
+            printf("sending string  %s",text);
             //Send message
-            byte = send(sock, text, strlen(text), 0);
+            byte = send(sock, text, strlen(text)+1,0);
             if(byte == -1)
                 perror("sending from client failed");
             else if(byte == 0)
                 printf("Connection've been closed");
 
             //Get reply from server
-            if (recv(sock, &reply, SIZE-1, 0)<0){
+            if (recv(sock, reply, SIZE, 0)<0){
                 perror("recv failed");
             };
-            printf("received message from srv : %s \n", reply);
+
+            printf("reply: %s \n", reply);
         }
     }
     //Close socket
