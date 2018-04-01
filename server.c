@@ -13,7 +13,7 @@
 #define SIZE 1024
 
 void* multiconnect(void* socketdesc);
-int read_in(int socket, char *buf, int len);
+void action(char* input);
 
 int main(int argc, char *argv[])
 {
@@ -21,14 +21,12 @@ int main(int argc, char *argv[])
     int *nwsock;
     struct sockaddr_in srv, clt;
     int structSize;
-    //char msg[SIZE]; char response[SIZE];
+    char cmd[SIZE];
 
     // Creating socket
     socketdesc = socket(AF_INET, SOCK_STREAM, 0);
     if(socketdesc == -1)
-        perror("Error on Soket");
-
-    puts("OK");
+        perror("Error on Socket");
 
     // Editting Server socket
     srv.sin_family = AF_INET;
@@ -49,6 +47,9 @@ int main(int argc, char *argv[])
 
     structSize = sizeof(clt);
 
+    puts("enter to start server");
+    fgets(cmd,SIZE,stdin); // read server commands before receiving clients
+    action(cmd);
     // Accept
     while((clsock = accept(socketdesc , (struct sockaddr *)&clt, (socklen_t*)&structSize))){
         puts("new connection accepted");
@@ -71,6 +72,37 @@ int main(int argc, char *argv[])
     }
 
     return (EXIT_SUCCESS);
+}
+
+void action(char* input){
+    if(input[0] == '\n' && input[1] == '\0'){
+        printf("server started\n");
+    }
+    else{//process the command/action
+        printf("action is : %s",input);
+        switch(input[0]){
+            case '-':
+                switch(input[1]){
+                    case 'a':
+                        printf("add key\n");
+                        break;
+                    case 'd':
+                        printf("delete key\n");
+                        break;
+                    case 'h':
+                    default:
+                        printf("unknown entry, commands: -hh (help), -ak/-av [key/val] (add key/val), -dk/-dv [key/val] (delete key/val)\n");
+                        break;
+                }
+                break;
+            default:
+                printf("unknown entry, commands: -hh (help), -ak/-av [key/val] (add key/val), -dk/-dv [key/val] (delete key/val)\n");
+                break;
+        }
+
+
+    }//loop to let make several actions before launching server?
+
 }
 
 
