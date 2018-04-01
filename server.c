@@ -81,7 +81,7 @@ void *multiconnect(void* socketdesc){
     char reply[SIZE], clmsg[SIZE];
 
     //rcv msgs from the client
-    while((bytesread = read(clsock, clmsg,SIZE-1))>0){
+    while((bytesread = recv(clsock, clmsg,SIZE-1,0))>0){
         clmsg[bytesread+1]='\0';
         printf("%s",clmsg);
         strcpy(reply, "ack from server"); //response to client
