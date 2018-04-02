@@ -8,12 +8,16 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #define PORT 7777
 #define SIZE 1024
+//global variable
+bool running = true;// tenté d'avoir une var globale pour arrêter le serveur
 
 void* multiconnect(void* socketdesc);
-void action(char* input);
+void* readcmd(void*);
+void printdefault();
 
 int main(int argc, char *argv[])
 {
@@ -21,7 +25,6 @@ int main(int argc, char *argv[])
     int *nwsock;
     struct sockaddr_in srv, clt;
     int structSize;
-    char cmd[SIZE];
 
     // Creating socket
     socketdesc = socket(AF_INET, SOCK_STREAM, 0);
@@ -46,12 +49,19 @@ int main(int argc, char *argv[])
         perror("Error on Listen");
 
     structSize = sizeof(clt);
-
     puts("enter to start server");
-    fgets(cmd,SIZE,stdin); // read server commands before receiving clients
-    action(cmd);
+
+    // manage the user CLI inputs form server side (more powerfull?)
+    pthread_t cliserver;
+    if(pthread_create(&cliserver, NULL, readcmd, NULL)<0){
+        perror("thread creation failed");
+        return 1;
+    }
+
     // Accept
-    while((clsock = accept(socketdesc , (struct sockaddr *)&clt, (socklen_t*)&structSize))){
+    while((clsock = accept(socketdesc , (struct sockaddr *)&clt, (socklen_t*)&structSize)) && running){
+        //important to put running on the right since it first checks the left side
+        // TODO trouver un moyen d'arreter le serveur correctement
         puts("new connection accepted");
         pthread_t th;
         nwsock = malloc(sizeof(nwsock));
@@ -63,7 +73,6 @@ int main(int argc, char *argv[])
         }
         //pthread_join(th, NULL);
         puts("new client accepted and thread occupied for it");
-
     }
 
     if(clsock == -1){
@@ -74,35 +83,79 @@ int main(int argc, char *argv[])
     return (EXIT_SUCCESS);
 }
 
-void action(char* input){
-    if(input[0] == '\n' && input[1] == '\0'){
-        printf("server started\n");
-    }
-    else{//process the command/action
-        printf("action is : %s",input);
-        switch(input[0]){
-            case '-':
-                switch(input[1]){
-                    case 'a':
-                        printf("add key\n");
-                        break;
-                    case 'd':
-                        printf("delete key\n");
-                        break;
-                    case 'h':
-                    default:
-                        printf("unknown entry, commands: -hh (help), -ak/-av [key/val] (add key/val), -dk/-dv [key/val] (delete key/val)\n");
-                        break;
-                }
-                break;
-            default:
-                printf("unknown entry, commands: -hh (help), -ak/-av [key/val] (add key/val), -dk/-dv [key/val] (delete key/val)\n");
-                break;
+void* readcmd(void* unused){
+    printf("running is: %d",running);
+    while(running){
+        char cmd[SIZE];
+        fgets(cmd,SIZE,stdin); // read command from CLI
+        if(cmd[0] == '\n' && cmd[1] == '\0'){
+            puts("server started");
         }
+        else{//process the command/readcmd
+            switch(cmd[0]){
+                case '-':
+                    switch(cmd[1]){
+                        case 'a':
+                            switch(cmd[2]){
+                                case 'k':
+                                    puts("add via key");
+                                    break;
+                                case 'v':
+                                    puts("add via value");
+                                    break;
+                                default:
+                                    printdefault();
+                                    break;
+                            }
+                            break;
+                        case 'd':
+                            switch(cmd[2]){
+                                case 'k':
+                                    puts("delete via key");
+                                    break;
+                                case 'v':
+                                    puts("delete via value");
+                                    break;
+                                default:
+                                    printdefault();
+                                    break;
+                            }
+                            break;
+                        case 'r':
+                            switch(cmd[2]){
+                                case 'k':
+                                    puts("read key");
+                                    break;
+                                case 'v':
+                                    puts("read value");
+                                    break;
+                                default:
+                                    printdefault();
+                                    break;
+                            }
+                            break;
+                        case 'h':
+                        default:
+                            printdefault();
+                            break;
+                    }
+                    break;
+                case 'q':
+                    puts("stop server");
+                    running = false;
+                    //how to shut down server properly?
+                    break;
+                default:
+                    printdefault();
+                    break;
+            }
+        }
+    }
+    return NULL;
+}
 
-
-    }//loop to let make several actions before launching server?
-
+void printdefault(){ //annoying to write each time the printf
+    puts("commands: -hh (help), -ak/-av [key/val] (add key/val), -dk/-dv [key/val] (delete key/val)");
 }
 
 
