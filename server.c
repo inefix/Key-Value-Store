@@ -19,9 +19,10 @@ void* multiconnect(void* socketdesc);     //multi thread
 void* readcmd(void*);
 void printdefault();
 
+int socketdesc, clsock;
+
 int main(int argc, char *argv[])
 {
-    int socketdesc, clsock;
     int *nwsock;
     struct sockaddr_in srv, clt;
     int structSize;
@@ -46,7 +47,7 @@ int main(int argc, char *argv[])
     if(bind(socketdesc, (struct sockaddr *)&srv, sizeof(srv)) == -1)
         perror("Error on Bind");
 
-   // Start listen the port, waiting queue limited to 20
+   // Start listen the port, waiting queue limited to 20 (20 simultaneous connections)
    if(listen(socketdesc, 20) == -1)
         perror("Error on Listen");
 
@@ -90,8 +91,8 @@ int main(int argc, char *argv[])
 void* readcmd(void* unused){
     printf("running is: %d",running);
     while(running){
-        char cmd[SIZE];
-        fgets(cmd,SIZE,stdin); // read command from CLI
+        char cmd[SIZE];   //store the value of the client's message
+        fgets(cmd, SIZE, stdin); // read command from CLI
         if(cmd[0] == '\n' && cmd[1] == '\0'){
             puts("server started");
         }
@@ -152,6 +153,8 @@ void* readcmd(void* unused){
                     puts("stop server");
                     running = false;
                     //how to shut down server properly?
+                    //close(clsock);
+                    //close(socketdesc);
                     break;
                 default:
                     printdefault();
