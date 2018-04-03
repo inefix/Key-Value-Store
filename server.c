@@ -36,10 +36,12 @@ int main(int argc, char *argv[])
     srv.sin_port = htons(PORT);
     srv.sin_addr.s_addr = INADDR_ANY;
     memset(&(srv.sin_zero), '\0', 8);
+
     // means reuse the port
     int reuse = 1;
     if (setsockopt(socketdesc, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int)) == -1)
         perror("Can't set the reuse option on the socket");
+
     // Bind a socket to a particular "address and port" combination
     if(bind(socketdesc, (struct sockaddr *)&srv, sizeof(srv)) == -1)
         perror("Error on Bind");
@@ -68,12 +70,12 @@ int main(int argc, char *argv[])
         nwsock = malloc(sizeof(nwsock));
         *nwsock = clsock;
 
-        if(pthread_create(&th, NULL, multiconnect, (void*) nwsock)<0){
+        if(pthread_create(&th, NULL, multiconnect, (void*) nwsock) < 0){
             perror("thread creation failed");
             return 1;
         }
         //Now join the thread , so that we dont terminate before the thread
-        //pthread_join(th, NULL);
+        pthread_join(th, NULL);
         puts("new client accepted and thread occupied for it");
     }
     //accept failed
@@ -167,7 +169,7 @@ void printdefault(){ //annoying to write each time the printf
 
 // each of these thread will handle a connection to a client --> connection handler
 void *multiconnect(void* socketdesc){
-    int clsock = *(int*)socketdesc;       ////Get the socket descriptor
+    int clsock = *(int*)socketdesc;       //Get the socket descriptor
     int bytesread, byte;
     char reply[SIZE], clmsg[SIZE];
 

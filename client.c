@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
 
     puts("Connected");
 
-    //comm with srv
+    //keep communicating with server
     while(1)
     {
         memset(msg, 0, SIZE);
@@ -59,14 +59,14 @@ int main(int argc, char** argv) {
             strcat(text, msg);
             printf("sending string  %s",text);
             //Send message
-            byte = send(sock, text, strlen(text)+1,0);
+            byte = send(sock, text, strlen(text)+1, 0);
             if(byte == -1)
                 perror("sending from client failed");
             else if(byte == 0)
                 printf("Connection've been closed");
 
             //Get reply from server
-            if (recv(sock, reply, SIZE, 0)<0){
+            if (recv(sock, reply, SIZE, 0) < 0){
                 perror("recv failed");
             };
 
