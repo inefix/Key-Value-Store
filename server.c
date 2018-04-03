@@ -1,12 +1,12 @@
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h>        //printf
+#include <string.h>       //strcpy
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <errno.h>
-#include <unistd.h>
-#include <arpa/inet.h>
+#include <unistd.h>       //close the socket
+#include <arpa/inet.h>    //inet_addr
 #include <pthread.h>
 #include <stdbool.h>
 
@@ -26,12 +26,12 @@ int main(int argc, char *argv[])
     struct sockaddr_in srv, clt;
     int structSize;
 
-    // Creating socket
+    // Creating socket (TCP)
     socketdesc = socket(AF_INET, SOCK_STREAM, 0);
     if(socketdesc == -1)
         perror("Error on Socket");
 
-    // Editting Server socket
+    // Editting Server socket --> Prepare the sockaddr_in structure
     srv.sin_family = AF_INET;
     srv.sin_port = htons(PORT);
     srv.sin_addr.s_addr = INADDR_ANY;
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     int reuse = 1;
     if (setsockopt(socketdesc, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int)) == -1)
         perror("Can't set the reuse option on the socket");
-    // Bind
+    // Bind a socket to a particular "address and port" combination
     if(bind(socketdesc, (struct sockaddr *)&srv, sizeof(srv)) == -1)
         perror("Error on Bind");
 
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Accept
+    // Accept incoming connection
     while((clsock = accept(socketdesc , (struct sockaddr *)&clt, (socklen_t*)&structSize)) && running){
         //important to put running on the right since it first checks the left side
         // TODO trouver un moyen d'arreter le serveur correctement
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         //pthread_join(th, NULL);
         puts("new client accepted and thread occupied for it");
     }
-
+    //accept failed
     if(clsock == -1){
         perror("Error on Accept");
         return 1;
