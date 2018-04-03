@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
         perror("Error on Bind");
 
    // Start listen the port, waiting queue limited to 20
-   if(listen(socketdesc, 20) == -1  )
+   if(listen(socketdesc, 20) == -1)
         perror("Error on Listen");
 
     structSize = sizeof(clt);
@@ -95,6 +95,7 @@ void* readcmd(void* unused){
             switch(cmd[0]){
                 case '-':
                     switch(cmd[1]){
+                        //when the client want to add a value
                         case 'a':
                             switch(cmd[2]){
                                 case 'k':
@@ -108,6 +109,7 @@ void* readcmd(void* unused){
                                     break;
                             }
                             break;
+                        //when the client want to delete a value
                         case 'd':
                             switch(cmd[2]){
                                 case 'k':
@@ -121,6 +123,7 @@ void* readcmd(void* unused){
                                     break;
                             }
                             break;
+                        //when the client whant to read a value
                         case 'r':
                             switch(cmd[2]){
                                 case 'k':
@@ -140,6 +143,7 @@ void* readcmd(void* unused){
                             break;
                     }
                     break;
+                //stop server
                 case 'q':
                     puts("stop server");
                     running = false;
@@ -178,10 +182,10 @@ void *multiconnect(void* socketdesc){
         memset(reply, 0, SIZE);
         memset(clmsg, 0, SIZE);
     }
-    if(bytesread==0){
+    if(bytesread == 0){
         puts("client disconnected");
     }
-    else if(bytesread==-1){
+    else if(bytesread == -1){
         perror("recv failed");
     }
 
