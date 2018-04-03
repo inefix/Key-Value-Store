@@ -1,7 +1,7 @@
 #include <stdio.h>        //printf
-#include <string.h>       //strcpy
+#include <string.h>       //strcpy + strlen
 #include <stdlib.h>
-#include <sys/socket.h>
+#include <sys/socket.h>   //socket
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <errno.h>

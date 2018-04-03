@@ -1,12 +1,12 @@
-#include <stdio.h>      //printf
-#include <string.h>     //strcpy
+#include <stdio.h>          //printf
+#include <string.h>         //strcpy
 #include <stdlib.h>
-#include <sys/socket.h>
+#include <sys/socket.h>     //socket
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <errno.h>
-#include <unistd.h>       //close the socket
-#include <arpa/inet.h>    //inet_addr
+#include <unistd.h>         //close the socket
+#include <arpa/inet.h>      //inet_addr
 
 
 //#define ServerIP "35.162.226.229"
@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     struct sockaddr_in srv;
     char text[SIZE], msg[SIZE],reply[SIZE];
     int byte;
-    
+
     // Creating socket (TCP)
     // Address Family - AF_INET (this is IP version 4)
     // Type - SOCK_STREAM (this means connection oriented TCP protocol)
