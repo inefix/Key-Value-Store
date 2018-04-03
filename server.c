@@ -5,9 +5,9 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <errno.h>
-#include <unistd.h>       //close the socket
+#include <unistd.h>       //close the socket + write
 #include <arpa/inet.h>    //inet_addr
-#include <pthread.h>
+#include <pthread.h>      //for threading , link with lpthread
 #include <stdbool.h>
 
 #define PORT 7777
@@ -15,7 +15,7 @@
 //global variable
 bool running = true;// tenté d'avoir une var globale pour arrêter le serveur
 
-void* multiconnect(void* socketdesc);
+void* multiconnect(void* socketdesc);     //multi thread
 void* readcmd(void*);
 void printdefault();
 
@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
         //important to put running on the right since it first checks the left side
         // TODO trouver un moyen d'arreter le serveur correctement
         puts("new connection accepted");
+        //thread
         pthread_t th;
         nwsock = malloc(sizeof(nwsock));
         *nwsock = clsock;
@@ -71,6 +72,7 @@ int main(int argc, char *argv[])
             perror("thread creation failed");
             return 1;
         }
+        //Now join the thread , so that we dont terminate before the thread
         //pthread_join(th, NULL);
         puts("new client accepted and thread occupied for it");
     }
@@ -163,18 +165,18 @@ void printdefault(){ //annoying to write each time the printf
 }
 
 
-// each of these thread will handle a connection to a client
+// each of these thread will handle a connection to a client --> connection handler
 void *multiconnect(void* socketdesc){
-    int clsock = *(int*)socketdesc;
+    int clsock = *(int*)socketdesc;       ////Get the socket descriptor
     int bytesread, byte;
     char reply[SIZE], clmsg[SIZE];
 
-    //rcv msgs from the client
-    while((bytesread = recv(clsock, clmsg,SIZE-1,0))>0){
+    //Receive a message from client
+    while((bytesread = recv(clsock, clmsg, SIZE-1, 0)) > 0){
         clmsg[bytesread+1]='\0';
         printf("%s",clmsg);
         strcpy(reply, "ack from server"); //response to client
-        byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know size of string so we can use strlen
+        byte = send(clsock, reply, strlen(reply)+1, 0); //in send, we know size of string so we can use strlen
         if(byte == -1)
             perror("Error on Recv");
         else if(byte == 0)
@@ -184,6 +186,7 @@ void *multiconnect(void* socketdesc){
     }
     if(bytesread == 0){
         puts("client disconnected");
+        fflush(stdout);
     }
     else if(bytesread == -1){
         perror("recv failed");
@@ -192,6 +195,7 @@ void *multiconnect(void* socketdesc){
     //clean up
     close(clsock);
 
+    //Free the socket pointer
     free(socketdesc);
     pthread_exit(NULL);
     return NULL;
