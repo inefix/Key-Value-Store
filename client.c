@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 
     srv.sin_family = AF_INET;
     srv.sin_port = htons(ServerPort);
-    srv.sin_addr.s_addr =inet_addr(ServerIP);
+    srv.sin_addr.s_addr = inet_addr(ServerIP);
     memset(&(srv.sin_zero), '\0', 8);
 
     // Connect to server
