@@ -15,6 +15,8 @@
 //global variable
 bool running = true;// tenté d'avoir une var globale pour arrêter le serveur
 
+
+
 void* multiconnect(void* socketdesc);
 void* readcmd(void*);
 void printdefault();
@@ -25,7 +27,7 @@ int main(int argc, char *argv[])
     int *nwsock;
     struct sockaddr_in srv, clt;
     int structSize;
-
+    
     // Creating socket
     socketdesc = socket(AF_INET, SOCK_STREAM, 0);
     if(socketdesc == -1)
