@@ -11,9 +11,22 @@
 #include <stdbool.h>
 
 #define PORT 7777
-#define SIZE 1024
+#define MSGSIZE 1024
+#define STORESIZE 1000 // modify later for dynamic size
+
 //global variable
 bool running = true;// tenté d'avoir une var globale pour arrêter le serveur
+
+// Key value storage...
+typedef struct KVstore KVstore;
+struct KVstore{
+    int key;
+    char* value;
+    //TODO rajouter un size pour savoir jusqu'à combien faire la boucle pour éviter de faire boucle sur STORESIZE?
+    //int leng;
+};
+
+KVstore kv[STORESIZE]; // malloc(sizeof(KVstore)*STORESIZE); //here or in main?
 
 struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
     int id;
@@ -29,8 +42,12 @@ int main(int argc, char *argv[])
     int socketdesc, clsock;
     int *nwsock;
     struct sockaddr_in srv, clt;
-    int structSize;
-    
+    int structsize;
+
+    // testing the kvstore
+    kv[0].key = 5;
+    kv[0].value = "test";
+
     // Creating socket
     socketdesc = socket(AF_INET, SOCK_STREAM, 0);
     if(socketdesc == -1)
@@ -49,11 +66,11 @@ int main(int argc, char *argv[])
     if(bind(socketdesc, (struct sockaddr *)&srv, sizeof(srv)) == -1)
         perror("Error on Bind");
 
-   // Start listen the port, waiting queue limited to 20
-   if(listen(socketdesc, 20) == -1  )
+    // Start listen the port, waiting queue limited to 20
+    if(listen(socketdesc, 20) == -1  )
         perror("Error on Listen");
 
-    structSize = sizeof(clt);
+    structsize = sizeof(clt);
     puts("enter to start server");
 
     // manage the user CLI inputs form server side (more powerfull?)
@@ -64,15 +81,14 @@ int main(int argc, char *argv[])
     }
     int i = 1;//counter for clients
     struct IDsock *client;
-    // Accept   => bloquant, trouver une solution pour arrêter le serveur proprement
-    while((clsock = accept(socketdesc , (struct sockaddr *)&clt, (socklen_t*)&structSize)) && running){
+    // Accept  TODO =>accept est bloquant, trouver une solution pour arrêter le serveur proprement
+    while((clsock = accept(socketdesc , (struct sockaddr *)&clt, (socklen_t*)&structsize)) && running){
         //important to put running on the right since it first checks the left side
         // TODO trouver un moyen d'arreter le serveur correctement
         puts("new connection accepted");
         pthread_t th;
         nwsock = malloc(sizeof(nwsock));
         *nwsock = clsock;
-
         client = malloc(sizeof(struct IDsock));
         client->id = i;
         client->sock=clsock;
@@ -93,15 +109,57 @@ int main(int argc, char *argv[])
     return (EXIT_SUCCESS);
 }
 
+// each of these thread will handle a connection to a client
+void *multiconnect(void* socketdesc){
+    struct IDsock *persID = (struct IDsock*)socketdesc;
+    int clsock = persID->sock;
+    //int clsock = *(int*)socketdesc;
+    int bytesread, byte;
+    char reply[MSGSIZE], clmsg[MSGSIZE];
+
+    //rcv msgs from the client
+    while((bytesread = recv(clsock, clmsg,MSGSIZE-1,0))>0){
+        clmsg[bytesread+1]='\0';
+        printf("client %i said %s",persID->id, clmsg);
+        snprintf(reply,sizeof(reply),"ack to client %d", persID->id);//response to client
+        byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
+        if(byte == -1)
+            perror("Error on Recv");
+        else if(byte == 0)
+            printf("Connection is close\n");
+        memset(reply, 0, MSGSIZE);
+        memset(clmsg, 0, MSGSIZE);
+
+        //testing kvstore
+        int k =0;
+        printf("kv[%i] has key = %i, value = %s\n",k,kv[k].key,kv[k].value);
+    }
+    if(bytesread==0){
+        puts("client disconnected");
+    }
+    else if(bytesread==-1){
+        perror("recv failed");
+    }
+
+    //clean up
+    close(clsock);
+
+    free(socketdesc);
+    pthread_exit(NULL);
+    return NULL;
+}
+
 void* readcmd(void* unused){
-    printf("running is: %d",running);
     while(running){
-        char cmd[SIZE];
-        fgets(cmd,SIZE,stdin); // read command from CLI
+        char cmd[MSGSIZE];
+        fgets(cmd,MSGSIZE,stdin); // read command from CLI
         if(cmd[0] == '\n' && cmd[1] == '\0'){
             puts("server started");
         }
-        else{//process the command/readcmd
+        else if((int)strlen(cmd)>=6){
+        //first of all check if the string lenght is >= 6 which is minimum to make something (-[][] [][return]=>6)
+            printf("length of cmd: %i\n",(int)strlen(cmd)); //contains the string + the return key
+            //process the command/readcmd
             switch(cmd[0]){
                 case '-':
                     switch(cmd[1]){
@@ -109,6 +167,7 @@ void* readcmd(void* unused){
                             switch(cmd[2]){
                                 case 'k':
                                     puts("add via key");
+
                                     break;
                                 case 'v':
                                     puts("add via value");
@@ -160,47 +219,13 @@ void* readcmd(void* unused){
                     break;
             }
         }
+        else{
+            printdefault();
+        }
     }
     return NULL;
 }
-
+//mettre ça dans un .h plus tard
 void printdefault(){ //annoying to write each time the printf
     puts("commands: -hh (help), -ak/-av [key/val] (add key/val), -dk/-dv [key/val] (delete key/val)");
-}
-
-
-// each of these thread will handle a connection to a client
-void *multiconnect(void* socketdesc){
-    struct IDsock *persID = (struct IDsock*)socketdesc;
-    int clsock = persID->sock;
-    //int clsock = *(int*)socketdesc;
-    int bytesread, byte;
-    char reply[SIZE], clmsg[SIZE];
-
-    //rcv msgs from the client
-    while((bytesread = recv(clsock, clmsg,SIZE-1,0))>0){
-        clmsg[bytesread+1]='\0';
-        printf("client %i %s",persID->id, clmsg);
-        strcpy(reply, "ack from server"); //response to client
-        byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know size of string so we can use strlen
-        if(byte == -1)
-            perror("Error on Recv");
-        else if(byte == 0)
-            printf("Connection is close\n");
-        memset(reply, 0, SIZE);
-        memset(clmsg, 0, SIZE);
-    }
-    if(bytesread==0){
-        puts("client disconnected");
-    }
-    else if(bytesread==-1){
-        perror("recv failed");
-    }
-
-    //clean up
-    close(clsock);
-
-    free(socketdesc);
-    pthread_exit(NULL);
-    return NULL;
 }
