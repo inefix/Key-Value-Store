@@ -15,7 +15,6 @@
 #define SIZE 1024
 
 int main(int argc, char** argv) {
-
     int sock;
     struct sockaddr_in srv;
     char text[SIZE], msg[SIZE],reply[SIZE];
@@ -46,14 +45,16 @@ int main(int argc, char** argv) {
         printf("'q' to close session \n"); //TODO ajouter toutes les fonctions
         printf("type your msg >>> ");
         fgets(msg, SIZE+1, stdin); //lire tout le string
+        // quel que soit le string on l'envoie au serveur, sinon on doit contrôler plusieurs fois que c'est correct...
         if(msg[0] == 'q'){
-            close(sock);
+            close(sock);//interrompre la connection
             return 0;
         }
         else{
-            strcpy(text, "client: ");
-            strcat(text, msg);
+            //TODO récupérer l'ID client perso
+            snprintf(text,sizeof(text),"%s",msg);
             printf("sending string  %s",text);
+
             //Send message
             byte = send(sock, text, strlen(text)+1,0);
             if(byte == -1)
