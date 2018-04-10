@@ -15,7 +15,10 @@
 //global variable
 bool running = true;// tenté d'avoir une var globale pour arrêter le serveur
 
-
+struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
+    int id;
+    int sock;
+};
 
 void* multiconnect(void* socketdesc);
 void* readcmd(void*);
@@ -59,8 +62,9 @@ int main(int argc, char *argv[])
         perror("thread creation failed");
         return 1;
     }
-
-    // Accept
+    int i = 1;//counter for clients
+    struct IDsock *client;
+    // Accept   => bloquant, trouver une solution pour arrêter le serveur proprement
     while((clsock = accept(socketdesc , (struct sockaddr *)&clt, (socklen_t*)&structSize)) && running){
         //important to put running on the right since it first checks the left side
         // TODO trouver un moyen d'arreter le serveur correctement
@@ -69,12 +73,16 @@ int main(int argc, char *argv[])
         nwsock = malloc(sizeof(nwsock));
         *nwsock = clsock;
 
-        if(pthread_create(&th, NULL, multiconnect, (void*) nwsock)<0){
+        client = malloc(sizeof(struct IDsock));
+        client->id = i;
+        client->sock=clsock;
+
+        if(pthread_create(&th, NULL, multiconnect, (void*) client)<0){
             perror("thread creation failed");
             return 1;
         }
-        //pthread_join(th, NULL);
         puts("new client accepted and thread occupied for it");
+        i++;
     }
 
     if(clsock == -1){
@@ -163,14 +171,16 @@ void printdefault(){ //annoying to write each time the printf
 
 // each of these thread will handle a connection to a client
 void *multiconnect(void* socketdesc){
-    int clsock = *(int*)socketdesc;
+    struct IDsock *persID = (struct IDsock*)socketdesc;
+    int clsock = persID->sock;
+    //int clsock = *(int*)socketdesc;
     int bytesread, byte;
     char reply[SIZE], clmsg[SIZE];
 
     //rcv msgs from the client
     while((bytesread = recv(clsock, clmsg,SIZE-1,0))>0){
         clmsg[bytesread+1]='\0';
-        printf("%s",clmsg);
+        printf("client %i %s",persID->id, clmsg);
         strcpy(reply, "ack from server"); //response to client
         byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know size of string so we can use strlen
         if(byte == -1)
