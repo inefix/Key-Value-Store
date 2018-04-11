@@ -121,6 +121,10 @@ void *multiconnect(void* socketdesc){
     while((bytesread = recv(clsock, clmsg,MSGSIZE-1,0))>0){
         clmsg[bytesread+1]='\0';
         printf("client %i said %s",persID->id, clmsg);
+
+        //TODO analyse clmsg
+        //TODO check regex    regcomp
+
         snprintf(reply,sizeof(reply),"ack to client %d", persID->id);//response to client
         byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
         if(byte == -1)
