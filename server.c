@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <regex.h>
 
 #define PORT 7777
 #define MSGSIZE 1024
@@ -124,13 +125,62 @@ void *multiconnect(void* socketdesc){
 
         //TODO analyse clmsg
         //TODO check regex    regcomp
+        //regex
+        int err;
+        regex_t preg;
+        const char *str_regex = "www\\.[-_[:alnum:]]+\\.[[:lower:]]{2,4}";
 
-        snprintf(reply,sizeof(reply),"ack to client %d", persID->id);//response to client
-        byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
+        err = regcomp (&preg, str_regex, REG_NOSUB | REG_EXTENDED);
+        if (err == 0) {
+           int match;
+           match = regexec (&preg, clmsg, 0, NULL, 0);
+           regfree (&preg);
+           if (match == 0){
+              printf ("%s is valid\n", clmsg);
+              //send message to the client
+              snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
+              byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
+              if(byte == -1) perror("Error on Recv");
+              else if(byte == 0) printf("Connection is close\n");
+
+              //analyse message
+              if(clmsg[0] == 'a'){      //add in the kv
+                //TODO add value from clmsg[2] until end
+              }
+              if(clmsg[0] == 'r'){      //read in the kv
+                //TODO search for the value at a certain key and print it
+              }
+              if(clmsg[0] == 'd'){      //delete in the kv
+                //TODO read + delete this line in the kv
+              }
+              if(clmsg[0] == 'm'){      //modify in the kv
+                //TODO read + modify this line in the kv
+              }
+              if(clmsg[0] == 'p'){      //print all the values in the kv
+                //TODO parcours tout le kv et affiche chaque value
+              }
+              if(clmsg[0] == 'q'){      //a client have left
+                printf("bye bye client %d\n", persID->id);
+              }
+           }
+           else if (match == REG_NOMATCH){
+              printf ("%s is not valide\n", clmsg);
+              //send message to the client
+              snprintf(reply,sizeof(reply),"client %d, your message is not valid! Try again", persID->id);//response to client
+              byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
+              if(byte == -1)
+                  perror("Error on Recv");
+              else if(byte == 0)
+                  printf("Connection is close\n");
+           }
+         }
+
+        //snprintf(reply,sizeof(reply),"ack to client %d", persID->id);//response to client
+        /*byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
         if(byte == -1)
             perror("Error on Recv");
         else if(byte == 0)
-            printf("Connection is close\n");
+            printf("Connection is close\n");*/
         memset(reply, 0, MSGSIZE);
         memset(clmsg, 0, MSGSIZE);
 
@@ -171,7 +221,6 @@ void* readcmd(void* unused){
                             switch(cmd[2]){
                                 case 'k':
                                     puts("add via key");
-
                                     break;
                                 case 'v':
                                     puts("add via value");
