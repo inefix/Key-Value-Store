@@ -23,16 +23,24 @@ typedef struct KVstore KVstore;
 struct KVstore{
     int key;
     char* value;
+    int *kv_array;
+    size_t used;
+    size_t size;
     //TODO rajouter un size pour savoir jusqu'à combien faire la boucle pour éviter de faire boucle sur STORESIZE?
     //int leng;
 };
 
-KVstore kv[STORESIZE]; // malloc(sizeof(KVstore)*STORESIZE); //here or in main?
+//KVstore kv[STORESIZE]; // malloc(sizeof(KVstore)*STORESIZE); //here or in main?
 
 struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
     int id;
     int sock;
 };
+
+//function to dynamically allocate memory to KVstore
+void initKVstore(KVstore *a, size_t initialSize);
+void insertKV(KVstore *a , int element);
+void freeKVstore(KVstore *a);
 
 void* multiconnect(void* socketdesc);
 void* readcmd(void*);
@@ -45,9 +53,9 @@ int main(int argc, char *argv[])
     struct sockaddr_in srv, clt;
     int structsize;
 
-    // testing the kvstore
+    /* testing the kvstore
     kv[0].key = 5;
-    kv[0].value = "test";
+    kv[0].value = "test";*/
 
     // Creating socket
     socketdesc = socket(AF_INET, SOCK_STREAM, 0);
@@ -110,6 +118,31 @@ int main(int argc, char *argv[])
     return (EXIT_SUCCESS);
 }
 
+//itinialize Key value array
+void initKVstore(KVstore *a, size_t initialSize){
+  a->kv_array = (int *)malloc(initialSize * sizeof(int));
+  a->used = 0;
+  a->size = initialSize;
+}
+
+//insert element into kv array and resize if necessary
+void insertKV(KVstore *a, int element) {
+  // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
+  // Therefore a->used can go up to a->size
+  if (a->used == a->size) {
+    a->size *= 2;
+    a->kv_array = (int *)realloc(a->kv_array, a->size * sizeof(int));
+  }
+  a->kv_array[a->used++] = element;
+}
+
+//free kv array at the end
+void freeKVstore(KVstore *a) {
+  free(a->kv_array);
+  a->kv_array = NULL;
+  a->used = a->size = 0;
+}
+
 // each of these thread will handle a connection to a client
 void *multiconnect(void* socketdesc){
     struct IDsock *persID = (struct IDsock*)socketdesc;
@@ -117,10 +150,26 @@ void *multiconnect(void* socketdesc){
     //int clsock = *(int*)socketdesc;
     int bytesread, byte;
     char reply[MSGSIZE], clmsg[MSGSIZE];
-
+    int i = 0; //counter to check if clmsg is empty, increment if not empty
     //rcv msgs from the client
     while((bytesread = recv(clsock, clmsg,MSGSIZE-1,0))>0){
+        KVstore kv;
+        //initialize kv array
+        if(i == 0){
+          initKVstore(&kv, 1);
+          printf("size of kv array at init: %lu\n", sizeof(kv.kv_array) / sizeof(int));
+        }
         clmsg[bytesread+1]='\0';
+        if(strlen(clmsg) != 0){
+          i++;
+          insertKV(&kv, i);
+          //printf("%d\n", kv.kv_array[9]);  // print 10th element
+          printf("%d\n", kv.used);  // print number of elements
+        }
+        //KVstore *kv = (int*) malloc(i * sizeof(int));
+        printf("size of kv array: %lu\n", sizeof(kv.kv_array) / sizeof(int));
+        /*kv[0].key = 5;
+        kv[0].value = "test";*/
         printf("client %i said %s",persID->id, clmsg);
 
         //TODO analyse clmsg
@@ -161,6 +210,7 @@ void *multiconnect(void* socketdesc){
               }
               if(clmsg[0] == 'q'){      //a client have left
                 printf("bye bye client %d\n", persID->id);
+                freeKVstore(&kv);
               }
            }
            else if (match == REG_NOMATCH){
@@ -186,7 +236,8 @@ void *multiconnect(void* socketdesc){
 
         //testing kvstore
         int k =0;
-        printf("kv[%i] has key = %i, value = %s\n",k,kv[k].key,kv[k].value);
+        //printf("kv[%i] has key = %i, value = %s\n",k,kv[k].key,kv[k].value);
+
     }
     if(bytesread==0){
         puts("client disconnected");
