@@ -30,7 +30,7 @@ struct KVstore{
     //int leng;
 };
 
-//KVstore kv[STORESIZE]; // malloc(sizeof(KVstore)*STORESIZE); //here or in main?
+KVstore kv; // malloc(sizeof(KVstore)*STORESIZE); //here or in main?
 
 struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
     int id;
@@ -130,7 +130,7 @@ void insertKV(KVstore *a, int element) {
   // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
   // Therefore a->used can go up to a->size
   if (a->used == a->size) {
-    a->size *= 2;
+    a->size += 1;
     a->kv_array = (int *)realloc(a->kv_array, a->size * sizeof(int));
   }
   a->kv_array[a->used++] = element;
@@ -153,21 +153,23 @@ void *multiconnect(void* socketdesc){
     int i = 0; //counter to check if clmsg is empty, increment if not empty
     //rcv msgs from the client
     while((bytesread = recv(clsock, clmsg,MSGSIZE-1,0))>0){
-        KVstore kv;
+        //KVstore kv;
         //initialize kv array
         if(i == 0){
           initKVstore(&kv, 1);
-          printf("size of kv array at init: %lu\n", sizeof(kv.kv_array) / sizeof(int));
+          //it is unecessary to print sizeof the array because
+          //it's impossible to the compiler to know the real allocated size.
+          //So it returns the size of the pointer.
         }
+
         clmsg[bytesread+1]='\0';
+
         if(strlen(clmsg) != 0){
           i++;
           insertKV(&kv, i);
-          //printf("%d\n", kv.kv_array[9]);  // print 10th element
           printf("%d\n", kv.used);  // print number of elements
         }
-        //KVstore *kv = (int*) malloc(i * sizeof(int));
-        printf("size of kv array: %lu\n", sizeof(kv.kv_array) / sizeof(int));
+
         /*kv[0].key = 5;
         kv[0].value = "test";*/
         printf("client %i said %s",persID->id, clmsg);
@@ -210,7 +212,7 @@ void *multiconnect(void* socketdesc){
               }
               if(clmsg[0] == 'q'){      //a client have left
                 printf("bye bye client %d\n", persID->id);
-                freeKVstore(&kv);
+                freeKVstore(&kv); //just to free memory, but this need to be deleted aftwards
               }
            }
            else if (match == REG_NOMATCH){
@@ -316,6 +318,7 @@ void* readcmd(void* unused){
                 case 'q':
                     puts("stop server");
                     running = false;
+                    freeKVstore(&kv);
                     //how to shut down server properly?
                     break;
                 default:
