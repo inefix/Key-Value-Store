@@ -130,7 +130,7 @@ void insertKV(KVstore *a, int element) {
   // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
   // Therefore a->used can go up to a->size
   if (a->used == a->size) {
-    a->size += 1;
+    a->size *= 2; //TODO check if it works...
     a->kv_array = (int *)realloc(a->kv_array, a->size * sizeof(int));
   }
   a->kv_array[a->used++] = element;
