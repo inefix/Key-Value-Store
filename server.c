@@ -152,7 +152,8 @@ void *multiconnect(void* socketdesc){
     char reply[MSGSIZE], clmsg[MSGSIZE];
     int i = 0; //counter to check if clmsg is empty, increment if not empty
     //rcv msgs from the client
-    while((bytesread = recv(clsock, clmsg,MSGSIZE-1,0))>0){
+    //!!!!!!!!!!! le massage est rempli par des espaces blancs à la fin!!!!!!!!!
+    while((bytesread = recv(clsock,clmsg,MSGSIZE-1,0))>0){
         //KVstore kv;
         //initialize kv array
         if(i == 0){
@@ -167,19 +168,19 @@ void *multiconnect(void* socketdesc){
         if(strlen(clmsg) != 0){
           i++;
           insertKV(&kv, i);
-          printf("%d\n", kv.used);  // print number of elements
+          //printf("%d\n", kv.used);  // print number of elements
         }
 
         /*kv[0].key = 5;
         kv[0].value = "test";*/
-        printf("client %i said %s",persID->id, clmsg);
+        //printf("client %i said %s\n",persID->id, clmsg);
 
         //TODO analyse clmsg
         //TODO check regex    regcomp
         //regex
         int err;
         regex_t preg;
-        const char *str_regex = "www\\.[-_[:alnum:]]+\\.[[:lower:]]{2,4}";
+        const char *str_regex = "([ard] .+)|(ak [1-9]{1,3} .+)|(rv .+)|(dv .+)|(m [1-9]{1,3} .+)|(mv .+ .+)|p|q";
 
         err = regcomp (&preg, str_regex, REG_NOSUB | REG_EXTENDED);
         if (err == 0) {
@@ -187,36 +188,67 @@ void *multiconnect(void* socketdesc){
            match = regexec (&preg, clmsg, 0, NULL, 0);
            regfree (&preg);
            if (match == 0){
-              printf ("%s is valid\n", clmsg);
+              printf("client %i said a valid string: %s\n",persID->id, clmsg);
               //send message to the client
               snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
               byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
               if(byte == -1) perror("Error on Recv");
               else if(byte == 0) printf("Connection is close\n");
 
+              //structure of a msg:
+              //a msg     --> add the msg and generate a key
+              //ak 111 msg    --> add the msg at key 111
+              //r 111     --> read the value at key 111
+              //rv msg     --> read the value corresponding to the msg
+              //d 111     --> delete the value at key 111
+              //dv msg     --> read the value corresponding to the msg
+              //m 111 msg     --> modify the value at key 111 with msg
+              //mv msg msg     --> modify the value corresponding to the msg with msg
+              //p   --> print all the values in the kv
+
               //analyse message
               if(clmsg[0] == 'a'){      //add in the kv
-                //TODO add value from clmsg[2] until end
+                //TODO add value from clmsg[3] until end
+                if(clmsg[1] == 'k'){
+                  //add the value by the key
+                } else {
+                  //add the value and generate a key    --> default
+                }
               }
               if(clmsg[0] == 'r'){      //read in the kv
                 //TODO search for the value at a certain key and print it
+                if(clmsg[1] == 'v'){
+                  //read by the value
+                } else {
+                  //read by the key   --> default
+                }
               }
               if(clmsg[0] == 'd'){      //delete in the kv
                 //TODO read + delete this line in the kv
+                if(clmsg[1] == 'v'){
+                  //delete by the value
+                } else {
+                  //delete by the key   --> default
+                }
               }
               if(clmsg[0] == 'm'){      //modify in the kv
                 //TODO read + modify this line in the kv
+                if(clmsg[1] == 'v'){
+                  //modify by the value
+                } else {
+                  //modify by the key   --> default
+                }
               }
               if(clmsg[0] == 'p'){      //print all the values in the kv
                 //TODO parcours tout le kv et affiche chaque value
               }
-              if(clmsg[0] == 'q'){      //a client have left
+              /*if(clmsg[0] == 'q'){      //a client have left
                 printf("bye bye client %d\n", persID->id);
                 freeKVstore(&kv); //just to free memory, but this need to be deleted aftwards
-              }
+              }*/
            }
            else if (match == REG_NOMATCH){
-              printf ("%s is not valide\n", clmsg);
+              printf("client %i said a not valid string: %s\n",persID->id, clmsg);
               //send message to the client
               snprintf(reply,sizeof(reply),"client %d, your message is not valid! Try again", persID->id);//response to client
               byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
@@ -237,7 +269,7 @@ void *multiconnect(void* socketdesc){
         memset(clmsg, 0, MSGSIZE);
 
         //testing kvstore
-        int k =0;
+        //int k =0;
         //printf("kv[%i] has key = %i, value = %s\n",k,kv[k].key,kv[k].value);
 
     }
