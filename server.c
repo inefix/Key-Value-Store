@@ -144,6 +144,17 @@ void freeKVstore(KVstore *a) {
   a->used = a->size = 0;
 }
 
+// different modes: 
+// 0: add giving just the string
+// 1: add giving key and string
+void addelementKV(int mode, int newkey, char* newvalue){
+	if(mode == 0){
+		// add with string
+	}else{
+		// add with key and string
+	}		// TODO: continue making functions here
+}	
+
 // each of these thread will handle a connection to a client
 void *multiconnect(void* socketdesc){
     struct IDsock *persID = (struct IDsock*)socketdesc;
