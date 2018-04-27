@@ -54,10 +54,10 @@ int main(int argc, char *argv[])
     struct sockaddr_in srv, clt;
     int structsize;
 
-    /* testing the kvstore
-    kv[0].key = 5;
-    kv[0].value = "test";*/
-
+	//KVstore kv;
+	//initialize kv array
+	initKVstore(&kv, 1);
+	
     // Creating socket
     socketdesc = socket(AF_INET, SOCK_STREAM, 0);
     if(socketdesc == -1)
@@ -155,26 +155,13 @@ void *multiconnect(void* socketdesc){
     //rcv msgs from the client
     // !!!!!!!!!!! le massage est rempli par des espaces blancs à la fin!!!!!!!!!
     while((bytesread = recv(clsock,clmsg,MSGSIZE-1,0))>0){
-        //KVstore kv;
-        //initialize kv array
-        if(i == 0){
-          initKVstore(&kv, 1);
-          //it is unecessary to print sizeof the array because
-          //it's impossible to the compiler to know the real allocated size.
-          //So it returns the size of the pointer.
-        }
-
         clmsg[bytesread+1]='\0';
 
         if(strlen(clmsg) != 0){
           i++;
-          insertKV(&kv, i);
+          insertKV(&kv, i); // TODO quelqu'un peut m'expliquer?
           //printf("%d\n", kv.used);  // print number of elements
         }
-
-        /*kv[0].key = 5;
-        kv[0].value = "test";*/
-        //printf("client %i said %s\n",persID->id, clmsg);
 		
 		// check regex and react
 		if (ctrlregex(clmsg) == 0){
