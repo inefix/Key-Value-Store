@@ -11,6 +11,8 @@
 #include <stdbool.h>
 #include <regex.h>
 
+#define TRUE  1
+#define FALSE 0
 #define PORT 7777
 #define MSGSIZE 1024
 #define STORESIZE 1000 // modify later for dynamic size
@@ -19,18 +21,18 @@
 bool running = true;// tenté d'avoir une var globale pour arrêter le serveur
 
 // Key value storage...
-typedef struct KVstore KVstore;
+typedef struct KVstore KVstore; // quelle idée, cela sert à rien non?
+
 struct KVstore{
     int key;
     char* value;
     int *kv_array;
     size_t used;
     size_t size;
-    //TODO rajouter un size pour savoir jusqu'à combien faire la boucle pour éviter de faire boucle sur STORESIZE?
     //int leng;
 };
 
-KVstore kv; // malloc(sizeof(KVstore)*STORESIZE); //here or in main?
+KVstore kv;
 
 struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
     int id;
@@ -153,7 +155,15 @@ void addelementKV(int mode, int newkey, char* newvalue){
 	}else{
 		// add with key and string
 	}		// TODO: continue making functions here
-}	
+}
+
+void printKV(){
+    int i,kvsize;
+    kvsize = sizeof(kv)/sizeof(KVstore);
+    for(i=0;i<kvsize;i++){
+        printf("kv %d key is %d\n",i,kv.key);
+    }
+}
 
 // each of these thread will handle a connection to a client
 void *multiconnect(void* socketdesc){
@@ -236,10 +246,6 @@ void *multiconnect(void* socketdesc){
 		}
         memset(reply, 0, MSGSIZE);
         memset(clmsg, 0, MSGSIZE);
-
-        //testing kvstore
-        //int k =0;
-        //printf("kv[%i] has key = %i, value = %s\n",k,kv[k].key,kv[k].value);
     }
     if(bytesread==0){
         puts("client disconnected");
@@ -287,55 +293,46 @@ void* readcmd(void* unused){
     while(running){
         char cmd[MSGSIZE];
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
-        if(cmd[0] == '\n' && cmd[1] == '\0'){
-            puts("server started");
-        }
-        else if(ctrlregex(cmd)==0){// check the string input
+        if(ctrlregex(cmd)==0){// check the string input
             printf("length of cmd: %i\n",(int)strlen(cmd)); //contains the string + the return key
             //process the command/readcmd
             switch(cmd[0]){
-                case '-':
+                case 'a':
                     switch(cmd[1]){
-                        case 'a':
-                            switch(cmd[2]){
-                                case 'k':
-                                    puts("add via key");
-                                    break;
-                                case 'v':
-                                    puts("add via value");
-                                    break;
-                                default:
-                                    printdefault();
-                                    break;
-                            }
+                        case ' ':
+                            puts("add via key");
+                            printf("content of kv: %d\n",kv.key);
                             break;
-                        case 'd':
-                            switch(cmd[2]){
-                                case 'k':
-                                    puts("delete via key");
-                                    break;
-                                case 'v':
-                                    puts("delete via value");
-                                    break;
-                                default:
-                                    printdefault();
-                                    break;
-                            }
+                        case 'v':
+                            puts("add via value");
                             break;
-                        case 'r':
-                            switch(cmd[2]){
-                                case 'k':
-                                    puts("read key");
-                                    break;
-                                case 'v':
-                                    puts("read value");
-                                    break;
-                                default:
-                                    printdefault();
-                                    break;
-                            }
+                        default:
+                            printdefault();
                             break;
-                        case 'h':
+                    }
+                    break;
+                case 'd':
+                    switch(cmd[1]){
+                        case 'k':
+                            puts("delete via key");
+                            break;
+                        case 'v':
+                            puts("delete via value");
+                            break;
+                        default:
+                            printdefault();
+                            break;
+                    }
+                    break;
+                case 'r':
+                    switch(cmd[1]){
+                        case ' ':
+                            puts("read key");
+                            printKV();
+                            break;
+                        case 'v':
+                            puts("read value");
+                            break;
                         default:
                             printdefault();
                             break;
@@ -355,6 +352,7 @@ void* readcmd(void* unused){
         else{
             printdefault();
         }
+
     }
     return NULL;
 }
