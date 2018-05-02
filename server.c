@@ -32,7 +32,8 @@ typedef struct{
     //int leng;
 }KVstore;
 
-KVstore kv;
+KVstore *kv = NULL;
+
 
 struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
     int id;
@@ -40,9 +41,9 @@ struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
 };
 
 //function to dynamically allocate memory to KVstore
-void initKVstore(KVstore *a, size_t initialSize);
-void insertKV(KVstore *a , int element);
-void freeKVstore(KVstore *a);
+void initKVstore(KVstore *array, size_t initialSize);
+void insertKV(KVstore *array , char *element);
+void freeKVstore(KVstore *array);
 
 void* multiconnect(void* socketdesc);
 void* readcmd(void*);
@@ -58,7 +59,12 @@ int main(int argc, char *argv[])
 
 	//KVstore kv;
 	//initialize kv array
-	initKVstore(&kv, 1);
+  kv = malloc(sizeof(KVstore));
+  if (kv == NULL) {
+    printf("Memory allocation issues\n");
+    return -1;
+  }
+	initKVstore(kv, 5);
 
     // Creating socket
     socketdesc = socket(AF_INET, SOCK_STREAM, 0);
@@ -123,17 +129,20 @@ int main(int argc, char *argv[])
 
 //itinialize Key value array
 void initKVstore(KVstore *array, size_t initialSize){
+  printf("PROBLEM\n");
   array->value = malloc(initialSize * sizeof(char*));
+  printf("EXCUSE ME\n");
   if (array->value == NULL) {
         printf("ERROR: Memory allocation failure!\n");
         exit(1);
     }
   array->used = 0;
   array->size = initialSize;
+  printf("problem931724\n");
 }
 
 //insert element into kv array and resize if necessary
-void insertKV(KVstore *array, char element) {
+void insertKV(KVstore *array, char *element) {
   // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
   // Therefore a->used can go up to a->size
   // if the number of used entries == size of the array, then we have to resize the kv_array
@@ -141,9 +150,9 @@ void insertKV(KVstore *array, char element) {
     void *pointer;
     array->size *= 2;
     //resize with realloc
-    pointer = (int *)realloc(array->value, array->size * sizeof(char*));
+    pointer = realloc(array->value, array->size * sizeof(char*));
     if (array->value == NULL) {
-      freeArray(array);
+      freeKVstore(array);
       printf("ERROR: Memory allocation failure!\n");
       exit(1);
     }
@@ -160,7 +169,7 @@ void insertKV(KVstore *array, char element) {
   }
   // a->used is the number of used entries (0 at the beginning), it keeps track of the number of used entries
   else
-    a->value[a->used++] = element;
+    array->value[array->used++] = element;
 }
 
 //free kv array at the end
@@ -187,13 +196,13 @@ void addelementKV(int mode, int newkey, char* newvalue){
 	}		// TODO: continue making functions here
 }
 
-void printKV(){
+/*void printKV(){
     int i,kvsize;
     kvsize = sizeof(kv)/sizeof(KVstore);
     for(i=0;i<kvsize;i++){
         printf("kv %d key is %d\n",i,kv.key);
     }
-}
+}*/
 
 // each of these thread will handle a connection to a client
 void *multiconnect(void* socketdesc){
@@ -206,13 +215,16 @@ void *multiconnect(void* socketdesc){
     //rcv msgs from the client
     // !!!!!!!!!!! le massage est rempli par des espaces blancs à la fin!!!!!!!!!
     while((bytesread = recv(clsock,clmsg,MSGSIZE-1,0))>0){
-        clmsg[bytesread+1]='\0';
+        //clmsg[bytesread+1]='\0';
+        printf("bytesread: %d\n", bytesread);
 
-        if(strlen(clmsg) != 0){
+        printf("client msg: %d\n", strlen(clmsg));
+
+        /*if(strlen(clmsg) != 0){
           i++;
-          insertKV(&kv, i); // TODO quelqu'un peut m'expliquer?
+          insertKV(kv, i); // TODO quelqu'un peut m'expliquer?
           //printf("%d\n", kv.used);  // print number of elements
-        }
+        }*/
 
 		// check regex and react
 		if (ctrlregex(clmsg) == 0){
@@ -226,10 +238,13 @@ void *multiconnect(void* socketdesc){
 		  //analyse message
 		  if(clmsg[0] == 'a'){      //add in the kv
 			//TODO add value from clmsg[3] until end
+
 			if(clmsg[1] == 'k'){
 			  //add the value by the key
 			} else {
 			  //add the value and generate a key    --> default
+        insertKV(kv, clmsg); //add strcat (de 2 à strlen)
+        printf("%s\n", kv->value[0]);
 			}
 		  }
 		  if(clmsg[0] == 'r'){      //read in the kv
@@ -331,7 +346,7 @@ void* readcmd(void* unused){
                     switch(cmd[1]){
                         case ' ':
                             puts("add via key");
-                            printf("content of kv: %d\n",kv.key);
+                            //printf("content of kv: %d\n",kv.key);
                             break;
                         case 'v':
                             puts("add via value");
@@ -358,7 +373,7 @@ void* readcmd(void* unused){
                     switch(cmd[1]){
                         case ' ':
                             puts("read key");
-                            printKV();
+                            //printKV();
                             break;
                         case 'v':
                             puts("read value");
