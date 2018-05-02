@@ -20,17 +20,17 @@
 //global variable
 bool running = true;// tenté d'avoir une var globale pour arrêter le serveur
 
-// Key value storage...
-typedef struct KVstore KVstore; // quelle idée, cela sert à rien non?
+/* Key value storage...
+typedef struct KVstore KVstore; // quelle idée, cela sert à rien non?*/
 
-struct KVstore{
+typedef struct{
     int key;
-    char* value;
-    int *kv_array;
-    size_t used;
+    char **value;
+    //int *kv_array;
+    size_t used; //size_t is a type guaranteed to hold any array index
     size_t size;
     //int leng;
-};
+}KVstore;
 
 KVstore kv;
 
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	//KVstore kv;
 	//initialize kv array
 	initKVstore(&kv, 1);
-	
+
     // Creating socket
     socketdesc = socket(AF_INET, SOCK_STREAM, 0);
     if(socketdesc == -1)
@@ -122,31 +122,61 @@ int main(int argc, char *argv[])
 }
 
 //itinialize Key value array
-void initKVstore(KVstore *a, size_t initialSize){
-  a->kv_array = (int *)malloc(initialSize * sizeof(int));
-  a->used = 0;
-  a->size = initialSize;
+void initKVstore(KVstore *array, size_t initialSize){
+  array->value = malloc(initialSize * sizeof(char*));
+  if (array->value == NULL) {
+        printf("ERROR: Memory allocation failure!\n");
+        exit(1);
+    }
+  array->used = 0;
+  array->size = initialSize;
 }
 
 //insert element into kv array and resize if necessary
-void insertKV(KVstore *a, int element) {
+void insertKV(KVstore *array, char element) {
   // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
   // Therefore a->used can go up to a->size
-  if (a->used == a->size) {
-    a->size *= 2; //TODO check if it works...
-    a->kv_array = (int *)realloc(a->kv_array, a->size * sizeof(int));
+  // if the number of used entries == size of the array, then we have to resize the kv_array
+  if (array->used == array->size) {
+    void *pointer;
+    array->size *= 2;
+    //resize with realloc
+    pointer = (int *)realloc(array->value, array->size * sizeof(char*));
+    if (array->value == NULL) {
+      freeArray(array);
+      printf("ERROR: Memory allocation failure!\n");
+      exit(1);
+    }
+    array->value = pointer;
   }
-  a->kv_array[a->used++] = element;
+  /* if the string passed is not NULL, copy it */
+  if (element != NULL) {
+    size_t length;
+
+    length = strlen(element);
+    array->value[array->used] = malloc(1 + length);
+    if (array->value[array->used] != NULL)
+        strcpy(array->value[array->used++], element);
+  }
+  // a->used is the number of used entries (0 at the beginning), it keeps track of the number of used entries
+  else
+    a->value[a->used++] = element;
 }
 
 //free kv array at the end
-void freeKVstore(KVstore *a) {
-  free(a->kv_array);
-  a->kv_array = NULL;
-  a->used = a->size = 0;
+void freeKVstore(KVstore *array) {
+  size_t i;
+  /* Free all the copies of the strings */
+  for (i = 0; i < array->used; ++i)
+    free(array->value[i]);
+
+  free(array->value);
+  free(array);
+  /*a->kv_array = NULL;
+  a->used = a->size = 0;*/
 }
 
-// different modes: 
+// different modes:
 // 0: add giving just the string
 // 1: add giving key and string
 void addelementKV(int mode, int newkey, char* newvalue){
@@ -183,7 +213,7 @@ void *multiconnect(void* socketdesc){
           insertKV(&kv, i); // TODO quelqu'un peut m'expliquer?
           //printf("%d\n", kv.used);  // print number of elements
         }
-		
+
 		// check regex and react
 		if (ctrlregex(clmsg) == 0){
 		  printf("client %i said a valid string: %s\n",persID->id, clmsg);
@@ -192,7 +222,7 @@ void *multiconnect(void* socketdesc){
 		  byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
 		  if(byte == -1) perror("Error on Recv");
 		  else if(byte == 0) printf("Connection is close\n");
-		  
+
 		  //analyse message
 		  if(clmsg[0] == 'a'){      //add in the kv
 			//TODO add value from clmsg[3] until end
@@ -277,7 +307,7 @@ int ctrlregex(char* msg){
 	int err, match;
 	regex_t preg;
 	const char *str_regex = "([ard] .+)|(ak [1-9]{1,3} .+)|(rv .+)|(dv .+)|(m [1-9]{1,3} .+)|(mv .+ .+)|p|q";
-	err = regcomp(&preg, str_regex, REG_NOSUB | REG_EXTENDED); 
+	err = regcomp(&preg, str_regex, REG_NOSUB | REG_EXTENDED);
 	if (err == 0) {// compilation of regex successful
 		match = regexec (&preg, msg, 0, NULL, 0);
 		regfree(&preg);
@@ -286,7 +316,7 @@ int ctrlregex(char* msg){
 	else{
 		regfree(&preg);
 		return REG_NOMATCH;
-	}	
+	}
 }
 
 void* readcmd(void* unused){
