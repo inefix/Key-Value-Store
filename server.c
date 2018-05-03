@@ -20,16 +20,12 @@
 //global variable
 bool running = true;// tenté d'avoir une var globale pour arrêter le serveur
 
-/* Key value storage...
-typedef struct KVstore KVstore; // quelle idée, cela sert à rien non?*/
-
+// Key value storage.
 typedef struct{
     int key;
-    char **value;
-    //int *kv_array;
+    char *value;
     size_t used; //size_t is a type guaranteed to hold any array index
     size_t size;
-    //int leng;
 }KVstore;
 
 KVstore *kv = NULL; // TODO donc ici on pourrait supprimer tous les KVstore *array dans les arguments
@@ -40,9 +36,9 @@ struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
 };
 
 //function to dynamically allocate memory to KVstore
-void initKVstore(KVstore *array, size_t initialSize);
-void insertKV(KVstore *array , char *element);
-void freeKVstore(KVstore *array);
+void initKVstore(size_t initialSize);
+void insertKV(char *newvalue, int newkey);
+void freeKVstore();
 
 void* multiconnect(void* socketdesc);
 void* readcmd(void*);
@@ -56,14 +52,8 @@ int main(int argc, char *argv[])
     struct sockaddr_in srv, clt;
     int structsize;
 
-	//KVstore kv;
 	//initialize kv array
-  kv = malloc(sizeof(KVstore));
-  if (kv == NULL) {
-    printf("Memory allocation issues\n");
-    return -1;
-  }
-	initKVstore(kv, 5);
+	initKVstore(2);
 
     // Creating socket
     socketdesc = socket(AF_INET, SOCK_STREAM, 0);
@@ -88,7 +78,6 @@ int main(int argc, char *argv[])
         perror("Error on Listen");
 
     structsize = sizeof(clt);
-    puts("enter to start server");
 
     // manage the user CLI inputs form server side (more powerfull?)
     pthread_t cliserver;
@@ -126,60 +115,62 @@ int main(int argc, char *argv[])
     return (EXIT_SUCCESS);
 }
 
-//itinialize Key value array
-void initKVstore(KVstore *array, size_t initialSize){
-  array->value = malloc(initialSize * sizeof(char*));
-  if (array->value == NULL) {
-        printf("ERROR: Memory allocation failure!\n");
-        exit(1);
-    }
-  array->used = 0;
-  array->size = initialSize;
+//itinialize Key value array with a array of initialSize length
+void initKVstore(size_t initialSize){
+	int i;
+	kv = (KVstore*) malloc(initialSize * sizeof(KVstore));
+	if (kv == NULL) {
+		printf("ERROR: Memory allocation failure!\n");
+		exit(1);
+	}
+	kv->used = 0; 
+	kv->size = initialSize; 
+	for(i=0;i<kv->size;i++){// faire de la place pour les strings
+		kv[i].value = (char*) malloc(sizeof(char*));
+	}
 }
 
 //insert element into kv array and resize if necessary
-void insertKV(KVstore *array, char *element) {
-  // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
-  // Therefore a->used can go up to a->size
-  // if the number of used entries == size of the array, then we have to resize the kv_array
-  
-  if (array->used == array->size) {
-    void *pointer;
-    array->size *= 2;
-    //resize with realloc
-    pointer = realloc(array->value, array->size * sizeof(char*));
-    if (array->value == NULL) {
-      freeKVstore(array);
-      printf("ERROR: Memory allocation failure!\n");
-      exit(1);
-    }
-    array->value = pointer;
-  }
-  /* if the string passed is not NULL, copy it */
-  if (element != NULL) {
-    size_t length;
-
-    length = strlen(element);
-    array->value[array->used] = malloc(1 + length);
-    if (array->value[array->used] != NULL)
-        strcpy(array->value[array->used++], element);
-  }
-  // a->used is the number of used entries (0 at the beginning), it keeps track of the number of used entries
-  else
-    array->value[array->used++] = element;
+void insertKV(char *newvalue, int newkey) {
+	
+	// resize if number of items is equal to size
+	if (kv->used == kv->size) {
+		int i;
+		size_t newsize = (size_t)(kv->size)*2;
+		printf("newsize: %zu\n",newsize);
+		//resize with realloc the kv
+		kv = (KVstore*) realloc(kv, newsize * sizeof(KVstore));
+		for(i=kv->size;i<newsize;i++){// faire de la place pour les strings
+			kv[i].value = (char*) malloc(sizeof(char*)); 
+		}
+		printf("kv0key: %d\n",kv[0].key); 
+		if (kv == NULL) {
+			freeKVstore(kv);
+			printf("ERROR: Memory allocation failure!\n");
+			exit(1);
+		}
+		else{
+			kv->size = newsize;
+		}
+	}
+	
+	/* if the string passed is not NULL, copy it */
+	if (newvalue != NULL) {
+		size_t length = strlen(newvalue);
+		//array->value[array->used] = malloc(1 + length);
+		int index = kv->used; // on ajoute un element
+		kv->used++;	
+		strncpy(kv[index].value, newvalue,length); // on insère la valeur
+		kv[index].key = newkey; // on indique aussi la clé
+	}
+	else
+		printf("newvalue is NULL");
+			
 }
 
 //free kv array at the end
-void freeKVstore(KVstore *array) {
-	size_t i;
-	/* Free all the copies of the strings */
-	for (i = 0; i < array->used; ++i){
-		free(array->value[i]);
-	}
-	free(array->value);
-	free(array);
-	/*a->kv_array = NULL;
-	a->used = a->size = 0;*/
+void freeKVstore() {
+	free(kv);
 }
 
 // different modes:
@@ -195,9 +186,9 @@ void addelementKV(int mode, int newkey, char* newvalue){
 
 void printKV(){
     int i,kvsize;
-    kvsize = sizeof(kv)/sizeof(KVstore);
+    kvsize = kv->used;
     for(i=0;i<kvsize;i++){
-        printf("kv %d key is %s\n",i,kv[i].value[i]);
+        printf("kv [%d] value is: %s and key is :%d\n",i,kv[i].value,kv[i].key);
     }
 }
 
@@ -239,8 +230,9 @@ void *multiconnect(void* socketdesc){
 			  //add the value by the key
 			} else {
 				//add the value and generate a key    --> default
-				insertKV(kv, clmsg); //add strcat (de 2 à strlen)
-				printf("%s\n", kv->value[0]);
+				
+				// TODO traiter le string pour avoir la partie key et value séparé
+				insertKV(clmsg,100); //add strcat (de 2 à strlen)
 			}
 		  }
 		  if(clmsg[0] == 'r'){      //read in the kv
@@ -331,6 +323,7 @@ int ctrlregex(char* msg){
 }
 
 void* readcmd(void* unused){
+	int newkey;
     while(running){
         char cmd[MSGSIZE];
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
@@ -341,9 +334,9 @@ void* readcmd(void* unused){
                 case 'a':
                     switch(cmd[1]){
                         case ' ':
+							newkey = 1;
                             puts("add via key");
-                            //printf("content of kv: %d\n",kv.key);
-                            insertKV(kv, cmd); //add strcat (de 2 à strleng)
+                            insertKV(cmd,newkey); //add strcat (de 2 à strleng)
                             printKV();
                             break;
                         case 'v':
