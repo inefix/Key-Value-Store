@@ -32,8 +32,7 @@ typedef struct{
     //int leng;
 }KVstore;
 
-KVstore *kv = NULL;
-
+KVstore *kv = NULL; // TODO donc ici on pourrait supprimer tous les KVstore *array dans les arguments
 
 struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
     int id;
@@ -129,16 +128,13 @@ int main(int argc, char *argv[])
 
 //itinialize Key value array
 void initKVstore(KVstore *array, size_t initialSize){
-  printf("PROBLEM\n");
   array->value = malloc(initialSize * sizeof(char*));
-  printf("EXCUSE ME\n");
   if (array->value == NULL) {
         printf("ERROR: Memory allocation failure!\n");
         exit(1);
     }
   array->used = 0;
   array->size = initialSize;
-  printf("problem931724\n");
 }
 
 //insert element into kv array and resize if necessary
@@ -146,6 +142,7 @@ void insertKV(KVstore *array, char *element) {
   // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
   // Therefore a->used can go up to a->size
   // if the number of used entries == size of the array, then we have to resize the kv_array
+  
   if (array->used == array->size) {
     void *pointer;
     array->size *= 2;
@@ -174,15 +171,15 @@ void insertKV(KVstore *array, char *element) {
 
 //free kv array at the end
 void freeKVstore(KVstore *array) {
-  size_t i;
-  /* Free all the copies of the strings */
-  for (i = 0; i < array->used; ++i)
-    free(array->value[i]);
-
-  free(array->value);
-  free(array);
-  /*a->kv_array = NULL;
-  a->used = a->size = 0;*/
+	size_t i;
+	/* Free all the copies of the strings */
+	for (i = 0; i < array->used; ++i){
+		free(array->value[i]);
+	}
+	free(array->value);
+	free(array);
+	/*a->kv_array = NULL;
+	a->used = a->size = 0;*/
 }
 
 // different modes:
@@ -196,13 +193,13 @@ void addelementKV(int mode, int newkey, char* newvalue){
 	}		// TODO: continue making functions here
 }
 
-/*void printKV(){
+void printKV(){
     int i,kvsize;
     kvsize = sizeof(kv)/sizeof(KVstore);
     for(i=0;i<kvsize;i++){
-        printf("kv %d key is %d\n",i,kv.key);
+        printf("kv %d key is %s\n",i,kv[i].value[i]);
     }
-}*/
+}
 
 // each of these thread will handle a connection to a client
 void *multiconnect(void* socketdesc){
@@ -211,14 +208,13 @@ void *multiconnect(void* socketdesc){
     //int clsock = *(int*)socketdesc;
     int bytesread, byte;
     char reply[MSGSIZE], clmsg[MSGSIZE];
-    int i = 0; //counter to check if clmsg is empty, increment if not empty
     //rcv msgs from the client
     // !!!!!!!!!!! le massage est rempli par des espaces blancs à la fin!!!!!!!!!
     while((bytesread = recv(clsock,clmsg,MSGSIZE-1,0))>0){
         //clmsg[bytesread+1]='\0';
         printf("bytesread: %d\n", bytesread);
 
-        printf("client msg: %d\n", strlen(clmsg));
+        printf("client msg: %zu\n", strlen(clmsg));
 
         /*if(strlen(clmsg) != 0){
           i++;
@@ -242,9 +238,9 @@ void *multiconnect(void* socketdesc){
 			if(clmsg[1] == 'k'){
 			  //add the value by the key
 			} else {
-			  //add the value and generate a key    --> default
-        insertKV(kv, clmsg); //add strcat (de 2 à strlen)
-        printf("%s\n", kv->value[0]);
+				//add the value and generate a key    --> default
+				insertKV(kv, clmsg); //add strcat (de 2 à strlen)
+				printf("%s\n", kv->value[0]);
 			}
 		  }
 		  if(clmsg[0] == 'r'){      //read in the kv
@@ -347,6 +343,8 @@ void* readcmd(void* unused){
                         case ' ':
                             puts("add via key");
                             //printf("content of kv: %d\n",kv.key);
+                            insertKV(kv, cmd); //add strcat (de 2 à strleng)
+                            printKV();
                             break;
                         case 'v':
                             puts("add via value");
@@ -386,7 +384,7 @@ void* readcmd(void* unused){
                 case 'q':
                     puts("stop server");
                     running = false;
-                    freeKVstore(&kv);
+                    freeKVstore(kv);
                     //how to shut down server properly?
                     break;
                 default:
