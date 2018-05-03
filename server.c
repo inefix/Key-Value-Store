@@ -11,8 +11,6 @@
 #include <stdbool.h>
 #include <regex.h>
 
-#define TRUE  1
-#define FALSE 0
 #define PORT 7777
 #define MSGSIZE 1024
 #define STORESIZE 1000 // modify later for dynamic size
@@ -37,8 +35,12 @@ struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
 
 //function to dynamically allocate memory to KVstore
 void initKVstore(size_t initialSize);
-void insertKV(char *newvalue, int newkey);
+void insertKV(int newkey, char *newvalue);
+//ajouter une fonction pour nettoyer un peu l'array?
 void freeKVstore();
+
+//functions to manipulate the KVstore
+void addpair(int newkey, char* newvalue);
 
 void* multiconnect(void* socketdesc);
 void* readcmd(void*);
@@ -127,23 +129,23 @@ void initKVstore(size_t initialSize){
 	kv->size = initialSize; 
 	for(i=0;i<kv->size;i++){// faire de la place pour les strings
 		kv[i].value = (char*) malloc(sizeof(char*));
+		kv[i].key = -1;
 	}
 }
 
 //insert element into kv array and resize if necessary
-void insertKV(char *newvalue, int newkey) {
+void insertKV(int newkey, char *newvalue) {
 	
 	// resize if number of items is equal to size
 	if (kv->used == kv->size) {
 		int i;
 		size_t newsize = (size_t)(kv->size)*2;
-		printf("newsize: %zu\n",newsize);
+		printf("resized array to: %zu\n",newsize);
 		//resize with realloc the kv
 		kv = (KVstore*) realloc(kv, newsize * sizeof(KVstore));
 		for(i=kv->size;i<newsize;i++){// faire de la place pour les strings
 			kv[i].value = (char*) malloc(sizeof(char*)); 
 		}
-		printf("kv0key: %d\n",kv[0].key); 
 		if (kv == NULL) {
 			freeKVstore(kv);
 			printf("ERROR: Memory allocation failure!\n");
@@ -153,7 +155,6 @@ void insertKV(char *newvalue, int newkey) {
 			kv->size = newsize;
 		}
 	}
-	
 	/* if the string passed is not NULL, copy it */
 	if (newvalue != NULL) {
 		size_t length = strlen(newvalue);
@@ -170,25 +171,66 @@ void insertKV(char *newvalue, int newkey) {
 
 //free kv array at the end
 void freeKVstore() {
+	int i;
+	for(i=0;i<kv->size;i++){
+		free(kv[i].value); // free all the string place
+	}
 	free(kv);
 }
 
-// different modes:
-// 0: add giving just the string
-// 1: add giving key and string
-void addelementKV(int mode, int newkey, char* newvalue){
-	if(mode == 0){
-		// add with string
+// 
+void addpair(int newkey, char* newvalue){
+	if(newkey == 0){ // we have to give a new key to the pair
+		int i,j,possiblekey;
+		bool check;
+		for(i=0;i<kv->size+1;i++){//on check si une clé peut être utilisée
+			check = true;
+			for(j=0;j<kv->size;j++){ // on check tout l'array
+				if(kv[j].key == i){
+					check = false;
+					break;
+				}
+				else{
+					possiblekey = i;// on garde la valeur tant qu'elle est possible
+				}	
+			}
+			if(check){
+				break;
+			}	
+		}
+		if(check){
+			insertKV(possiblekey,newvalue);
+		}				
 	}else{
-		// add with key and string
-	}		// TODO: continue making functions here
+		insertKV(newkey, newvalue);
+	}
 }
+
+void readpair(int key, char* value){
+	int i;
+	if(key==0){// we just have the value and want to read the key
+		for(i=0;i<kv->size;i++){
+			if(strcmp(kv[i].value,value)){ // we found the value and show the key
+				printf("value - %s - has the key %d\n",kv[i].value, kv[i].key);
+				break;
+			}	
+		}
+	}
+	else{ // we just have the key and want the value
+		for(i=0;i<kv->size;i++){
+			if(kv[i].key==key){ // we found the value and show the key
+				printf("the key %d has value %s \n",kv[i].key, kv[i].value);
+				break;
+			}	
+		}
+	}
+}	
 
 void printKV(){
     int i,kvsize;
     kvsize = kv->used;
     for(i=0;i<kvsize;i++){
-        printf("kv [%d] value is: %s and key is :%d\n",i,kv[i].value,kv[i].key);
+        printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
     }
 }
 
@@ -232,7 +274,7 @@ void *multiconnect(void* socketdesc){
 				//add the value and generate a key    --> default
 				
 				// TODO traiter le string pour avoir la partie key et value séparé
-				insertKV(clmsg,100); //add strcat (de 2 à strlen)
+				insertKV(100,clmsg); //add strcat (de 2 à strlen)
 			}
 		  }
 		  if(clmsg[0] == 'r'){      //read in the kv
@@ -334,10 +376,9 @@ void* readcmd(void* unused){
                 case 'a':
                     switch(cmd[1]){
                         case ' ':
-							newkey = 1;
+							newkey = 0;
                             puts("add via key");
-                            insertKV(cmd,newkey); //add strcat (de 2 à strleng)
-                            printKV();
+                            addpair(newkey,cmd); //add strcat (de 2 à strleng)
                             break;
                         case 'v':
                             puts("add via value");
@@ -364,7 +405,7 @@ void* readcmd(void* unused){
                     switch(cmd[1]){
                         case ' ':
                             puts("read key");
-                            //printKV();
+                            readpair(0,"a 1 hello");
                             break;
                         case 'v':
                             puts("read value");
@@ -373,6 +414,9 @@ void* readcmd(void* unused){
                             printdefault();
                             break;
                     }
+                    break;
+                case 'p':
+                    printKV();
                     break;
                 case 'q':
                     puts("stop server");
