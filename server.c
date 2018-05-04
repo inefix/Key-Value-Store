@@ -365,19 +365,64 @@ int ctrlregex(char* msg){
 }
 
 void* readcmd(void* unused){
-	int newkey;
+	int newkey, cmdlen;
+	char* tok;
+	char* mode;
+	char value[MSGSIZE]; 
     while(running){
         char cmd[MSGSIZE];
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
         if(ctrlregex(cmd)==0){// check the string input
-            printf("length of cmd: %i\n",(int)strlen(cmd)); //contains the string + the return key
+            cmdlen = (int)strlen(cmd);
+            printf("length of cmd: %i\n", cmdlen); //contains the string + the return key
+            //substring = strstr(cmd, " ");
+            //strncpy(substring, cmd+2,sizeof(cmd)-2);
+            tok = strtok(cmd," ");
+            mode = tok;
+            printf("mode:%s\n",mode);
+            tok = strtok(NULL, " ");
+            if(tok != NULL)
+				newkey = atoi(tok);
+				
+            printf("newkey:%d\n",newkey);
+            tok = strtok(NULL, " \n"); 
+            if(tok != NULL)
+				strcpy(value,tok);
+				
+            printf("value:%s\n",value);
+            
+            
+            if(strcmp(mode, "a")==0){
+				puts("add via value");
+				newkey = 1;
+                addpair(newkey,cmd); //add strcat (de 2 à strleng)
+                break;
+			}else if(strcmp(mode, "ak")==0){
+				puts("add via key");
+			}else if(strcmp(mode, "r")==0){
+				puts("read key");
+			}else if(strcmp(mode, "rv")==0){
+				puts("read value");
+			}else if(strcmp(mode, "d")==0){
+				puts("delete via key");
+			}else if(strcmp(mode, "dv")==0){
+				puts("delete via value");
+			}else if(strcmp(mode, "m")==0){
+				
+			}else if(strcmp(mode, "mv")==0){
+				
+			}else if(strcmp(mode, "p")==0){
+				printKV();
+			}								
+            
+            /*
             //process the command/readcmd
             switch(cmd[0]){
                 case 'a':
                     switch(cmd[1]){
                         case ' ':
 							newkey = 0;
-                            puts("add via key");
+                            //puts("add via key");
                             addpair(newkey,cmd); //add strcat (de 2 à strleng)
                             break;
                         case 'v':
@@ -428,6 +473,7 @@ void* readcmd(void* unused){
                     printdefault();
                     break;
             }
+            */
         }
         else{
             printdefault();
