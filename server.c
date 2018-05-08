@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <regex.h>
+#include <ctype.h>
 
 #define PORT 7777
 #define MSGSIZE 1024
@@ -44,6 +45,7 @@ void addpair(int newkey, char* newvalue);
 
 void* multiconnect(void* socketdesc);
 void* readcmd(void*);
+void processcmd(char* input);
 int ctrlregex(char* msg);
 void printdefault();
 
@@ -248,66 +250,19 @@ void *multiconnect(void* socketdesc){
         printf("bytesread: %d\n", bytesread);
 
         printf("client msg: %zu\n", strlen(clmsg));
-
-        /*if(strlen(clmsg) != 0){
-          i++;
-          insertKV(kv, i); // TODO quelqu'un peut m'expliquer?
-          //printf("%d\n", kv.used);  // print number of elements
-        }*/
-
 		// check regex and react
 		if (ctrlregex(clmsg) == 0){
-		  printf("client %i said a valid string: %s\n",persID->id, clmsg);
-		  // TODO send message to the client why not put on end to wait for confirmation of modify of the kv store???
-		  snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
-		  byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
-		  if(byte == -1) perror("Error on Recv");
-		  else if(byte == 0) printf("Connection is close\n");
+			//client side input processing
+			printf("client %i said a valid string: %s\n",persID->id, clmsg);
+			// TODO send message to the client why not put on end to wait for confirmation of modify of the kv store???
+			snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
+			byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
+			if(byte == -1) perror("Error on Recv");
+			else if(byte == 0) printf("Connection is close\n");
+			
+			processcmd(clmsg);
 
-		  //analyse message
-		  if(clmsg[0] == 'a'){      //add in the kv
-			//TODO add value from clmsg[3] until end
-
-			if(clmsg[1] == 'k'){
-			  //add the value by the key
-			} else {
-				//add the value and generate a key    --> default
-				
-				// TODO traiter le string pour avoir la partie key et value séparé
-				insertKV(100,clmsg); //add strcat (de 2 à strlen)
-			}
-		  }
-		  if(clmsg[0] == 'r'){      //read in the kv
-			//TODO search for the value at a certain key and print it
-			if(clmsg[1] == 'v'){
-			  //read by the value
-			} else {
-			  //read by the key   --> default
-			}
-		  }
-		  if(clmsg[0] == 'd'){      //delete in the kv
-			//TODO read + delete this line in the kv
-			if(clmsg[1] == 'v'){
-			  //delete by the value
-			} else {
-			  //delete by the key   --> default
-			}
-		  }
-		  if(clmsg[0] == 'm'){      //modify in the kv
-			//TODO read + modify this line in the kv
-			if(clmsg[1] == 'v'){
-			  //modify by the value
-			} else {
-			  //modify by the key   --> default
-			}
-		  }
-		  if(clmsg[0] == 'p'){      //print all the values in the kv
-			//TODO parcours tout le kv et affiche chaque value
-		  }
-		  /*if(clmsg[0] == 'q'){      //a client have left
-			printf("bye bye client %d\n", persID->id);
-			freeKVstore(&kv); //just to free memory, but this need to be deleted aftwards
-		  }*/
+			
 		}
 		else{
 		  printf("client %i said a not valid string: %s\n",persID->id, clmsg);
@@ -337,17 +292,6 @@ void *multiconnect(void* socketdesc){
     return NULL;
 }
 
-//structure of a msg: REGEX controlling this
-//a msg     --> add the msg and generate a key
-//ak 111 msg    --> add the msg at key 111
-//r 111     --> read the value at key 111
-//rv msg     --> read the value corresponding to the msg
-//d 111     --> delete the value at key 111
-//dv msg     --> read the value corresponding to the msg
-//m 111 msg     --> modify the value at key 111 with msg
-//mv msg msg     --> modify the value corresponding to the msg with msg
-//p   --> print all the values in the kv
-
 int ctrlregex(char* msg){
 	int err, match;
 	regex_t preg;
@@ -364,124 +308,135 @@ int ctrlregex(char* msg){
 	}
 }
 
+// server side command input
 void* readcmd(void* unused){
-	int newkey, cmdlen;
-	char* tok;
-	char* mode;
-	char value[MSGSIZE]; 
+	int cmdlen; 
     while(running){
         char cmd[MSGSIZE];
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
         if(ctrlregex(cmd)==0){// check the string input
             cmdlen = (int)strlen(cmd);
             printf("length of cmd: %i\n", cmdlen); //contains the string + the return key
-            //substring = strstr(cmd, " ");
-            //strncpy(substring, cmd+2,sizeof(cmd)-2);
-            tok = strtok(cmd," ");
-            mode = tok;
-            printf("mode:%s\n",mode);
-            tok = strtok(NULL, " ");
-            if(tok != NULL)
-				newkey = atoi(tok);
-				
-            printf("newkey:%d\n",newkey);
-            tok = strtok(NULL, " \n"); 
-            if(tok != NULL)
-				strcpy(value,tok);
-				
-            printf("value:%s\n",value);
-            
-            
-            if(strcmp(mode, "a")==0){
-				puts("add via value");
-				newkey = 1;
-                addpair(newkey,cmd); //add strcat (de 2 à strleng)
-                break;
-			}else if(strcmp(mode, "ak")==0){
-				puts("add via key");
-			}else if(strcmp(mode, "r")==0){
-				puts("read key");
-			}else if(strcmp(mode, "rv")==0){
-				puts("read value");
-			}else if(strcmp(mode, "d")==0){
-				puts("delete via key");
-			}else if(strcmp(mode, "dv")==0){
-				puts("delete via value");
-			}else if(strcmp(mode, "m")==0){
-				
-			}else if(strcmp(mode, "mv")==0){
-				
-			}else if(strcmp(mode, "p")==0){
-				printKV();
-			}								
-            
-            /*
-            //process the command/readcmd
-            switch(cmd[0]){
-                case 'a':
-                    switch(cmd[1]){
-                        case ' ':
-							newkey = 0;
-                            //puts("add via key");
-                            addpair(newkey,cmd); //add strcat (de 2 à strleng)
-                            break;
-                        case 'v':
-                            puts("add via value");
-                            break;
-                        default:
-                            printdefault();
-                            break;
-                    }
-                    break;
-                case 'd':
-                    switch(cmd[1]){
-                        case 'k':
-                            puts("delete via key");
-                            break;
-                        case 'v':
-                            puts("delete via value");
-                            break;
-                        default:
-                            printdefault();
-                            break;
-                    }
-                    break;
-                case 'r':
-                    switch(cmd[1]){
-                        case ' ':
-                            puts("read key");
-                            readpair(0,"a 1 hello");
-                            break;
-                        case 'v':
-                            puts("read value");
-                            break;
-                        default:
-                            printdefault();
-                            break;
-                    }
-                    break;
-                case 'p':
-                    printKV();
-                    break;
-                case 'q':
-                    puts("stop server");
-                    running = false;
-                    freeKVstore(kv);
-                    //how to shut down server properly?
-                    break;
-                default:
-                    printdefault();
-                    break;
-            }
-            */
+            processcmd(cmd);							
         }
         else{
             printdefault();
         }
-
     }
     return NULL;
 }
+
+//structure of a msg: REGEX controlling this
+//a msg     --> add the msg and generate a key
+//ak 111 msg    --> add the msg at key 111
+//r 111     --> read the value at key 111
+//rv msg     --> read the value corresponding to the msg
+//d 111     --> delete the value at key 111
+//dv msg     --> read the value corresponding to the msg
+//m 111 msg     --> modify the value at key 111 with msg
+//mv msg msg     --> modify the value corresponding to the msg with msg
+//p   --> print all the values in the kv
+void processcmd(char* input){
+	int newkey;
+	char* tok;
+	char* mode;
+	char value[MSGSIZE], value2[MSGSIZE]; 
+	
+	tok = strtok(input," ");
+	mode = tok;
+	printf("mode:%s\n",mode);
+	tok = strtok(NULL, " ");
+	if(tok != NULL){
+		if(strcmp(mode, "a")==0){
+			puts("add via value");
+			newkey = 0;
+			strcpy(value,tok);
+			addpair(newkey,value); //add strcat (de 2 à strleng)
+		}else if(strcmp(mode, "ak")==0){
+			puts("add via key");
+			if(isdigit(tok[0])){
+				newkey = atoi(tok);
+				printf("newkey:%d\n",newkey);
+				tok = strtok(NULL, " \n"); 
+				if(tok != NULL){
+					strcpy(value,tok);
+					addpair(newkey, value);	
+				}
+			}else{
+				puts("bad input");
+			}	
+		}else if(strcmp(mode, "r")==0){
+			puts("read key");
+			if(isdigit(tok[0])){
+				newkey = atoi(tok);
+				printf("ready key:%d\n",newkey);
+				readpair(newkey," ");
+			}else{
+				puts("error on input");
+			}
+		}else if(strcmp(mode, "rv")==0){
+			puts("read via value");
+			if(isdigit(tok[0])==0){
+				strcpy(value,tok);
+				printf("searching key of:%s\n",value);
+				readpair(0,value);
+			}else{
+				puts("error on input");
+			}
+		}else if(strcmp(mode, "d")==0){
+			puts("delete via key");
+			if(isdigit(tok[0])){
+				newkey = atoi(tok);
+				printf("delete key:%d\n",newkey);
+				//delete function
+			}else{
+				puts("error on input");
+			}
+		}else if(strcmp(mode, "dv")==0){
+			puts("delete via value");
+			if(isdigit(tok[0])==0){
+				strcpy(value,tok);
+				printf("delete value:%s\n",value);
+				// delete function
+			}else{
+				puts("error on input");
+			}
+		}else if(strcmp(mode, "m")==0){
+			if(isdigit(tok[0])){
+				newkey = atoi(tok);
+				tok = strtok(NULL, " \n"); 
+				if(tok != NULL){
+					strcpy(value,tok);						
+					printf("modify key %d with value:%s\n",newkey,value);
+					// modify function
+				}
+			}else{
+				puts("error on input");
+			}
+		}else if(strcmp(mode, "mv")==0){
+			if(isdigit(tok[0])==0){
+				strcpy(value,tok);
+				tok = strtok(NULL, " \n"); 
+				if(tok != NULL){
+					strcpy(value2,tok);						
+					printf("modify value of %s with value:%s\n",value,value2);
+					// modify function
+				}
+			}else{
+				puts("error on input");
+			}
+		}
+		else{
+            printdefault();
+        }
+	}else if(strcmp(mode, "p")==0){
+			printKV(); // rework this, isn't working...
+		}
+	else{
+		puts("error on input");
+	}
+}	
+
 //mettre ça dans un .h plus tard
 void printdefault(){ //annoying to write each time the printf
     puts("commands: -hh (help), -ak/-av [key/val] (add key/val), -dk/-dv [key/val] (delete key/val)");
