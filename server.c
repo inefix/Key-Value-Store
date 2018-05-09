@@ -127,8 +127,8 @@ void initKVstore(size_t initialSize){
 		printf("ERROR: Memory allocation failure!\n");
 		exit(1);
 	}
-	kv->used = 0; 
-	kv->size = initialSize; 
+	kv->used = 0;
+	kv->size = initialSize;
 	for(i=0;i<kv->size;i++){// faire de la place pour les strings
 		kv[i].value = (char*) malloc(sizeof(char*));
 		kv[i].key = -1;
@@ -137,7 +137,7 @@ void initKVstore(size_t initialSize){
 
 //insert element into kv array and resize if necessary
 void insertKV(int newkey, char *newvalue) {
-	
+
 	// resize if number of items is equal to size
 	if (kv->used == kv->size) {
 		int i;
@@ -146,7 +146,7 @@ void insertKV(int newkey, char *newvalue) {
 		//resize with realloc the kv
 		kv = (KVstore*) realloc(kv, newsize * sizeof(KVstore));
 		for(i=kv->size;i<newsize;i++){// faire de la place pour les strings
-			kv[i].value = (char*) malloc(sizeof(char*)); 
+			kv[i].value = (char*) malloc(sizeof(char*));
 		}
 		if (kv == NULL) {
 			freeKVstore(kv);
@@ -162,13 +162,13 @@ void insertKV(int newkey, char *newvalue) {
 		size_t length = strlen(newvalue);
 		//array->value[array->used] = malloc(1 + length);
 		int index = kv->used; // on ajoute un element
-		kv->used++;	
+		kv->used++;
 		strncpy(kv[index].value, newvalue,length); // on insère la valeur
 		kv[index].key = newkey; // on indique aussi la clé
 	}
 	else
 		printf("newvalue is NULL");
-			
+
 }
 
 //free kv array at the end
@@ -180,7 +180,7 @@ void freeKVstore() {
 	free(kv);
 }
 
-// 
+//
 void addpair(int newkey, char* newvalue){
 	if(newkey == 0){ // we have to give a new key to the pair
 		int i,j,possiblekey;
@@ -194,15 +194,15 @@ void addpair(int newkey, char* newvalue){
 				}
 				else{
 					possiblekey = i;// on garde la valeur tant qu'elle est possible
-				}	
+				}
 			}
 			if(check){
 				break;
-			}	
+			}
 		}
 		if(check){
 			insertKV(possiblekey,newvalue);
-		}				
+		}
 	}else{
 		insertKV(newkey, newvalue);
 	}
@@ -215,7 +215,7 @@ void readpair(int key, char* value){
 			if(strcmp(kv[i].value,value)){ // we found the value and show the key
 				printf("value - %s - has the key %d\n",kv[i].value, kv[i].key);
 				break;
-			}	
+			}
 		}
 	}
 	else{ // we just have the key and want the value
@@ -223,10 +223,10 @@ void readpair(int key, char* value){
 			if(kv[i].key==key){ // we found the value and show the key
 				printf("the key %d has value %s \n",kv[i].key, kv[i].value);
 				break;
-			}	
+			}
 		}
 	}
-}	
+}
 
 void printKV(){
     int i,kvsize;
@@ -253,16 +253,16 @@ void *multiconnect(void* socketdesc){
 		// check regex and react
 		if (ctrlregex(clmsg) == 0){
 			//client side input processing
-			printf("client %i said a valid string: %s\n",persID->id, clmsg);
+			printf("client %i said a valid string: %s",persID->id, clmsg);
 			// TODO send message to the client why not put on end to wait for confirmation of modify of the kv store???
 			snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
 			byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
 			if(byte == -1) perror("Error on Recv");
 			else if(byte == 0) printf("Connection is close\n");
-			
+
 			processcmd(clmsg);
 
-			
+
 		}
 		else{
 		  printf("client %i said a not valid string: %s\n",persID->id, clmsg);
@@ -310,14 +310,14 @@ int ctrlregex(char* msg){
 
 // server side command input
 void* readcmd(void* unused){
-	int cmdlen; 
+	int cmdlen;
     while(running){
         char cmd[MSGSIZE];
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
         if(ctrlregex(cmd)==0){// check the string input
             cmdlen = (int)strlen(cmd);
             printf("length of cmd: %i\n", cmdlen); //contains the string + the return key
-            processcmd(cmd);							
+            processcmd(cmd);
         }
         else{
             printdefault();
@@ -340,8 +340,8 @@ void processcmd(char* input){
 	int newkey;
 	char* tok;
 	char* mode;
-	char value[MSGSIZE], value2[MSGSIZE]; 
-	
+	char value[MSGSIZE], value2[MSGSIZE];
+
 	tok = strtok(input," ");
 	mode = tok;
 	printf("mode:%s\n",mode);
@@ -357,14 +357,14 @@ void processcmd(char* input){
 			if(isdigit(tok[0])){
 				newkey = atoi(tok);
 				printf("newkey:%d\n",newkey);
-				tok = strtok(NULL, " \n"); 
+				tok = strtok(NULL, " \n");
 				if(tok != NULL){
 					strcpy(value,tok);
-					addpair(newkey, value);	
+					addpair(newkey, value);
 				}
 			}else{
 				puts("bad input");
-			}	
+			}
 		}else if(strcmp(mode, "r")==0){
 			puts("read key");
 			if(isdigit(tok[0])){
@@ -404,9 +404,9 @@ void processcmd(char* input){
 		}else if(strcmp(mode, "m")==0){
 			if(isdigit(tok[0])){
 				newkey = atoi(tok);
-				tok = strtok(NULL, " \n"); 
+				tok = strtok(NULL, " \n");
 				if(tok != NULL){
-					strcpy(value,tok);						
+					strcpy(value,tok);
 					printf("modify key %d with value:%s\n",newkey,value);
 					// modify function
 				}
@@ -416,9 +416,9 @@ void processcmd(char* input){
 		}else if(strcmp(mode, "mv")==0){
 			if(isdigit(tok[0])==0){
 				strcpy(value,tok);
-				tok = strtok(NULL, " \n"); 
+				tok = strtok(NULL, " \n");
 				if(tok != NULL){
-					strcpy(value2,tok);						
+					strcpy(value2,tok);
 					printf("modify value of %s with value:%s\n",value,value2);
 					// modify function
 				}
@@ -435,7 +435,7 @@ void processcmd(char* input){
 	else{
 		puts("error on input");
 	}
-}	
+}
 
 //mettre ça dans un .h plus tard
 void printdefault(){ //annoying to write each time the printf
