@@ -42,6 +42,9 @@ void freeKVstore();
 
 //functions to manipulate the KVstore
 void addpair(int newkey, char* newvalue);
+void readpair(int key, char* value);
+void deletepair(int key, char* value);
+void printKV();
 
 void* multiconnect(void* socketdesc);
 void* readcmd(void*);
@@ -180,7 +183,7 @@ void freeKVstore() {
 	free(kv);
 }
 
-//
+// 
 void addpair(int newkey, char* newvalue){
 	if(newkey == 0){ // we have to give a new key to the pair
 		int i,j,possiblekey;
@@ -217,6 +220,7 @@ void readpair(int key, char* value){
 				break;
 			}
 		}
+		printf("no key found");
 	}
 	else{ // we just have the key and want the value
 		for(i=0;i<kv->size;i++){
@@ -225,14 +229,47 @@ void readpair(int key, char* value){
 				break;
 			}
 		}
+		printf("no key found");
 	}
+}
+
+void deletepair(int key, char* value){
+	int i;
+	if(key==0){// we just have the value
+		for(i=0;i<kv->size;i++){
+			if(strcmp(kv[i].value,value)){ 
+				printf("deleting - %s - having the key %d\n",kv[i].value, kv[i].key);
+				kv[i].key=-1;
+				kv[i].value = "";
+				printf("réduire taille de l'array? ");
+				break;
+			}
+		}
+	}
+	else{ // we just have the key
+		for(i=0;i<kv->size;i++){
+			if(kv[i].key==key){ // we found the value and show the key
+				printf("deleting key %d having value %s \n",kv[i].key, kv[i].value);
+				kv[i].key=-1;
+				kv[i].value = "";
+				printf("réduire taille de l'array? ");
+				break;
+			}
+		}
+	}
+	
 }
 
 void printKV(){
     int i,kvsize;
     kvsize = kv->used;
     for(i=0;i<kvsize;i++){
-        printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
+		if(kv[i].key!=-1){
+			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
+		}
+		else{
+			printf("index %d is NULL\n",i);	
+		}	
     }
 }
 
@@ -261,8 +298,6 @@ void *multiconnect(void* socketdesc){
 			else if(byte == 0) printf("Connection is close\n");
 
 			processcmd(clmsg);
-
-
 		}
 		else{
 		  printf("client %i said a not valid string: %s\n",persID->id, clmsg);
@@ -346,8 +381,11 @@ void processcmd(char* input){
 	mode = tok;
 	printf("mode:%s\n",mode);
 	tok = strtok(NULL, " ");
-	if(tok != NULL){
-		if(strcmp(mode, "a")==0){
+	printKV();
+	if(strcmp(mode, "p")==0){
+		printKV(); // rework this, isn't working...
+	}else if(tok != NULL){
+		if(strcmp(mode, "a")==0){ 
 			puts("add via value");
 			newkey = 0;
 			strcpy(value,tok);
@@ -370,7 +408,7 @@ void processcmd(char* input){
 			if(isdigit(tok[0])){
 				newkey = atoi(tok);
 				printf("read key: %d\n",newkey);
-				readpair(newkey," ");
+				readpair(newkey,"");
 			}else{
 				puts("error on input");
 			}
@@ -388,7 +426,7 @@ void processcmd(char* input){
 			if(isdigit(tok[0])){
 				newkey = atoi(tok);
 				printf("delete key:%d\n",newkey);
-				//delete function
+				deletepair(newkey, "");
 			}else{
 				puts("error on input");
 			}
@@ -397,7 +435,7 @@ void processcmd(char* input){
 			if(isdigit(tok[0])==0){
 				strcpy(value,tok);
 				printf("delete value:%s\n",value);
-				// delete function
+				deletepair(0,value);
 			}else{
 				puts("error on input");
 			}
@@ -429,9 +467,7 @@ void processcmd(char* input){
 		else{
             printdefault();
         }
-	}else if(strcmp(mode, "p")==0){
-			printKV(); // rework this, isn't working...
-		}
+	}
 	else{
 		puts("error on input");
 	}
