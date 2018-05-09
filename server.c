@@ -369,7 +369,7 @@ void processcmd(char* input){
 			puts("read key");
 			if(isdigit(tok[0])){
 				newkey = atoi(tok);
-				printf("read key:%d\n",newkey);
+				printf("read key: %d\n",newkey);
 				readpair(newkey," ");
 			}else{
 				puts("error on input");
