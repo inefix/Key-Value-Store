@@ -184,7 +184,7 @@ void freeKVstore() {
 	free(kv);
 }
 
-// 
+//
 void addpair(int newkey, char* newvalue){
 	if(newkey == 0){ // we have to give a new key to the pair
 		int i,j,possiblekey;
@@ -238,8 +238,8 @@ void deletepair(int key, char* value){
 	int i;
 	if(key==0){// we just have the value
 		for(i=0;i<kv->size;i++){
-			if(strcmp(kv[i].value,value)){ 
-				printf("deleting - %s - having the key %d\n",delnewline(kv[i].value), kv[i].key);
+			if(strcmp(kv[i].value,value)){
+				printf("deleting - %s - having the key %d\n",kv[i].value, kv[i].key);
 				kv[i].key=-1;
 				kv[i].value = "";
 				printf("réduire taille de l'array? ");
@@ -250,7 +250,7 @@ void deletepair(int key, char* value){
 	else{ // we just have the key
 		for(i=0;i<kv->size;i++){
 			if(kv[i].key==key){ // we found the value and show the key
-				printf("deleting key %d having value %s \n",kv[i].key, delnewline(kv[i].value));
+				printf("deleting key %d having value %s \n",kv[i].key, kv[i].value);
 				kv[i].key=-1;
 				kv[i].value = "";
 				printf("réduire taille de l'array? ");
@@ -258,7 +258,7 @@ void deletepair(int key, char* value){
 			}
 		}
 	}
-	
+
 }
 
 void printKV(){
@@ -266,11 +266,11 @@ void printKV(){
     kvsize = kv->used;
     for(i=0;i<kvsize;i++){
 		if(kv[i].key!=-1){
-			printf("kv[%d].value is: %s and key is: %d\n",i,delnewline(kv[i].value),kv[i].key);
+			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
 		}
 		else{
-			printf("index %d is NULL\n",i);	
-		}	
+			printf("index %d is NULL\n",i);
+		}
     }
 }
 
