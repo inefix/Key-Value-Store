@@ -51,6 +51,7 @@ void* readcmd(void*);
 void processcmd(char* input);
 int ctrlregex(char* msg);
 void printdefault();
+const char* delnewline(char* str);
 
 int main(int argc, char *argv[])
 {
@@ -238,7 +239,7 @@ void deletepair(int key, char* value){
 	if(key==0){// we just have the value
 		for(i=0;i<kv->size;i++){
 			if(strcmp(kv[i].value,value)){ 
-				printf("deleting - %s - having the key %d\n",kv[i].value, kv[i].key);
+				printf("deleting - %s - having the key %d\n",delnewline(kv[i].value), kv[i].key);
 				kv[i].key=-1;
 				kv[i].value = "";
 				printf("réduire taille de l'array? ");
@@ -249,7 +250,7 @@ void deletepair(int key, char* value){
 	else{ // we just have the key
 		for(i=0;i<kv->size;i++){
 			if(kv[i].key==key){ // we found the value and show the key
-				printf("deleting key %d having value %s \n",kv[i].key, kv[i].value);
+				printf("deleting key %d having value %s \n",kv[i].key, delnewline(kv[i].value));
 				kv[i].key=-1;
 				kv[i].value = "";
 				printf("réduire taille de l'array? ");
@@ -265,7 +266,7 @@ void printKV(){
     kvsize = kv->used;
     for(i=0;i<kvsize;i++){
 		if(kv[i].key!=-1){
-			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
+			printf("kv[%d].value is: %s and key is: %d\n",i,delnewline(kv[i].value),kv[i].key);
 		}
 		else{
 			printf("index %d is NULL\n",i);	
@@ -345,13 +346,13 @@ int ctrlregex(char* msg){
 
 // server side command input
 void* readcmd(void* unused){
-	int cmdlen;
+	//int cmdlen;
     while(running){
         char cmd[MSGSIZE];
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
+        cmd[strcspn(cmd,"\n")]=0;
         if(ctrlregex(cmd)==0){// check the string input
-            cmdlen = (int)strlen(cmd);
-            printf("length of cmd: %i\n", cmdlen); //contains the string + the return key
+            //cmdlen = (int)strlen(cmd);
             processcmd(cmd);
         }
         else{
@@ -379,13 +380,12 @@ void processcmd(char* input){
 
 	tok = strtok(input," ");
 	mode = tok;
-	printf("mode:%s\n",mode);
+	printf("mode:'%s'\n",mode);
 	tok = strtok(NULL, " ");
-	printKV();
-	if(strcmp(mode, "p")==0){
-		printKV(); // rework this, isn't working...
+	if(mode[0]=='p'){
+		printKV();
 	}else if(tok != NULL){
-		if(strcmp(mode, "a")==0){ 
+		if(strcmp(mode, "a")==0){
 			puts("add via value");
 			newkey = 0;
 			strcpy(value,tok);
@@ -470,6 +470,7 @@ void processcmd(char* input){
 	}
 	else{
 		puts("error on input");
+		puts("error mode p");
 	}
 }
 
@@ -477,3 +478,29 @@ void processcmd(char* input){
 void printdefault(){ //annoying to write each time the printf
     puts("commands: -hh (help), -ak/-av [key/val] (add key/val), -dk/-dv [key/val] (delete key/val)");
 }
+
+
+/*
+// voir pour réussir à supprimer ce putain de retour à la ligne
+const char* delnewline(char* str){
+    int leng = (int)strlen(str);
+    char* str2;
+    str2 = malloc(sizeof(char)*(leng-2));
+    printf("str[leng-1]:'%c'\n",str[leng-1]);
+    char c;
+    c = str[leng-1];
+    if(isprint(c) && c != '\\')
+        putchar(c);
+    else
+        printf("\\x%02x", c);
+
+    if(str[leng-1]=='\n'){
+        printf("old:'%s'\n",str);
+        strncpy(str2,str,leng-2);
+        printf("new:'%s'\n",str2);
+        return str2;
+    }else{
+        return str;
+    }
+}
+*/
