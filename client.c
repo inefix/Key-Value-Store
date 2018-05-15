@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
         else{
             //TODO récupérer l'ID client perso
             snprintf(text,sizeof(text),"%s",msg);
-            printf("sending string  %s",text);
+            printf("sending string %s",text);
 
             //Send message
             byte = send(sock, text, strlen(text)+1,0);
