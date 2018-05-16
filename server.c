@@ -265,13 +265,14 @@ void deletepair(int key, char* value){
 void modifyPair(int key, char* value, char* value2){
   //TODO modify key and value
   int i;
-  size_t length = strlen(value2);
+  size_t length1 = strlen(value);
+  size_t length2 = strlen(value2);
   if(key == 0){
     for(i=0; i<kv->size; i++){
       if(strcmp(kv[i].value, value) == 0){
         printf("Modifying %s with %s ", value, value2);
-        memset(kv[i].value, 0, sizeof(kv[i].value));
-        strncpy(kv[i].value, value2,length);
+        memset(kv[i].value, 0, length1);
+        strncpy(kv[i].value, value2,length2);
         break;
       }
       if( strcmp(kv[i].value, value) != 0){
