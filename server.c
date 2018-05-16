@@ -44,6 +44,7 @@ void freeKVstore();
 void addpair(int newkey, char* newvalue);
 void readpair(int key, char* value);
 void deletepair(int key, char* value);
+void modifyPair(int key, char* value);
 void printKV();
 
 void* multiconnect(void* socketdesc);
@@ -261,14 +262,14 @@ void deletepair(int key, char* value){
 
 }
 
-void modifyPair(int newKey, *char newValue){
+void modifyPair(int key, char* value){
   //TODO modify key and value
   int i;
   if(key == 0){
     for(i=0; i<kv->size; i++){
       if(strcmp(kv[i].value, value)){
         printf("Modifying - %s ", kv[i].value);
-        insertKV(newKey, newValue);
+        insertKV(key, value);
         break;
       }
     }
@@ -461,7 +462,7 @@ void processcmd(char* input){
 				if(tok != NULL){
 					strcpy(value,tok);
 					printf("modify key %d with value:%s\n",newkey,value);
-					// modify function
+					modifyPair(newkey, "");
 				}
 			}else{
 				puts("error on input");
@@ -473,7 +474,7 @@ void processcmd(char* input){
 				if(tok != NULL){
 					strcpy(value2,tok);
 					printf("modify value of %s with value:%s\n",value,value2);
-					// modify function
+					modifyPair(0, value2);
 				}
 			}else{
 				puts("error on input");
