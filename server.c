@@ -237,12 +237,13 @@ void readpair(int key, char* value){
 
 void deletepair(int key, char* value){
 	int i;
+  size_t length = strlen(value);
 	if(key==0){// we just have the value
 		for(i=0;i<kv->size;i++){
-			if(strcmp(kv[i].value,value)){
+			if(strcmp(kv[i].value,value) == 0){
 				printf("deleting - %s - having the key %d\n",kv[i].value, kv[i].key);
 				kv[i].key=-1;
-				kv[i].value = "";
+				memset(kv[i].value, 0, length);
 				printf("réduire taille de l'array? ");
 				break;
 			}
@@ -253,7 +254,7 @@ void deletepair(int key, char* value){
 			if(kv[i].key==key){ // we found the value and show the key
 				printf("deleting key %d having value %s \n",kv[i].key, kv[i].value);
 				kv[i].key=-1;
-				kv[i].value = "";
+        memset(kv[i].value, 0, length);
 				printf("réduire taille de l'array? ");
 				break;
 			}
@@ -263,22 +264,33 @@ void deletepair(int key, char* value){
 }
 
 void modifyPair(int key, char* value, char* value2){
-  //TODO modify key and value
   int i;
   size_t length1 = strlen(value);
   size_t length2 = strlen(value2);
+  int counter = 0;
   if(key == 0){
     for(i=0; i<kv->size; i++){
       if(strcmp(kv[i].value, value) == 0){
         printf("Modifying %s with %s ", value, value2);
         memset(kv[i].value, 0, length1);
         strncpy(kv[i].value, value2,length2);
-        break;
-      }
-      if( strcmp(kv[i].value, value) != 0){
-        printf("Value not found!");
+        counter++;
+        //break;
       }
     }
+  }
+  else{ // we just have the key
+		for(i=0;i<kv->size;i++){
+			if(kv[i].key == key){
+				printf("Modifying key %d having value %s \n",kv[i].key, kv[i].value);
+        memset(kv[i].value, 0, length1);
+        strncpy(kv[i].value, value2,length2);
+        counter++;
+			}
+		}
+	}
+  if(counter == 0){
+    printf("Value not found!");
   }
 }
 
@@ -469,7 +481,7 @@ void processcmd(char* input){
 				if(tok != NULL){
 					strcpy(value,tok);
 					printf("modify key %d with value:%s\n",newkey,value);
-					//modifyPair(newkey, value);
+					modifyPair(newkey, "", value);
 				}
 			}else{
 				puts("error on input");
