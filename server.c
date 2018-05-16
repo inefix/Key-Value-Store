@@ -353,7 +353,7 @@ void *multiconnect(void* socketdesc){
 int ctrlregex(char* msg){
 	int err, match;
 	regex_t preg;
-	const char *str_regex = "([ard] .+)|(ak [1-9]{1,3} .+)|(rv .+)|(dv .+)|(m [1-9]{1,3} .+)|(mv .+ .+)|p|q";
+	const char *str_regex = "([ard] .+)|(ak [0-9]{1,3} .+)|(rv .+)|(dv .+)|(m [0-9]{1,3} .+)|(mv .+ .+)|p|q";
 	err = regcomp(&preg, str_regex, REG_NOSUB | REG_EXTENDED);
 	if (err == 0) {// compilation of regex successful
 		match = regexec (&preg, msg, 0, NULL, 0);
@@ -416,7 +416,7 @@ void processcmd(char* input){
 			puts("add via key");
 			if(isdigit(tok[0])){
 				newkey = atoi(tok);
-				printf("newkey:%d\n",newkey);
+				printf("newkey: %d\n",newkey);
 				tok = strtok(NULL, " \n");
 				if(tok != NULL){
 					strcpy(value,tok);
