@@ -286,12 +286,13 @@ void *multiconnect(void* socketdesc){
     while((bytesread = recv(clsock,clmsg,MSGSIZE-1,0))>0){
         //clmsg[bytesread+1]='\0';
         printf("bytesread: %d\n", bytesread);
-
         printf("client msg: %zu\n", strlen(clmsg));
+        clmsg[strlen(clmsg)-1] = '\0';
+        
 		// check regex and react
 		if (ctrlregex(clmsg) == 0){
 			//client side input processing
-			printf("client %i said a valid string: %s",persID->id, clmsg);
+			printf("client %i said a valid string: %s\n",persID->id, clmsg);
 			// TODO send message to the client why not put on end to wait for confirmation of modify of the kv store???
 			snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
 			byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
