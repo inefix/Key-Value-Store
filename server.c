@@ -262,20 +262,19 @@ void deletepair(int key, char* value){
 
 }
 
-void modifyPair(int key, char* value, char*value2){
+void modifyPair(int key, char* value, char* value2){
   //TODO modify key and value
   int i;
-  int counter = 0;
   size_t length = strlen(value2);
   if(key == 0){
     for(i=0; i<kv->size; i++){
       if(strcmp(kv[i].value, value) == 0){
         printf("Modifying %s with %s ", value, value2);
+        memset(kv[i].value, 0, sizeof(kv[i].value));
         strncpy(kv[i].value, value2,length);
-        counter++;
         break;
       }
-      if(counter == 0){
+      if( strcmp(kv[i].value, value) != 0){
         printf("Value not found!");
       }
     }
