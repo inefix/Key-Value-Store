@@ -261,6 +261,21 @@ void deletepair(int key, char* value){
 
 }
 
+void modifyPair(int newKey, *char newValue){
+  //TODO modify key and value
+  int i;
+  if(key == 0){
+    for(i=0; i<kv->size; i++){
+      if(strcmp(kv[i].value, value)){
+        printf("Modifying - %s ", kv[i].value);
+        insertKV(newKey, newValue);
+        break;
+      }
+    }
+  }
+
+}
+
 void printKV(){
     int i,kvsize;
     kvsize = kv->used;
@@ -288,7 +303,7 @@ void *multiconnect(void* socketdesc){
         printf("bytesread: %d\n", bytesread);
         printf("client msg: %zu\n", strlen(clmsg));
         clmsg[strlen(clmsg)-1] = '\0';
-        
+
 		// check regex and react
 		if (ctrlregex(clmsg) == 0){
 			//client side input processing
