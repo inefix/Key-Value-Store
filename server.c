@@ -265,15 +265,17 @@ void deletepair(int key, char* value){
 void modifyPair(int key, char* value, char*value2){
   //TODO modify key and value
   int i;
+  int counter = 0;
   size_t length = strlen(value2);
   if(key == 0){
     for(i=0; i<kv->size; i++){
       if(strcmp(kv[i].value, value) == 0){
         printf("Modifying %s with %s ", value, value2);
-        strncpy(kv[i].value, value2, length);
+        strncpy(kv[i].value, value2,length);
+        counter++;
         break;
       }
-      if(strcmp(kv[i].value, value) != 0){
+      if(counter == 0){
         printf("Value not found!");
       }
     }
@@ -284,12 +286,12 @@ void printKV(){
     int i,kvsize;
     kvsize = kv->used;
     for(i=0;i<kvsize;i++){
-		if(kv[i].key!=-1){
-			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
-		}
-		else{
-			printf("index %d is NULL\n",i);
-		}
+  		if(kv[i].key!=-1){
+  			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
+  		}
+  		else{
+  			printf("index %d is NULL\n",i);
+  		}
     }
 }
 
@@ -304,9 +306,9 @@ void *multiconnect(void* socketdesc){
     // !!!!!!!!!!! le massage est rempli par des espaces blancs à la fin!!!!!!!!!
     while((bytesread = recv(clsock,clmsg,MSGSIZE-1,0))>0){
         //clmsg[bytesread+1]='\0';
-        printf("bytesread: %d\n", bytesread);
-        printf("client msg: %zu\n", strlen(clmsg));
-        clmsg[strlen(clmsg)-1] = '\0';
+        //printf("bytesread: %d\n", bytesread);
+        //printf("client msg: %zu\n", strlen(clmsg));
+        clmsg[strlen(clmsg)-1] = '\0';    //in oder to delete the new line
 
 		// check regex and react
 		if (ctrlregex(clmsg) == 0){
@@ -319,6 +321,7 @@ void *multiconnect(void* socketdesc){
 			else if(byte == 0) printf("Connection is close\n");
 
 			processcmd(clmsg);
+
 		}
 		else{
 		  printf("client %i said a not valid string: %s\n",persID->id, clmsg);
@@ -370,9 +373,9 @@ void* readcmd(void* unused){
     while(running){
         char cmd[MSGSIZE];
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
-        cmd[strcspn(cmd,"\n")]=0;
         if(ctrlregex(cmd)==0){// check the string input
             //cmdlen = (int)strlen(cmd);
+            cmd[strlen(cmd)-1] = '\0';    //in oder to delete the new line
             processcmd(cmd);
         }
         else{
@@ -399,12 +402,12 @@ void processcmd(char* input){
 	char value[MSGSIZE], value2[MSGSIZE];
 
 	tok = strtok(input," ");
-	mode = tok;
+	mode = tok;      //première partie du string
 	printf("mode:'%s'\n",mode);
-	tok = strtok(NULL, " ");
+	tok = strtok(NULL, " ");   //deuxième partie du string
 	if(mode[0]=='p'){
 		printKV();
-	}else if(tok != NULL){
+	}else if(tok != NULL){     //inutile vue que déjà testé dans regex non?
 		if(strcmp(mode, "a")==0){
 			puts("add via value");
 			newkey = 0;
