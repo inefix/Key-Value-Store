@@ -11,48 +11,7 @@
 #include <stdbool.h>
 #include <regex.h>
 #include <ctype.h>
-
-#define PORT 7777
-#define MSGSIZE 1024
-#define STORESIZE 1000 // modify later for dynamic size
-
-//global variable
-bool running = true;// tenté d'avoir une var globale pour arrêter le serveur
-
-// Key value storage.
-typedef struct{
-    int key;
-    char *value;
-    size_t used; //size_t is a type guaranteed to hold any array index
-    size_t size;
-}KVstore;
-
-KVstore *kv = NULL; // TODO donc ici on pourrait supprimer tous les KVstore *array dans les arguments
-
-struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
-    int id;
-    int sock;
-};
-
-//function to dynamically allocate memory to KVstore
-void initKVstore(size_t initialSize);
-void insertKV(int newkey, char *newvalue);
-//ajouter une fonction pour nettoyer un peu l'array?
-void freeKVstore();
-
-//functions to manipulate the KVstore
-void addpair(int newkey, char* newvalue);
-void readpair(int key, char* value);
-void deletepair(int key, char* value);
-void modifyPair(int key, char* value1, char* value2);
-void printKV();
-
-void* multiconnect(void* socketdesc);
-void* readcmd(void*);
-void processcmd(char* input);
-int ctrlregex(char* msg);
-void printdefault();
-const char* delnewline(char* str);
+#include "server.h"
 
 int main(int argc, char *argv[])
 {
@@ -151,7 +110,7 @@ void insertKV(int newkey, char *newvalue) {
 		//resize with realloc the kv
 		kv = (KVstore*) realloc(kv, newsize * sizeof(KVstore));
 		for(i=kv->size;i<newsize;i++){// faire de la place pour les strings
-			kv[i].value = (char*) malloc(sizeof(char*));
+			kv[i].value = (char*) malloc(sizeof(char*)*VALUESIZE);
 		}
 		if (kv == NULL) {
 			freeKVstore(kv);
@@ -215,23 +174,30 @@ void addpair(int newkey, char* newvalue){
 
 void readpair(int key, char* value){
 	int i = 0;
+	bool check = true;
 	if(key==0){// we just have the value and want to read the key
 		for(i=0; i<kv->size; i++){
-			if(strcmp(kv[i].value,value)){ // we found the value and show the key
-				printf("value - %s - has the key %d\n",kv[i].value, kv[i].key);
+			if(strcmp(kv[i].value,value)==0){ // we found the value and show the key
+				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
+				check = false;
 				break;
 			}
 		}
-		printf("no key found\n");
+		if(check){
+			printf("no pair found\n");
+		}
 	}
 	else{ // we just have the key and want the value
 		for(i=0;i<kv->size;i++){
 			if(kv[i].key==key){ // we found the value and show the key
-				printf("the key %d has value %s \n",kv[i].key, kv[i].value);
+				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
+				check = false;
 				break;
 			}
 		}
-		printf("no key found\n");
+		if(check){
+			printf("no pair found\n");
+		}
 	}
 }
 
@@ -311,11 +277,9 @@ void printKV(){
 void *multiconnect(void* socketdesc){
     struct IDsock *persID = (struct IDsock*)socketdesc;
     int clsock = persID->sock;
-    //int clsock = *(int*)socketdesc;
     int bytesread, byte;
     char reply[MSGSIZE], clmsg[MSGSIZE];
     //rcv msgs from the client
-    // !!!!!!!!!!! le massage est rempli par des espaces blancs à la fin!!!!!!!!!
     while((bytesread = recv(clsock,clmsg,MSGSIZE-1,0))>0){
         //clmsg[bytesread+1]='\0';
         //printf("bytesread: %d\n", bytesread);
@@ -328,7 +292,7 @@ void *multiconnect(void* socketdesc){
 			printf("client %i said a valid string: %s\n",persID->id, clmsg);
 			// TODO send message to the client why not put on end to wait for confirmation of modify of the kv store???
 			snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
-			byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
+			byte = send(clsock, reply, strlen(reply)+1,0); 
 			if(byte == -1) perror("Error on Recv");
 			else if(byte == 0) printf("Connection is close\n");
 
@@ -339,7 +303,7 @@ void *multiconnect(void* socketdesc){
 		  printf("client %i said a not valid string: %s\n",persID->id, clmsg);
 		  //send message to the client
 		  snprintf(reply,sizeof(reply),"client %d, your message is not valid! Try again", persID->id);//response to client
-		  byte = send(clsock, reply, strlen(reply)+1,0); //in send, we know MSGSIZE of string so we can use strlen
+		  byte = send(clsock, reply, strlen(reply)+1,0);
 		  if(byte == -1)
 			  perror("Error on Recv");
 		  else if(byte == 0)
@@ -355,7 +319,6 @@ void *multiconnect(void* socketdesc){
         perror("recv failed");
     }
 
-    //clean up
     close(clsock);
 
     free(socketdesc);
@@ -510,33 +473,6 @@ void processcmd(char* input){
 	}
 }
 
-//mettre ça dans un .h plus tard
 void printdefault(){ //annoying to write each time the printf
-    puts("commands: -hh (help), -ak/-av [key/val] (add key/val), -dk/-dv [key/val] (delete key/val)");
+    puts("commands ('cmd [args] effect'): h (help), a/ak [-/k] (add k/v), -d/-dv [-/v] (delete k/v)");
 }
-
-
-/*
-// voir pour réussir à supprimer ce putain de retour à la ligne
-const char* delnewline(char* str){
-    int leng = (int)strlen(str);
-    char* str2;
-    str2 = malloc(sizeof(char)*(leng-2));
-    printf("str[leng-1]:'%c'\n",str[leng-1]);
-    char c;
-    c = str[leng-1];
-    if(isprint(c) && c != '\\')
-        putchar(c);
-    else
-        printf("\\x%02x", c);
-
-    if(str[leng-1]=='\n'){
-        printf("old:'%s'\n",str);
-        strncpy(str2,str,leng-2);
-        printf("new:'%s'\n",str2);
-        return str2;
-    }else{
-        return str;
-    }
-}
-*/
