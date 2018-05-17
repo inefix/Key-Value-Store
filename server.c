@@ -348,7 +348,6 @@ int ctrlregex(char* msg){
 	int err, match;
 	regex_t preg;
 	const char *str_regex = "(^[ad] .+)|(^ak [[:digit:]]+ .+)|(^r [[:digit:]]+)|(^rv .+)|(^dv .+)|(^m [[:digit:]]+ .+)|(^mv .+ .+)|^p|^q";
-  //re_t pattern = re_compile("[Hh]ello [Ww]orld\\s*[!]?");
 	err = regcomp(&preg, str_regex, REG_NOSUB | REG_EXTENDED);
 	if (err == 0) {// compilation of regex successful
 		match = regexec (&preg, msg, 0, NULL, 0);
