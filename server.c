@@ -1,5 +1,8 @@
-
-
+/*
+ * Servier code of the KVstore
+ * Description of the program:
+ */
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 #include "server.h"
 
 // main launching the socket server and distributing the thread to handle several clients
@@ -91,17 +94,15 @@ void *multiconnect(void* socketdesc){
 		if (ctrlregex(clmsg) == 0){
 			//client side input processing
 			printf("client %i said a valid string: %s\n",persID->id, clmsg);
-			// TODO send message to the client why not put on end to wait for confirmation of modify of the kv store???
 			snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
 			byte = send(clsock, reply, strlen(reply)+1,0);
 
-      snprintf(rep_client,sizeof(rep_client),"request done");//if add key
+			snprintf(rep_client,sizeof(rep_client),"request done");//if add key
 
 			processcmd(clmsg);
 
-      //TODO: send message
-      byte = send(clsock, rep_client, strlen(rep_client)+1,0);
-      if(byte == -1) perror("Error on Recv");
+			byte = send(clsock, rep_client, strlen(rep_client)+1,0);
+			if(byte == -1) perror("Error on Recv");
 			else if(byte == 0) printf("Connection is close\n");
 
 		}
@@ -278,13 +279,10 @@ void processcmd(char* input){
 }
 
 /* 
- * 
  * ----------------------------------
  *  initilazing and adding elements to the KVstore
  * ----------------------------------
- * 
  */
-
 
 //itinialize Key value array with a array of initialSize length
 void initKVstore(size_t initialSize){
@@ -354,7 +352,6 @@ void freeKVstore() {
  * ----------------------------------
  * 
  */
-
 
 // adds a pair based on key or value
 void addpair(int newkey, char* newvalue){
