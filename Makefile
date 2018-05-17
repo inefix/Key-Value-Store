@@ -8,8 +8,8 @@ all :   server client
 clean :
 	rm -f  *.o client
 	rm -f  *.o server
-	
-	
+
+
 #------------------------------------------
 #
 #------------------------------------------
@@ -31,4 +31,4 @@ client.o :  client.c
 # Server
 #-----------------------------------------------
 server.o : server.c
-	gcc -pthread -Wall -c server.c
+	gcc -pthread -Wall -c server.c dynamicArray.c
