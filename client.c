@@ -8,8 +8,6 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-
-//#define ServerIP "35.162.226.229"
 #define ServerIP "127.0.0.1"
 #define ServerPort 7777
 #define SIZE 1024
@@ -42,7 +40,7 @@ int main(int argc, char** argv) {
         memset(text, 0, SIZE);
         memset(reply, 0, SIZE);
         //Get message
-        printf("'q' to close session \n"); //TODO ajouter toutes les fonctions
+        printf("'q' to close session \n");
         printf("type your msg >>> ");
         fgets(msg, SIZE+1, stdin); //lire tout le string
         // quel que soit le string on l'envoie au serveur, sinon on doit contrôler plusieurs fois que c'est correct...
@@ -79,7 +77,6 @@ int main(int argc, char** argv) {
 
         }
     }
-    //Close socket
-    close(sock);
+    close(sock);//Close socket
     return (EXIT_SUCCESS);
 }
