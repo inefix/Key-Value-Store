@@ -1,4 +1,15 @@
-#include"server.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#include "server.h"
+#include "dynamicArray.h"
+
+extern KVstore *kv; // our main KV store array
+extern char rep_client[MSGSIZE];
+extern bool running;// tenté d'avoir une var globale pour arrêter le serveur
 
 //itinialize Key value array with a array of initialSize length
 void initKVstore(size_t initialSize){

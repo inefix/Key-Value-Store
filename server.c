@@ -2,19 +2,29 @@
  * Servier code of the KVstore
  * Description of the program:
  */
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 #include "server.h"
 #include "dynamicArray.h"
+
+KVstore *kv; // our main KV store array
+char rep_client[MSGSIZE];
+bool running;// tenté d'avoir une var globale pour arrêter le serveur
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // main launching the socket server and distributing the thread to handle several clients
 int main(int argc, char *argv[])
 {
+	
     int socketdesc, clsock;
     int *nwsock;
     struct sockaddr_in srv, clt;
     int structsize;
+    running = true;
+    strcpy(rep_client,"");
 
 	//initialize kv array
+	kv = NULL;
 	initKVstore(2);
 
     // Creating socket
@@ -323,7 +333,7 @@ void insertKV(int newkey, char *newvalue) {
 			kv->size = newsize;
 		}
 	}
-	/* if the string passed is not NULL, copy it /
+	// if the string passed is not NULL, copy it 
 	if (newvalue != NULL) {
 		size_t length = strlen(newvalue);
 		//array->value[array->used] = malloc(1 + length);

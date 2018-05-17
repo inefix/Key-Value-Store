@@ -31,9 +31,6 @@
 #define STORESIZE 1000 // modify later for dynamic size
 #define VALUESIZE 50
 
-// GLOBAL VARIABLE
-
-bool running = true;// tenté d'avoir une var globale pour arrêter le serveur
 
 // Key value storage.
 typedef struct{
@@ -43,14 +40,11 @@ typedef struct{
     size_t size;
 }KVstore;
 
-KVstore *kv = NULL; // our main KV store array
-
 struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer
     int id;
     int sock;
 };
 
-char rep_client[MSGSIZE] = "";
 
 // FUNCTIONS
 
@@ -58,10 +52,6 @@ char rep_client[MSGSIZE] = "";
 void* multiconnect(void* socketdesc);
 void* readcmd(void*);
 
-//function to dynamically allocate memory to KVstore
-void initKVstore(size_t initialSize);
-void insertKV(int newkey, char *newvalue);
-void freeKVstore();
 
 // control functions and default messages
 void processcmd(char* input);
