@@ -13,6 +13,8 @@
 #include <ctype.h>
 #include "server.h"
 
+char rep_client[MSGSIZE] = "request done";
+
 int main(int argc, char *argv[])
 {
     int socketdesc, clsock;
@@ -179,24 +181,28 @@ void readpair(int key, char* value){
 		for(i=0; i<kv->size; i++){
 			if(strcmp(kv[i].value,value)==0){ // we found the value and show the key
 				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
+        snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
 				check = false;
 				break;
 			}
 		}
 		if(check){
 			printf("no pair found\n");
+      snprintf(rep_client,sizeof(rep_client),"no pair found");
 		}
 	}
 	else{ // we just have the key and want the value
 		for(i=0;i<kv->size;i++){
 			if(kv[i].key==key){ // we found the value and show the key
 				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
+        snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
 				check = false;
 				break;
 			}
 		}
 		if(check){
 			printf("no pair found\n");
+      snprintf(rep_client,sizeof(rep_client),"no pair found");
 		}
 	}
 }
@@ -208,6 +214,7 @@ void deletepair(int key, char* value){
 		for(i=0;i<kv->size;i++){
 			if(strcmp(kv[i].value,value) == 0){
 				printf("deleting - %s - having the key %d\n",kv[i].value, kv[i].key);
+        snprintf(rep_client,sizeof(rep_client),"deleting - %s - having the key %d",kv[i].value, kv[i].key);
 				kv[i].key=-1;
 				memset(kv[i].value, 0, length);
 				printf("réduire taille de l'array? ");
@@ -219,6 +226,7 @@ void deletepair(int key, char* value){
 		for(i=0;i<kv->size;i++){
 			if(kv[i].key==key){ // we found the value and show the key
 				printf("deleting key %d having value %s \n",kv[i].key, kv[i].value);
+        snprintf(rep_client,sizeof(rep_client),"deleting key %d having value %s",kv[i].key, kv[i].value);
 				kv[i].key=-1;
         memset(kv[i].value, 0, length);
 				printf("réduire taille de l'array? ");
@@ -238,6 +246,7 @@ void modifyPair(int key, char* value, char* value2){
     for(i=0; i<kv->size; i++){
       if(strcmp(kv[i].value, value) == 0){
         printf("Modifying %s with %s \n", value, value2);
+        snprintf(rep_client,sizeof(rep_client),"Modifying %s with %s", value, value2);
         memset(kv[i].value, 0, length1);
         strncpy(kv[i].value, value2,length2);
         counter++;
@@ -249,6 +258,7 @@ void modifyPair(int key, char* value, char* value2){
 		for(i=0;i<kv->size;i++){
 			if(kv[i].key == key){
 				printf("Modifying key %d having value %s \n",kv[i].key, kv[i].value);
+        snprintf(rep_client,sizeof(rep_client),"Modifying key %d having value %s",kv[i].key, kv[i].value);
         memset(kv[i].value, 0, length1);
         strncpy(kv[i].value, value2,length2);
         counter++;
@@ -256,17 +266,20 @@ void modifyPair(int key, char* value, char* value2){
 		}
 	}
   if(counter == 0){
-    printf("Value not found!");
+    printf("Value not found!\n");
+    snprintf(rep_client,sizeof(rep_client),"Value not found!");
   }
 }
 
 void printKV(){
     int i,kvsize;
     kvsize = kv->used;
+    snprintf(rep_client,sizeof(rep_client),"printing KV");
     for(i=0;i<kvsize;i++){
   		if(kv[i].key!=-1){
   			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
-  		}
+        snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
+      }
   		else{
   			printf("index %d is NULL\n",i);
   		}
@@ -293,10 +306,15 @@ void *multiconnect(void* socketdesc){
 			// TODO send message to the client why not put on end to wait for confirmation of modify of the kv store???
 			snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
 			byte = send(clsock, reply, strlen(reply)+1,0);
-			if(byte == -1) perror("Error on Recv");
-			else if(byte == 0) printf("Connection is close\n");
+
+      snprintf(rep_client,sizeof(rep_client),"request done");//if add key
 
 			processcmd(clmsg);
+
+      //TODO: send message
+      byte = send(clsock, rep_client, strlen(rep_client)+1,0);
+      if(byte == -1) perror("Error on Recv");
+			else if(byte == 0) printf("Connection is close\n");
 
 		}
 		else{

@@ -68,6 +68,15 @@ int main(int argc, char** argv) {
             };
 
             printf("reply: %s \n", reply);
+
+            if(strcmp(strstr(reply, "is valid"), "is valid") == 0) {
+              //Get reply from server
+              if (recv(sock, reply, SIZE, 0)<0){
+                  perror("recv failed");
+              };
+              printf("reply 2: %s \n", reply);
+            }
+
         }
     }
     //Close socket
