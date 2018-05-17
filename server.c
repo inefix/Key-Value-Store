@@ -214,15 +214,15 @@ void addpair(int newkey, char* newvalue){
 }
 
 void readpair(int key, char* value){
-	int i;
+	int i = 0;
 	if(key==0){// we just have the value and want to read the key
-		for(i=0;i<kv->size;i++){
+		for(i=0; i<kv->size; i++){
 			if(strcmp(kv[i].value,value)){ // we found the value and show the key
 				printf("value - %s - has the key %d\n",kv[i].value, kv[i].key);
 				break;
 			}
 		}
-		printf("no key found");
+		printf("no key found\n");
 	}
 	else{ // we just have the key and want the value
 		for(i=0;i<kv->size;i++){
@@ -231,7 +231,7 @@ void readpair(int key, char* value){
 				break;
 			}
 		}
-		printf("no key found");
+		printf("no key found\n");
 	}
 }
 
@@ -366,7 +366,7 @@ void *multiconnect(void* socketdesc){
 int ctrlregex(char* msg){
 	int err, match;
 	regex_t preg;
-	const char *str_regex = "(^[ard] .+)|(^ak [[:digit:]]+ .+)|(^rv .+)|(^dv .+)|(^m [[:digit:]]+ .+)|(^mv .+ .+)|^p|^q";
+	const char *str_regex = "(^[ad] .+)|(^ak [[:digit:]]+ .+)|(^r [[:digit:]]+)|(^rv .+)|(^dv .+)|(^m [[:digit:]]+ .+)|(^mv .+ .+)|^p|^q";
   //re_t pattern = re_compile("[Hh]ello [Ww]orld\\s*[!]?");
 	err = regcomp(&preg, str_regex, REG_NOSUB | REG_EXTENDED);
 	if (err == 0) {// compilation of regex successful
@@ -452,7 +452,7 @@ void processcmd(char* input){
 			puts("read via value");
 			if(isdigit(tok[0])==0){
 				strcpy(value,tok);
-				printf("searching key of:%s\n",value);
+				printf("searching key of: %s\n",value);
 				readpair(0,value);
 			}else{
 				puts("error on input");
