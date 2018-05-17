@@ -271,7 +271,7 @@ void modifyPair(int key, char* value, char* value2){
   if(key == 0){
     for(i=0; i<kv->size; i++){
       if(strcmp(kv[i].value, value) == 0){
-        printf("Modifying %s with %s ", value, value2);
+        printf("Modifying %s with %s \n", value, value2);
         memset(kv[i].value, 0, length1);
         strncpy(kv[i].value, value2,length2);
         counter++;
@@ -366,7 +366,8 @@ void *multiconnect(void* socketdesc){
 int ctrlregex(char* msg){
 	int err, match;
 	regex_t preg;
-	const char *str_regex = "([ard] .+)|(ak [0-9]{1,3} .+)|(rv .+)|(dv .+)|(m [0-9]{1,3} .+)|(mv .+ .+)|p|q";
+	const char *str_regex = "(^[ard] .+)|(^ak [[:digit:]]+ .+)|(^rv .+)|(^dv .+)|(^m [[:digit:]]+ .+)|(^mv .+ .+)|^p|^q";
+  //re_t pattern = re_compile("[Hh]ello [Ww]orld\\s*[!]?");
 	err = regcomp(&preg, str_regex, REG_NOSUB | REG_EXTENDED);
 	if (err == 0) {// compilation of regex successful
 		match = regexec (&preg, msg, 0, NULL, 0);
@@ -492,7 +493,7 @@ void processcmd(char* input){
 				tok = strtok(NULL, " \n");
 				if(tok != NULL){
 					strcpy(value2,tok);
-					printf("modify value of %s with value:%s\n",value,value2);
+					printf("modify value of %s with value: %s\n",value,value2);
 					modifyPair(0, value, value2);
 				}
 			}else{
