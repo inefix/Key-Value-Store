@@ -424,7 +424,7 @@ void processcmd(char* input){
 			puts("delete via key");
 			if(isdigit(tok[0])){
 				newkey = atoi(tok);
-				printf("delete key:%d\n",newkey);
+				printf("delete key: %d\n",newkey);
 				deletepair(newkey, "");
 			}else{
 				puts("error on input");
