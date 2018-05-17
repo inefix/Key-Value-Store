@@ -1,12 +1,14 @@
+#ifndef SERVER_H_
+#define SERVER_H_
 /*
  * SERVER.H :
- * 
+ *
  * Header file for the KV store server part
- * 
- * contains all global variables, prototypes and 
+ *
+ * contains all global variables, prototypes and
 */
 
-// INCLUDES 
+// INCLUDES
 // we decided to put these in the header for simplicity and readability reasons since it's not a big project and we only use it once
 #include <stdio.h>
 #include <string.h>
@@ -23,7 +25,7 @@
 #include <ctype.h>
 
 
-// CONSTANTS 
+// CONSTANTS
 #define PORT 7777
 #define MSGSIZE 1024
 #define STORESIZE 1000 // modify later for dynamic size
@@ -54,7 +56,7 @@ char rep_client[MSGSIZE] = "";
 
 //main functions operating the strings
 void* multiconnect(void* socketdesc);
-void* readcmd(void*); 
+void* readcmd(void*);
 
 //function to dynamically allocate memory to KVstore
 void initKVstore(size_t initialSize);
@@ -73,4 +75,4 @@ void deletepair(int key, char* value);
 void modifyPair(int key, char* value1, char* value2);
 void printKV();
 
-
+#endif

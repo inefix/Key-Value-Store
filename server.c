@@ -4,6 +4,7 @@
  */
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 #include "server.h"
+#include "dynamicArray.h"
 
 // main launching the socket server and distributing the thread to handle several clients
 int main(int argc, char *argv[])
@@ -189,7 +190,7 @@ void processcmd(char* input){
 	tok = strtok(NULL, " ");   //deuxième partie du string
 	if(mode[0]=='p'){
 		printKV();
-	}else if(tok != NULL){    
+	}else if(tok != NULL){
 		if(strcmp(mode, "a")==0){
 			puts("add via value");
 			newkey = 0;
@@ -278,13 +279,13 @@ void processcmd(char* input){
 	}
 }
 
-/* 
+/*
  * ----------------------------------
  *  initilazing and adding elements to the KVstore
  * ----------------------------------
  */
 
-//itinialize Key value array with a array of initialSize length
+/*itinialize Key value array with a array of initialSize length
 void initKVstore(size_t initialSize){
 	int i;
 	kv = (KVstore*) malloc(initialSize * sizeof(KVstore));
@@ -322,7 +323,7 @@ void insertKV(int newkey, char *newvalue) {
 			kv->size = newsize;
 		}
 	}
-	/* if the string passed is not NULL, copy it */
+	/* if the string passed is not NULL, copy it /
 	if (newvalue != NULL) {
 		size_t length = strlen(newvalue);
 		//array->value[array->used] = malloc(1 + length);
@@ -343,14 +344,14 @@ void freeKVstore() {
 		free(kv[i].value); // free all the string place
 	}
 	free(kv);
-}
+}*/
 
-/* 
- * 
+/*
+ *
  * ----------------------------------
  * functions manipulating the KVstore
  * ----------------------------------
- * 
+ *
  */
 
 // adds a pair based on key or value
@@ -385,14 +386,14 @@ void addpair(int newkey, char* newvalue){
 				addpair(0,newvalue);
 				check = false;
 				break;
-			}	
+			}
 		}
 		if(check){
 			insertKV(newkey, newvalue);
 			printf("New pair: value '%s' has the key '%d'\n",newvalue, newkey);
 			snprintf(rep_client,sizeof(rep_client),"New pair: value '%s' has the key '%d'",newvalue, newkey);
 		}
-		
+
 	}
 }
 
