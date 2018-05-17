@@ -1,20 +1,8 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <errno.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <pthread.h>
-#include <stdbool.h>
-#include <regex.h>
-#include <ctype.h>
+
+
 #include "server.h"
 
-char rep_client[MSGSIZE] = "request done";
-
+// main launching the socket server and distributing the thread to handle several clients
 int main(int argc, char *argv[])
 {
     int socketdesc, clsock;
@@ -36,7 +24,7 @@ int main(int argc, char *argv[])
     srv.sin_addr.s_addr = INADDR_ANY;
     memset(&(srv.sin_zero), '\0', 8);
     // means reuse the port
-    int reuse = 1;
+    int reuse = true;
     if (setsockopt(socketdesc, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int)) == -1)
         perror("Can't set the reuse option on the socket");
     // Bind
@@ -85,206 +73,6 @@ int main(int argc, char *argv[])
     return (EXIT_SUCCESS);
 }
 
-//itinialize Key value array with a array of initialSize length
-void initKVstore(size_t initialSize){
-	int i;
-	kv = (KVstore*) malloc(initialSize * sizeof(KVstore));
-	if (kv == NULL) {
-		printf("ERROR: Memory allocation failure!\n");
-		exit(1);
-	}
-	kv->used = 0;
-	kv->size = initialSize;
-	for(i=0;i<kv->size;i++){// faire de la place pour les strings
-		kv[i].value = (char*) malloc(sizeof(char*));
-		kv[i].key = -1;
-	}
-}
-
-//insert element into kv array and resize if necessary
-void insertKV(int newkey, char *newvalue) {
-
-	// resize if number of items is equal to size
-	if (kv->used == kv->size) {
-		int i;
-		size_t newsize = (size_t)(kv->size)*2;
-		printf("resized array to: %zu\n",newsize);
-		//resize with realloc the kv
-		kv = (KVstore*) realloc(kv, newsize * sizeof(KVstore));
-		for(i=kv->size;i<newsize;i++){// faire de la place pour les strings
-			kv[i].value = (char*) malloc(sizeof(char*)*VALUESIZE);
-		}
-		if (kv == NULL) {
-			freeKVstore(kv);
-			printf("ERROR: Memory allocation failure!\n");
-			exit(1);
-		}
-		else{
-			kv->size = newsize;
-		}
-	}
-	/* if the string passed is not NULL, copy it */
-	if (newvalue != NULL) {
-		size_t length = strlen(newvalue);
-		//array->value[array->used] = malloc(1 + length);
-		int index = kv->used; // on ajoute un element
-		kv->used++;
-		strncpy(kv[index].value, newvalue,length); // on insère la valeur
-		kv[index].key = newkey; // on indique aussi la clé
-	}
-	else
-		printf("newvalue is NULL");
-
-}
-
-//free kv array at the end
-void freeKVstore() {
-	int i;
-	for(i=0;i<kv->size;i++){
-		free(kv[i].value); // free all the string place
-	}
-	free(kv);
-}
-
-//
-void addpair(int newkey, char* newvalue){
-	if(newkey == 0){ // we have to give a new key to the pair
-		int i,j,possiblekey;
-		bool check;
-		for(i=0;i<kv->size+1;i++){//on check si une clé peut être utilisée
-			check = true;
-			for(j=0;j<kv->size;j++){ // on check tout l'array
-				if(kv[j].key == i){
-					check = false;
-					break;
-				}
-				else{
-					possiblekey = i;// on garde la valeur tant qu'elle est possible
-				}
-			}
-			if(check){
-				break;
-			}
-		}
-		if(check){
-			insertKV(possiblekey,newvalue);
-		}
-	}else{
-		insertKV(newkey, newvalue);
-	}
-}
-
-void readpair(int key, char* value){
-	int i = 0;
-	bool check = true;
-	if(key==0){// we just have the value and want to read the key
-		for(i=0; i<kv->size; i++){
-			if(strcmp(kv[i].value,value)==0){ // we found the value and show the key
-				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
-        snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
-				check = false;
-				break;
-			}
-		}
-		if(check){
-			printf("no pair found\n");
-      snprintf(rep_client,sizeof(rep_client),"no pair found");
-		}
-	}
-	else{ // we just have the key and want the value
-		for(i=0;i<kv->size;i++){
-			if(kv[i].key==key){ // we found the value and show the key
-				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
-        snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
-				check = false;
-				break;
-			}
-		}
-		if(check){
-			printf("no pair found\n");
-      snprintf(rep_client,sizeof(rep_client),"no pair found");
-		}
-	}
-}
-
-void deletepair(int key, char* value){
-	int i;
-  size_t length = strlen(value);
-	if(key==0){// we just have the value
-		for(i=0;i<kv->size;i++){
-			if(strcmp(kv[i].value,value) == 0){
-				printf("deleting - %s - having the key %d\n",kv[i].value, kv[i].key);
-        snprintf(rep_client,sizeof(rep_client),"deleting - %s - having the key %d",kv[i].value, kv[i].key);
-				kv[i].key=-1;
-				memset(kv[i].value, 0, length);
-				printf("réduire taille de l'array? ");
-				break;
-			}
-		}
-	}
-	else{ // we just have the key
-		for(i=0;i<kv->size;i++){
-			if(kv[i].key==key){ // we found the value and show the key
-				printf("deleting key %d having value %s \n",kv[i].key, kv[i].value);
-        snprintf(rep_client,sizeof(rep_client),"deleting key %d having value %s",kv[i].key, kv[i].value);
-				kv[i].key=-1;
-        memset(kv[i].value, 0, length);
-				printf("réduire taille de l'array? ");
-				break;
-			}
-		}
-	}
-
-}
-
-void modifyPair(int key, char* value, char* value2){
-  int i;
-  size_t length1 = strlen(value);
-  size_t length2 = strlen(value2);
-  int counter = 0;
-  if(key == 0){
-    for(i=0; i<kv->size; i++){
-      if(strcmp(kv[i].value, value) == 0){
-        printf("Modifying %s with %s \n", value, value2);
-        snprintf(rep_client,sizeof(rep_client),"Modifying %s with %s", value, value2);
-        memset(kv[i].value, 0, length1);
-        strncpy(kv[i].value, value2,length2);
-        counter++;
-        //break;
-      }
-    }
-  }
-  else{ // we just have the key
-		for(i=0;i<kv->size;i++){
-			if(kv[i].key == key){
-				printf("Modifying key %d having value %s \n",kv[i].key, kv[i].value);
-        snprintf(rep_client,sizeof(rep_client),"Modifying key %d having value %s",kv[i].key, kv[i].value);
-        memset(kv[i].value, 0, length1);
-        strncpy(kv[i].value, value2,length2);
-        counter++;
-			}
-		}
-	}
-  if(counter == 0){
-    printf("Value not found!\n");
-    snprintf(rep_client,sizeof(rep_client),"Value not found!");
-  }
-}
-
-void printKV(){
-    int i,kvsize;
-    kvsize = kv->used;
-    snprintf(rep_client,sizeof(rep_client),"printing KV");
-    for(i=0;i<kvsize;i++){
-  		if(kv[i].key!=-1){
-  			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
-        snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
-      }
-  		else{
-  			printf("index %d is NULL\n",i);
-  		}
-    }
-}
 
 // each of these thread will handle a connection to a client
 void *multiconnect(void* socketdesc){
@@ -344,10 +132,21 @@ void *multiconnect(void* socketdesc){
     return NULL;
 }
 
+// Regex controlling the correct way to give a request
 int ctrlregex(char* msg){
 	int err, match;
 	regex_t preg;
 	const char *str_regex = "(^[ad] .+)|(^ak [[:digit:]]+ .+)|(^r [[:digit:]]+)|(^rv .+)|(^dv .+)|(^m [[:digit:]]+ .+)|(^mv .+ .+)|^p|^q";
+	//structure of a msg: REGEX controlling this
+	//a msg     --> add the msg and generate a key
+	//ak 111 msg    --> add the msg at key 111
+	//r 111     --> read the value at key 111
+	//rv msg     --> read the value corresponding to the msg
+	//d 111     --> delete the value at key 111
+	//dv msg     --> read the value corresponding to the msg
+	//m 111 msg     --> modify the value at key 111 with msg
+	//mv msg msg     --> modify the value corresponding to the msg with msg
+	//p   --> print all the values in the kv
 	err = regcomp(&preg, str_regex, REG_NOSUB | REG_EXTENDED);
 	if (err == 0) {// compilation of regex successful
 		match = regexec (&preg, msg, 0, NULL, 0);
@@ -360,15 +159,13 @@ int ctrlregex(char* msg){
 	}
 }
 
-// server side command input
+// Server side command input
 void* readcmd(void* unused){
-	//int cmdlen;
     while(running){
         char cmd[MSGSIZE];
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
         if(ctrlregex(cmd)==0){// check the string input
-            //cmdlen = (int)strlen(cmd);
-            cmd[strlen(cmd)-1] = '\0';    //in oder to delete the new line
+            cmd[strlen(cmd)-1] = '\0'; //in oder to delete the new line
             processcmd(cmd);
         }
         else{
@@ -378,16 +175,7 @@ void* readcmd(void* unused){
     return NULL;
 }
 
-//structure of a msg: REGEX controlling this
-//a msg     --> add the msg and generate a key
-//ak 111 msg    --> add the msg at key 111
-//r 111     --> read the value at key 111
-//rv msg     --> read the value corresponding to the msg
-//d 111     --> delete the value at key 111
-//dv msg     --> read the value corresponding to the msg
-//m 111 msg     --> modify the value at key 111 with msg
-//mv msg msg     --> modify the value corresponding to the msg with msg
-//p   --> print all the values in the kv
+// takes decision to manipulate KVstore based on the input
 void processcmd(char* input){
 	int newkey;
 	char* tok;
@@ -400,12 +188,12 @@ void processcmd(char* input){
 	tok = strtok(NULL, " ");   //deuxième partie du string
 	if(mode[0]=='p'){
 		printKV();
-	}else if(tok != NULL){     //inutile vue que déjà testé dans regex non?
+	}else if(tok != NULL){    
 		if(strcmp(mode, "a")==0){
 			puts("add via value");
 			newkey = 0;
 			strcpy(value,tok);
-			addpair(newkey,value); //add strcat (de 2 à strleng)
+			addpair(newkey,value);
 		}else if(strcmp(mode, "ak")==0){
 			puts("add via key");
 			if(isdigit(tok[0])){
@@ -486,8 +274,244 @@ void processcmd(char* input){
 	}
 	else{
 		puts("error on input");
-		puts("error mode p");
 	}
+}
+
+/* 
+ * 
+ * ----------------------------------
+ *  initilazing and adding elements to the KVstore
+ * ----------------------------------
+ * 
+ */
+
+
+//itinialize Key value array with a array of initialSize length
+void initKVstore(size_t initialSize){
+	int i;
+	kv = (KVstore*) malloc(initialSize * sizeof(KVstore));
+	if (kv == NULL) {
+		printf("ERROR: Memory allocation failure!\n");
+		exit(1);
+	}
+	kv->used = 0;
+	kv->size = initialSize;
+	for(i=0;i<kv->size;i++){// faire de la place pour les strings
+		kv[i].value = (char*) malloc(sizeof(char*));
+		kv[i].key = -1;
+	}
+}
+
+//insert element into kv array and resize if necessary
+void insertKV(int newkey, char *newvalue) {
+
+	// resize if number of items is equal to size
+	if (kv->used == kv->size) {
+		int i;
+		size_t newsize = (size_t)(kv->size)*2;
+		printf("resized array to: %zu\n",newsize);
+		//resize with realloc the kv
+		kv = (KVstore*) realloc(kv, newsize * sizeof(KVstore));
+		for(i=kv->size;i<newsize;i++){// faire de la place pour les strings
+			kv[i].value = (char*) malloc(sizeof(char*)*VALUESIZE);
+		}
+		if (kv == NULL) {
+			freeKVstore(kv);
+			printf("ERROR: Memory allocation failure!\n");
+			exit(1);
+		}
+		else{
+			kv->size = newsize;
+		}
+	}
+	/* if the string passed is not NULL, copy it */
+	if (newvalue != NULL) {
+		size_t length = strlen(newvalue);
+		//array->value[array->used] = malloc(1 + length);
+		int index = kv->used; // on ajoute un element
+		kv->used++;
+		strncpy(kv[index].value, newvalue,length); // on insère la valeur
+		kv[index].key = newkey; // on indique aussi la clé
+	}
+	else
+		printf("newvalue is NULL");
+
+}
+
+//free kv array at the end
+void freeKVstore() {
+	int i;
+	for(i=0;i<kv->size;i++){
+		free(kv[i].value); // free all the string place
+	}
+	free(kv);
+}
+
+/* 
+ * 
+ * ----------------------------------
+ * functions manipulating the KVstore
+ * ----------------------------------
+ * 
+ */
+
+
+// adds a pair based on key or value
+void addpair(int newkey, char* newvalue){
+	int i,j,possiblekey;
+	bool check = true;
+	if(newkey == 0){ // we have to give a new key to the pair
+		for(i=0;i<kv->size+1;i++){//on check si une clé peut être utilisée
+			check = true;
+			for(j=0;j<kv->size;j++){ // on check tout l'array
+				if(kv[j].key == i){
+					check = false;
+					break;
+				}
+				else{
+					possiblekey = i;// on garde la valeur tant qu'elle est possible
+				}
+			}
+			if(check){
+				break;
+			}
+		}
+		if(check){
+			insertKV(possiblekey,newvalue);
+			printf("New pair: value '%s' has the new generated key '%d'\n",newvalue, possiblekey);
+			snprintf(rep_client,sizeof(rep_client),"New pair: value '%s' has the key '%d'",newvalue, possiblekey);
+		}
+	}else{
+		for(i=0;i<kv->size+1;i++){//on check si une clé peut être utilisée
+			if(kv[i].key==newkey){
+				//key exists already, assign a new key:
+				addpair(0,newvalue);
+				check = false;
+				break;
+			}	
+		}
+		if(check){
+			insertKV(newkey, newvalue);
+			printf("New pair: value '%s' has the key '%d'\n",newvalue, newkey);
+			snprintf(rep_client,sizeof(rep_client),"New pair: value '%s' has the key '%d'",newvalue, newkey);
+		}
+		
+	}
+}
+
+
+void modifyPair(int key, char* value, char* value2){
+  int i;
+  size_t length1 = strlen(value);
+  size_t length2 = strlen(value2);
+  int counter = 0;
+  if(key == 0){
+    for(i=0; i<kv->size; i++){
+      if(strcmp(kv[i].value, value) == 0){
+        printf("Modifying %s with %s \n", value, value2);
+        snprintf(rep_client,sizeof(rep_client),"Modifying %s with %s", value, value2);
+        memset(kv[i].value, 0, length1);
+        strncpy(kv[i].value, value2,length2);
+        counter++;
+        break;
+      }
+    }
+  }
+  else{ // we just have the key
+		for(i=0;i<kv->size;i++){
+			if(kv[i].key == key){
+				printf("Modifying key %d having value %s \n",kv[i].key, kv[i].value);
+				snprintf(rep_client,sizeof(rep_client),"Modifying key %d having value %s",kv[i].key, kv[i].value);
+				memset(kv[i].value, 0, length1);
+				strncpy(kv[i].value, value2,length2);
+				counter++;
+				break;
+			}
+		}
+	}
+  if(counter == 0){
+    printf("Value not found!\n");
+    snprintf(rep_client,sizeof(rep_client),"Value not found!");
+  }
+}
+
+
+void deletepair(int key, char* value){
+	int i;
+	size_t length = strlen(value);
+	if(key==0){// we just have the value
+		for(i=0;i<kv->size;i++){
+			if(strcmp(kv[i].value,value) == 0){
+				printf("deleting - %s - having the key %d\n",kv[i].value, kv[i].key);
+				snprintf(rep_client,sizeof(rep_client),"deleting - %s - having the key %d",kv[i].value, kv[i].key);
+				kv[i].key=-1;
+				memset(kv[i].value, 0, length);
+				printf("réduire taille de l'array? ");
+				break;
+			}
+		}
+	}
+	else{ // we just have the key
+		for(i=0;i<kv->size;i++){
+			if(kv[i].key==key){ // we found the value and show the key
+				printf("deleting key %d having value %s \n",kv[i].key, kv[i].value);
+				snprintf(rep_client,sizeof(rep_client),"deleting key %d having value %s",kv[i].key, kv[i].value);
+				kv[i].key=-1;
+				memset(kv[i].value, 0, length);
+				printf("réduire taille de l'array? ");
+				break;
+			}
+		}
+	}
+}
+
+
+void readpair(int key, char* value){
+	int i = 0;
+	bool check = true;
+	if(key==0){// we just have the value and want to read the key
+		for(i=0; i<kv->size; i++){
+			if(strcmp(kv[i].value,value)==0){ // we found the value and show the key
+				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
+				snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
+				check = false;
+				break;
+			}
+		}
+		if(check){
+			printf("no pair found\n");
+      snprintf(rep_client,sizeof(rep_client),"no pair found");
+		}
+	}
+	else{ // we just have the key and want the value
+		for(i=0;i<kv->size;i++){
+			if(kv[i].key==key){ // we found the value and show the key
+				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
+        snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
+				check = false;
+				break;
+			}
+		}
+		if(check){
+			printf("no pair found\n");
+      snprintf(rep_client,sizeof(rep_client),"no pair found");
+		}
+	}
+}
+
+void printKV(){
+    int i,kvsize;
+    kvsize = kv->used;
+    snprintf(rep_client,sizeof(rep_client),"printing KV");
+    for(i=0;i<kvsize;i++){
+  		if(kv[i].key!=-1){
+  			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
+        snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
+      }
+  		else{
+  			printf("index %d is NULL\n",i);
+  		}
+    }
 }
 
 void printdefault(){ //annoying to write each time the printf
