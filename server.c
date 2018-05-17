@@ -292,7 +292,7 @@ void *multiconnect(void* socketdesc){
 			printf("client %i said a valid string: %s\n",persID->id, clmsg);
 			// TODO send message to the client why not put on end to wait for confirmation of modify of the kv store???
 			snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
-			byte = send(clsock, reply, strlen(reply)+1,0); 
+			byte = send(clsock, reply, strlen(reply)+1,0);
 			if(byte == -1) perror("Error on Recv");
 			else if(byte == 0) printf("Connection is close\n");
 
@@ -433,7 +433,7 @@ void processcmd(char* input){
 			puts("delete via value");
 			if(isdigit(tok[0])==0){
 				strcpy(value,tok);
-				printf("delete value:%s\n",value);
+				printf("delete value: %s\n",value);
 				deletepair(0,value);
 			}else{
 				puts("error on input");
