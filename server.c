@@ -1,5 +1,5 @@
 /*
- * Servier code of the KVstore
+ * Server code of the KVstore
  * Description of the program:
  */
 
@@ -10,12 +10,12 @@ KVstore *kv; // our main KV store array
 char rep_client[MSGSIZE];
 bool running;// tenté d'avoir une var globale pour arrêter le serveur
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex;// = PTHREAD_MUTEX_INITIALIZER;
 
 // main launching the socket server and distributing the thread to handle several clients
 int main(int argc, char *argv[])
 {
-	
+
     int socketdesc, clsock;
     int *nwsock;
     struct sockaddr_in srv, clt;
@@ -57,6 +57,12 @@ int main(int argc, char *argv[])
         perror("thread creation failed");
         return 1;
     }
+
+		if (pthread_mutex_init(&mutex, NULL) != 0){
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+
     int i = 1;//counter for clients
     struct IDsock *client;
     // Accept  TODO =>accept est bloquant, trouver une solution pour arrêter le serveur proprement
@@ -75,6 +81,10 @@ int main(int argc, char *argv[])
             perror("thread creation failed");
             return 1;
         }
+				if (pthread_mutex_init(&mutex, NULL) != 0){
+		        printf("\n mutex init failed\n");
+		        return 1;
+		    }
         puts("new client accepted and thread occupied for it");
         i++;
     }
@@ -83,6 +93,8 @@ int main(int argc, char *argv[])
         perror("Error on Accept");
         return 1;
     }
+
+		pthread_mutex_destroy(&mutex);
 
     return (EXIT_SUCCESS);
 }
@@ -174,6 +186,7 @@ int ctrlregex(char* msg){
 // Server side command input
 void* readcmd(void* unused){
     while(running){
+				pthread_mutex_lock(&mutex);
         char cmd[MSGSIZE];
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
         if(ctrlregex(cmd)==0){// check the string input
@@ -183,6 +196,7 @@ void* readcmd(void* unused){
         else{
             printdefault();
         }
+				pthread_mutex_unlock(&mutex);
     }
     return NULL;
 }
@@ -333,7 +347,7 @@ void insertKV(int newkey, char *newvalue) {
 			kv->size = newsize;
 		}
 	}
-	// if the string passed is not NULL, copy it 
+	// if the string passed is not NULL, copy it
 	if (newvalue != NULL) {
 		size_t length = strlen(newvalue);
 		//array->value[array->used] = malloc(1 + length);
@@ -366,6 +380,7 @@ void freeKVstore() {
 
 // adds a pair based on key or value
 void addpair(int newkey, char* newvalue){
+	pthread_mutex_lock(&mutex);
 	int i,j,possiblekey;
 	bool check = true;
 	if(newkey == 0){ // we have to give a new key to the pair
@@ -405,10 +420,12 @@ void addpair(int newkey, char* newvalue){
 		}
 
 	}
+	pthread_mutex_unlock(&mutex);
 }
 
 
 void modifyPair(int key, char* value, char* value2){
+	pthread_mutex_lock(&mutex);
   int i;
   size_t length1 = strlen(value);
   size_t length2 = strlen(value2);
@@ -441,10 +458,12 @@ void modifyPair(int key, char* value, char* value2){
     printf("Value not found!\n");
     snprintf(rep_client,sizeof(rep_client),"Value not found!");
   }
+	pthread_mutex_unlock(&mutex);
 }
 
 
 void deletepair(int key, char* value){
+	pthread_mutex_lock(&mutex);
 	int i;
 	size_t length = strlen(value);
 	if(key==0){// we just have the value
@@ -471,10 +490,12 @@ void deletepair(int key, char* value){
 			}
 		}
 	}
+	pthread_mutex_unlock(&mutex);
 }
 
 
 void readpair(int key, char* value){
+	pthread_mutex_lock(&mutex);
 	int i = 0;
 	bool check = true;
 	if(key==0){// we just have the value and want to read the key
@@ -505,9 +526,11 @@ void readpair(int key, char* value){
       snprintf(rep_client,sizeof(rep_client),"no pair found");
 		}
 	}
+	pthread_mutex_unlock(&mutex);
 }
 
 void printKV(){
+		pthread_mutex_lock(&mutex);
     int i,kvsize;
     kvsize = kv->used;
     snprintf(rep_client,sizeof(rep_client),"printing KV");
@@ -520,6 +543,7 @@ void printKV(){
   			printf("index %d is NULL\n",i);
   		}
     }
+		pthread_mutex_unlock(&mutex);
 }
 
 void printdefault(){ //annoying to write each time the printf
