@@ -10,7 +10,10 @@ KVstore *kv; // our main KV store array
 char rep_client[MSGSIZE];
 bool running;// tenté d'avoir une var globale pour arrêter le serveur
 
-pthread_mutex_t mutex;// = PTHREAD_MUTEX_INITIALIZER;
+int readCount;
+pthread_mutex_t mutex_resourceAccess;// = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_readCountAccess;
+pthread_mutex_t mutex_serviceQueue;
 
 // main launching the socket server and distributing the thread to handle several clients
 int main(int argc, char *argv[])
@@ -58,7 +61,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-		if (pthread_mutex_init(&mutex, NULL) != 0){
+		if (pthread_mutex_init(&mutex_resourceAccess, NULL) != 0){
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+		if (pthread_mutex_init(&mutex_readCountAccess, NULL) != 0){
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+		if (pthread_mutex_init(&mutex_serviceQueue, NULL) != 0){
         printf("\n mutex init failed\n");
         return 1;
     }
@@ -81,10 +92,7 @@ int main(int argc, char *argv[])
             perror("thread creation failed");
             return 1;
         }
-				if (pthread_mutex_init(&mutex, NULL) != 0){
-		        printf("\n mutex init failed\n");
-		        return 1;
-		    }
+
         puts("new client accepted and thread occupied for it");
         i++;
     }
@@ -94,7 +102,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-		pthread_mutex_destroy(&mutex);
+		pthread_mutex_destroy(&mutex_resourceAccess);
+		pthread_mutex_destroy(&mutex_readCountAccess);
+		pthread_mutex_destroy(&mutex_serviceQueue);
 
     return (EXIT_SUCCESS);
 }
@@ -186,7 +196,6 @@ int ctrlregex(char* msg){
 // Server side command input
 void* readcmd(void* unused){
     while(running){
-				pthread_mutex_lock(&mutex);
         char cmd[MSGSIZE];
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
         if(ctrlregex(cmd)==0){// check the string input
@@ -196,7 +205,6 @@ void* readcmd(void* unused){
         else{
             printdefault();
         }
-				pthread_mutex_unlock(&mutex);
     }
     return NULL;
 }
@@ -379,8 +387,12 @@ void freeKVstore() {
  */
 
 // adds a pair based on key or value
-void addpair(int newkey, char* newvalue){
-	pthread_mutex_lock(&mutex);
+void addpair(int newkey, char* newvalue){		//write
+
+	pthread_mutex_lock(&mutex_serviceQueue);
+	pthread_mutex_lock(&mutex_resourceAccess);
+	pthread_mutex_unlock(&mutex_serviceQueue);
+
 	int i,j,possiblekey;
 	bool check = true;
 	if(newkey == 0){ // we have to give a new key to the pair
@@ -420,12 +432,16 @@ void addpair(int newkey, char* newvalue){
 		}
 
 	}
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&mutex_resourceAccess);
 }
 
 
-void modifyPair(int key, char* value, char* value2){
-	pthread_mutex_lock(&mutex);
+void modifyPair(int key, char* value, char* value2){		//write
+
+	pthread_mutex_lock(&mutex_serviceQueue);
+	pthread_mutex_lock(&mutex_resourceAccess);
+	pthread_mutex_unlock(&mutex_serviceQueue);
+
   int i;
   size_t length1 = strlen(value);
   size_t length2 = strlen(value2);
@@ -458,12 +474,16 @@ void modifyPair(int key, char* value, char* value2){
     printf("Value not found!\n");
     snprintf(rep_client,sizeof(rep_client),"Value not found!");
   }
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&mutex_resourceAccess);
 }
 
 
-void deletepair(int key, char* value){
-	pthread_mutex_lock(&mutex);
+void deletepair(int key, char* value){		//write
+
+	pthread_mutex_lock(&mutex_serviceQueue);
+	pthread_mutex_lock(&mutex_resourceAccess);
+	pthread_mutex_unlock(&mutex_serviceQueue);
+
 	int i;
 	size_t length = strlen(value);
 	if(key==0){// we just have the value
@@ -490,12 +510,21 @@ void deletepair(int key, char* value){
 			}
 		}
 	}
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&mutex_resourceAccess);
 }
 
 
-void readpair(int key, char* value){
-	pthread_mutex_lock(&mutex);
+void readpair(int key, char* value){			//read
+
+	pthread_mutex_lock(&mutex_serviceQueue);
+	pthread_mutex_lock(&mutex_readCountAccess);
+	if (readCount == 0){
+		pthread_mutex_lock(&mutex_resourceAccess);
+	}
+	readCount++;
+	pthread_mutex_unlock(&mutex_serviceQueue);
+	pthread_mutex_unlock(&mutex_readCountAccess);
+
 	int i = 0;
 	bool check = true;
 	if(key==0){// we just have the value and want to read the key
@@ -526,11 +555,26 @@ void readpair(int key, char* value){
       snprintf(rep_client,sizeof(rep_client),"no pair found");
 		}
 	}
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_lock(&mutex_readCountAccess);
+	readCount--;
+	if (readCount == 0){
+			pthread_mutex_unlock(&mutex_resourceAccess);
+	}
+	pthread_mutex_unlock(&mutex_readCountAccess);
 }
 
-void printKV(){
-		pthread_mutex_lock(&mutex);
+
+void printKV(){				//read
+
+		pthread_mutex_lock(&mutex_serviceQueue);
+		pthread_mutex_lock(&mutex_readCountAccess);
+		if (readCount == 0){
+			pthread_mutex_lock(&mutex_resourceAccess);
+		}
+		readCount++;
+		pthread_mutex_unlock(&mutex_serviceQueue);
+		pthread_mutex_unlock(&mutex_readCountAccess);
+
     int i,kvsize;
     kvsize = kv->used;
     snprintf(rep_client,sizeof(rep_client),"printing KV");
@@ -543,7 +587,12 @@ void printKV(){
   			printf("index %d is NULL\n",i);
   		}
     }
-		pthread_mutex_unlock(&mutex);
+		pthread_mutex_lock(&mutex_readCountAccess);
+		readCount--;
+		if (readCount == 0){
+				pthread_mutex_unlock(&mutex_resourceAccess);
+		}
+		pthread_mutex_unlock(&mutex_readCountAccess);
 }
 
 void printdefault(){ //annoying to write each time the printf
