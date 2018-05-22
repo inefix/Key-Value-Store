@@ -22,7 +22,7 @@ void initKVstore(size_t initialSize){
 	kv->used = 0;
 	kv->size = initialSize;
 	for(i=0;i<kv->size;i++){// faire de la place pour les strings
-		kv[i].value = (char*) malloc(sizeof(char*));
+		kv[i].value = (char*) malloc(sizeof(char*)*VALUESIZE);
 		kv[i].key = -1;
 	}
 }
@@ -39,6 +39,7 @@ void insertKV(int newkey, char *newvalue) {
 		kv = (KVstore*) realloc(kv, newsize * sizeof(KVstore));
 		for(i=kv->size;i<newsize;i++){// faire de la place pour les strings
 			kv[i].value = (char*) malloc(sizeof(char*)*VALUESIZE);
+			kv[i].key = -1;
 		}
 		if (kv == NULL) {
 			freeKVstore(kv);
