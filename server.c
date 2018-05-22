@@ -179,7 +179,7 @@ int ctrlregex(char* msg){
 	//d 111     --> delete the value at key 111
 	//dv msg     --> read the value corresponding to the msg
 	//m 111 msg     --> modify the value at key 111 with msg
-	//mv msg msg     --> modify the value corresponding to the msg with msg
+	//mv msg msg2     --> modify the value corresponding to the msg with msg2
 	//p   --> print all the values in the kv
 	err = regcomp(&preg, str_regex, REG_NOSUB | REG_EXTENDED);
 	if (err == 0) {// compilation of regex successful
@@ -215,7 +215,7 @@ void processcmd(char* input){
 	char* tok;
 	char* mode;
 	char value[MSGSIZE], value2[MSGSIZE];
-	
+
 	tok = strtok(input," ");
 	mode = tok;      //première partie du string
 	printf("mode:'%s'\n",mode);
@@ -366,7 +366,7 @@ void addpair(int newkey, char* newvalue){		//write
 		}
 
 	}
-	pthread_mutex_unlock(&mutex_resourceAccess);
+	pthread_mutex_unlock(&mutex_resourceAccess);		//the important one
 }
 
 
@@ -408,7 +408,7 @@ void modifyPair(int key, char* value, char* value2){		//write
     printf("Value not found!\n");
     snprintf(rep_client,sizeof(rep_client),"Value not found!");
   }
-	pthread_mutex_unlock(&mutex_resourceAccess);
+	pthread_mutex_unlock(&mutex_resourceAccess);			//the important one
 }
 
 
@@ -444,7 +444,7 @@ void deletepair(int key, char* value){		//write
 			}
 		}
 	}
-	pthread_mutex_unlock(&mutex_resourceAccess);
+	pthread_mutex_unlock(&mutex_resourceAccess);			//the important one
 }
 
 
@@ -493,7 +493,7 @@ void readpair(int key, char* value){			//read
 	pthread_mutex_lock(&mutex_readCountAccess);
 	readCount--;
 	if (readCount == 0){
-			pthread_mutex_unlock(&mutex_resourceAccess);
+			pthread_mutex_unlock(&mutex_resourceAccess);		//the important one
 	}
 	pthread_mutex_unlock(&mutex_readCountAccess);
 }

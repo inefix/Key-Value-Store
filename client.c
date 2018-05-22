@@ -33,14 +33,27 @@ int main(int argc, char** argv) {
 
     puts("Connected");
 
+    printf("\n");
+
     //comm with srv
+    printf("'a vale' to add a value\n");
+    printf("'ak key vale' to add a value with a key\n");
+    printf("'r key' to read a value with a certain key\n");
+    printf("'rv vale' to read a key with a certain value\n");
+    printf("'d key' to delete a value with a certain key\n");
+    printf("'dv vale' to delete a key with a certain value\n");
+    printf("'m key new_value' to modify a value with a certain key\n");
+    printf("'mv old_vale new_value' to modify a old_value with a new_value\n");
+    printf("'p' to print all the entries in the Key Value Store\n");
+
     while(1)
     {
         memset(msg, 0, SIZE);
         memset(text, 0, SIZE);
         memset(reply, 0, SIZE);
         //Get message
-        printf("'q' to close session \n");
+        printf("'q' to close session\n");
+        printf("\n");
         printf("type your msg >>> ");
         fgets(msg, SIZE+1, stdin); //lire tout le string
         // quel que soit le string on l'envoie au serveur, sinon on doit contrôler plusieurs fois que c'est correct...
@@ -76,6 +89,7 @@ int main(int argc, char** argv) {
             }
 
         }
+        printf("\n");
     }
     close(sock);//Close socket
     return (EXIT_SUCCESS);
