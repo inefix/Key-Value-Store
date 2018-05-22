@@ -1,0 +1,232 @@
+%#####################################################################
+% Author: Loïc Rosset & Jonas Epper
+% Created: 19.11.2017
+% Modified: 1.12.2017
+% Description: description projet
+%#####################################################################
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[head=14pt,left=1in,right=1in, bottom=1in]{geometry} % to modify geometry
+\usepackage[utf8]{inputenc}                           % to allow utf-8 encoding input e.g. ö é ä etc.
+\usepackage[french]{babel}			                  % other options: frenchb,german
+\usepackage[pdftex]{graphicx}                         % to include graphics
+\usepackage{amsmath}                                  % for maths functions
+\usepackage{amsfonts}                                 % for maths fonts
+\usepackage{amssymb}                                  % for maths symbols
+\usepackage[hidelinks]{hyperref}                      % to allow urls and inner references
+\usepackage{titling}                                  % for fancy titles
+\usepackage{caption}                                  % for fancy captions
+\usepackage{listings}                                 % to include listings
+\usepackage{color}                                    % for custom colors
+
+\usepackage{blindtext}                                % for placeholder text
+\usepackage{float}									  % for fixing figure
+%################### Preamble Start 
+%%%%%%%%%%%%%%%%%%%%
+% move title to top of page
+\setlength{\droptitle}{-10em}
+
+%%%%%%%%%%%%%%%%%%%%
+% setup page
+%\sloppy
+%\pagenumbering{roman}
+%\pagestyle{plain}
+%\pagenumbering{arabic}
+%\pagestyle{headings}
+
+% header and footer
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyfoot[R]{\thepage/\pageref{LastPage}}
+\fancyfoot[C]{}
+\fancyfoot[L]{\footnotesize\emailurl{\myemail}}
+\fancyhead[L]{\thetitle}
+\fancyhead[R]{\theauthor}
+
+% remove additional space between tables and their captions
+%\captionsetup[table]{skip=0pt}
+
+\graphicspath{{figures/}}
+
+
+%%%%%%%%%%%%%%%%%%%%
+% Listings
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.99,0.99,0.97}
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=single, 
+  tabsize=4, 
+  numbers=left,
+  numberstyle=\tiny\color{codegray},
+  stepnumber=1,
+  xleftmargin=\parindent,
+  language=Erlang,
+  showstringspaces=false,
+  basicstyle=\fontsize{9}{11}\selectfont\ttfamily,
+  %basicstyle=\tiny,
+  backgroundcolor=\color{backcolour},   
+  commentstyle=\color{codegreen},
+  keywordstyle=\color{codepurple},
+  stringstyle=\color{blue},
+  identifierstyle=\color{black},
+  extendedchars=true,
+  inputencoding=utf8,
+  literate={á}{{\'a}}1 {à}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1 {è}{{\'e}}1 {ê}{{\'e}}1 {ç}{{\'c}}1 
+}
+
+\lstset{escapechar=@,style=customc} % set default language
+
+%\lstset{language=Erlang} 
+
+%%%%%%%%%%%%%%%%%%%%
+% TODO box
+
+\newcommand{\todo}[1]{\par \noindent
+\begin{minipage}[c]{0.95 \textwidth}
+\textit{#1} \end{minipage}\par}
+
+\newcommand{\emailurl}[1]{\href{mailto:#1}{#1}}
+\newcommand{\email}[1]{\gdef\myemail{#1}}
+\newcommand{\address}[1]{\gdef\myaddress{#1}}
+%\newcommand{\keywords}[1]{\begin{center}{\bfseries Keywords:} #1\end{center}}
+\newcommand{\keywords}[1]{\vskip \baselineskip \noindent{\bfseries Keywords:} #1 \vskip \baselineskip \par}
+
+\renewcommand\maketitle{
+\begin{center}%
+    {\huge \thetitle \vskip \baselineskip \par}%
+    {\large \theauthor \vskip \baselineskip \par}%
+\myaddress
+\emailurl{\myemail}
+\end{center}
+}
+
+%################### Preamble Stop #####################################
+
+% title setup
+\title{Key-value Store: mini-Project 2018}
+\date{\today}
+\author{Andrea \textsc{Rar}, Ryan \textsc{Siow}, Jonas \textsc{Epper}}
+\address{IN.4022 Operating system\\
+University of Fribourg \\}
+\email{andrea.rar@unifr.ch, ryan.siow@unifr.ch, jonas.epper@unifr.ch}
+
+\begin{document}
+%################### Report Start 
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+\noindent Résumé
+
+\keywords{Key-valuestore, threads,...}
+
+\end{abstract}
+
+\newpage
+\renewcommand{\contentsname}{Table des matières}
+\tableofcontents
+\newpage
+
+\section{Introduction}
+Intro...
+
+\section{titre}
+
+italique: \textit{exemple italique}
+\subsection{soustitre}
+
+
+\begin{figure}[ht]
+	\centering
+  %\includegraphics[height=200px]{graphs/TEDAClock.png} % chemin jusqu'à l'image
+\caption{TEDA Clock}
+	\label{fig:fig4}
+\end{figure}
+
+
+\section{Conclusion}
+...
+
+%------------------- Bibliography Start -------------------------------
+\begin{thebibliography}{20}
+
+\bibitem{article} % cited with '\cite{book}'
+Ananth Murthy, Chandan Yeshwanth, Shrisha Rao.									% author (Firstname Lastname, Firstname2 Lastname2, ...)
+\textit{Distributed Approximation Algorithms for the Multiple Knapsack Problem}.	% title (italics)
+2 Février 2017.										% editor, date
+
+\bibitem{Karp} % cited with '\cite{book}'
+Richard M. Karp.									% author (Firstname Lastname, Firstname2 Lastname2, ...)
+\textit{Reducibility Among Combinatorial Problems}.	% title (italics)
+R.E. Miller et J. W. Thatcher, 1972.										% editor, date
+
+\bibitem{Cook} % cited with '\cite{book}'
+Stephen Cook.									% author (Firstname Lastname, Firstname2 Lastname2, ...)
+\textit{The Complexity of Theorem-Proving Procedures}.	% title (italics)
+Conference Record of Third Annual ACM Symposium on Theory of Computing (STOC), 1971.										% editor, date
+
+\bibitem{Crypto} % cited with '\cite{book}'
+Ralph C. Merkle, Martin E. Hellman.									% author (Firstname Lastname, Firstname2 Lastname2, ...)
+\textit{Hiding information and signatures in trapdoor knapsacks}.	% title (italics)
+IEEE Transaction on Information Theory, 1978.
+
+% web source
+\bibitem{PNP}
+Thomas Messias.								% author (sometimes not available)
+\textit{P = NP ou P =/= NP, le problème de maths à un million de dollars}.					    % title (italics)
+\url{http://www.slate.fr/story/109569/probleme-million-dollars},			% url
+Last visited: 17.12.2017.									% date
+\end{thebibliography}
+%------------------- Bibliography End -------------------------------
+
+
+%################### Report End #####################################
+
+
+%################### Appendix Start #####################################
+%%%%%%%%%%%%      l'APPENDIX SE MET N'IMPORTE OU... 
+\appendix 
+%\renewcommand{\thesection}{Appendix \Alph{section}}
+\renewcommand{\thesubsection}{\Alph{section}.\arabic{subsection}}
+
+\clearpage	
+
+\section{Code source} \label{app:sourceCode}
+
+\subsection{Phase d'initialisation}
+Exemple sous titre
+
+\begin{figure}[H]
+%\lstinputlisting[firstline=17, lastline=50]{../code/greedy.erl}
+\caption{Phase d'initialisation.}
+\label{fig:initalisation}
+\end{figure}
+
+\section{User Manual}
+Pour un guide d'utilisation des codes, voir le fichier ....., en annexe.
+
+
+%\begin{figure}
+%\begin{lstlisting}
+%// constrain speed to +/- MAX_SPEED
+%double bounded_speed(double speed) { 
+%  if (speed > MAX_SPEED) return MAX_SPEED;
+%  else if (speed < -MAX_SPEED) return -MAX_SPEED;
+%  else return speed;
+%}
+%\end{lstlisting}
+%\caption{Listing within \LaTeX.}
+%\label{fig:listing2}
+%\end{figure}
+
+
+
+%################### Appendix End #####################################
+\end{document}
