@@ -215,7 +215,7 @@ void processcmd(char* input){
 	char* tok;
 	char* mode;
 	char value[MSGSIZE], value2[MSGSIZE];
-
+	
 	tok = strtok(input," ");
 	mode = tok;      //première partie du string
 	printf("mode:'%s'\n",mode);
@@ -531,5 +531,5 @@ void printKV(){				//read
 }
 
 void printdefault(){ //annoying to write each time the printf
-    puts("commands ('cmd [args] effect'): h (help), a/ak [-/k] (add k/v), -d/-dv [-/v] (delete k/v)");
+    //puts("commands ('cmd [args] effect'): h (help), a/ak [-/k] (add k/v), -d/-dv [-/v] (delete k/v)");
 }
