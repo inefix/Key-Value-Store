@@ -16,7 +16,9 @@ pthread_mutex_t wmutex;
 pthread_mutex_t readTry;
 pthread_mutex_t resource;
 
-int block_key;
+int block_key_add;
+int block_key_modify;
+int block_key_delete;
 
 // main launching the socket server and distributing the thread to handle several clients
 int main(int argc, char *argv[])
@@ -30,7 +32,9 @@ int main(int argc, char *argv[])
     strcpy(rep_client,"");
 
     readcount = writecount = 0;
-    block_key = 0;
+    block_key_add = 0;
+    block_key_modify = -1;
+    block_key_delete = -1;
 
 	//initialize kv array
 	kv = NULL;
@@ -365,7 +369,7 @@ void addpair(int newkey, char* newvalue){		//write
 			}
 		}
 		if(check){
-      block_key = possiblekey;    //store the key to block this entry to reader
+      block_key_add = possiblekey;    //store the key to block this entry to reader
 			insertKV(possiblekey,newvalue);
 			printf("New pair: value '%s' has the new generated key '%d'\n",newvalue, possiblekey);
 			snprintf(rep_client,sizeof(rep_client),"New pair: value '%s' has the key '%d'",newvalue, possiblekey);
@@ -416,6 +420,7 @@ void modifyPair(int key, char* value, char* value2){		//write
   if(key == 0){
     for(i=0; i<kv->size; i++){
       if(strcmp(kv[i].value, value) == 0){
+        block_key_modify = i;
         printf("Modifying %s with %s \n", value, value2);
         snprintf(rep_client,sizeof(rep_client),"Modifying %s with %s", value, value2);
         memset(kv[i].value, 0, length1);
@@ -428,6 +433,7 @@ void modifyPair(int key, char* value, char* value2){		//write
   else{ // we just have the key
 		for(i=0;i<kv->size;i++){
 			if(kv[i].key == key){
+        block_key_modify = i;
 				printf("Modifying key %d having value %s \n",kv[i].key, kv[i].value);
 				snprintf(rep_client,sizeof(rep_client),"Modifying key %d having value %s",kv[i].key, kv[i].value);
 				memset(kv[i].value, 0, length1);
@@ -469,6 +475,7 @@ void deletepair(int key, char* value){		//write
 	if(key==0){// we just have the value
 		for(i=0;i<kv->size;i++){
 			if(strcmp(kv[i].value,value) == 0){
+        block_key_delete = i;
 				printf("deleting - %s - having the key %d\n",kv[i].value, kv[i].key);
 				snprintf(rep_client,sizeof(rep_client),"deleting - %s - having the key %d",kv[i].value, kv[i].key);
 				kv[i].key=-1;
@@ -481,6 +488,7 @@ void deletepair(int key, char* value){		//write
 	else{ // we just have the key
 		for(i=0;i<kv->size;i++){
 			if(kv[i].key==key){ // we found the value and show the key
+        block_key_delete = i;
 				printf("deleting key %d having value %s \n",kv[i].key, kv[i].value);
 				snprintf(rep_client,sizeof(rep_client),"deleting key %d having value %s",kv[i].key, kv[i].value);
 				kv[i].key=-1;
@@ -559,8 +567,8 @@ void printKV(){				//read
     int i,kvsize;
     kvsize = kv->used;
     snprintf(rep_client,sizeof(rep_client),"printing KV");
-    for(i=0;i<block_key;i++){
-  		if(kv[i].key!=-1){
+    for(i=0;i<block_key_add;i++){
+  		if(kv[i].key!=-1 && i!=block_key_modify && i!=block_key_delete){
   			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
       }
@@ -578,9 +586,17 @@ void printKV(){				//read
     pthread_mutex_unlock(&rmutex);
     pthread_mutex_unlock(&readTry);
 
-    for(i=block_key;i<kvsize;i++){
-  		if(kv[i].key!=-1){
+    for(i=block_key_add;i<kvsize;i++){
+  		if(kv[i].key!=-1 && i!=block_key_modify && i!=block_key_delete){
   			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
+        snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
+      }
+      if(i==block_key_modify){
+        printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
+        snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
+      }
+      if(i==block_key_delete){
+        printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
       }
   		else{
