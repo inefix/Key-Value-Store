@@ -1,10 +1,11 @@
 make clean
-make 
+make
 echo "starting server:"
-./server << EOF
+./server << EOD
 a test1
 a test2
 a test3
 p
-EOF
+q
+EOD
 make clean
