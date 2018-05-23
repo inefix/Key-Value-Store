@@ -16,6 +16,8 @@ pthread_mutex_t wmutex;
 pthread_mutex_t readTry;
 pthread_mutex_t resource;
 
+int block_key;
+
 // main launching the socket server and distributing the thread to handle several clients
 int main(int argc, char *argv[])
 {
@@ -26,6 +28,9 @@ int main(int argc, char *argv[])
     int structsize;
     running = true;
     strcpy(rep_client,"");
+
+    readcount = writecount = 0;
+    block_key = 0;
 
 	//initialize kv array
 	kv = NULL;
@@ -359,6 +364,7 @@ void addpair(int newkey, char* newvalue){		//write
 			}
 		}
 		if(check){
+      block_key = possiblekey;    //store the key to block this entry to reader
 			insertKV(possiblekey,newvalue);
 			printf("New pair: value '%s' has the new generated key '%d'\n",newvalue, possiblekey);
 			snprintf(rep_client,sizeof(rep_client),"New pair: value '%s' has the key '%d'",newvalue, possiblekey);
@@ -549,6 +555,19 @@ void readpair(int key, char* value){			//read
 
 void printKV(){				//read
 
+    int i,kvsize;
+    kvsize = kv->used;
+    snprintf(rep_client,sizeof(rep_client),"printing KV");
+    for(i=0;i<block_key;i++){
+  		if(kv[i].key!=-1){
+  			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
+        snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
+      }
+  		else{
+  			printf("index %d is NULL\n",i);
+  		}
+    }
+
     pthread_mutex_lock(&readTry);
     pthread_mutex_lock(&rmutex);
     readcount++;
@@ -558,10 +577,7 @@ void printKV(){				//read
     pthread_mutex_unlock(&rmutex);
     pthread_mutex_unlock(&readTry);
 
-    int i,kvsize;
-    kvsize = kv->used;
-    snprintf(rep_client,sizeof(rep_client),"printing KV");
-    for(i=0;i<kvsize;i++){
+    for(i=block_key;i<kvsize;i++){
   		if(kv[i].key!=-1){
   			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
