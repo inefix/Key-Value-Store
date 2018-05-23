@@ -229,8 +229,9 @@ void processcmd(char* input){
 	if(mode[0]=='p'){
 		printKV();
 	}else if(mode[0] == 'q'){
-    running = false;
-  }else if(tok != NULL){
+		running = false;
+		printf("server shut down\n");
+	}else if(tok != NULL){
 		if(strcmp(mode, "a")==0){
 			puts("add via value");
 			newkey = 0;
