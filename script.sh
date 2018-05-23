@@ -1,11 +1,17 @@
 make clean
 make
-echo "starting server:"
-./server << EOD
+echo "creating clients"
+
+for VAR in {1..2}
+do 
+gnome-terminal -e ./client << EOF
 a test1
 a test2
 a test3
 p
 q
-EOD
+EOF
+	echo "starting client $VAR"
+done
+
 make clean
