@@ -228,7 +228,9 @@ void processcmd(char* input){
 	tok = strtok(NULL, " ");   //deuxième partie du string
 	if(mode[0]=='p'){
 		printKV();
-	}else if(tok != NULL){
+	}else if(mode[0] == 'q'){
+    running = false;
+  }else if(tok != NULL){
 		if(strcmp(mode, "a")==0){
 			puts("add via value");
 			newkey = 0;
