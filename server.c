@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     strcpy(rep_client,"");
 
     readcount = writecount = 0;
-    block_key_add = 0;
+    block_key_add = -1;
     block_key_modify = -1;
     block_key_delete = -1;
 
@@ -391,6 +391,8 @@ void addpair(int newkey, char* newvalue){		//write
 
 	}
 
+  //sleep(10);
+
   pthread_mutex_unlock(&resource);
 
 	pthread_mutex_lock(&wmutex);
@@ -512,21 +514,12 @@ void deletepair(int key, char* value){		//write
 
 void readpair(int key, char* value){			//read
 
-  pthread_mutex_lock(&readTry);
-	pthread_mutex_lock(&rmutex);
-  readcount++;
-  if (readcount == 1){
-    pthread_mutex_lock(&resource);
-  }
-	pthread_mutex_unlock(&rmutex);
-  pthread_mutex_unlock(&readTry);
-
 	int i;
 	bool check = true;
 	if(key==0){// 'RV' we just have the value and want to read the key
 		printf("kv size: '%zu'\n",kv->size);
-		for(i=0; i<kv->size; i++){
-			if(strcmp(kv[i].value,value)==0){ // we found the value and show the key
+		for(i=0; i<block_key_add; i++){
+			if(strcmp(kv[i].value,value)==0 && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
 				snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
 				check = false;
@@ -539,8 +532,60 @@ void readpair(int key, char* value){			//read
 		}
 	}
 	else{ // 'R' we just have the key and want the value
-		for(i=0;i<kv->size;i++){
-			if(kv[i].key==key){ // we found the value and show the key
+		for(i=0;i<block_key_add;i++){
+			if(kv[i].key==key && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
+				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
+				snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
+				check = false;
+				break;
+			}
+		}
+		if(check){
+			printf("no pair found\n");
+			snprintf(rep_client,sizeof(rep_client),"no pair found");
+		}
+	}
+
+
+  pthread_mutex_lock(&readTry);
+	pthread_mutex_lock(&rmutex);
+  readcount++;
+  if (readcount == 1){
+    pthread_mutex_lock(&resource);
+  }
+	pthread_mutex_unlock(&rmutex);
+  pthread_mutex_unlock(&readTry);
+
+  if(key==0){// 'RV' we just have the value and want to read the key
+		printf("kv size: '%zu'\n",kv->size);
+		for(i=block_key_add; i<kv->used; i++){
+			if(strcmp(kv[i].value,value)==0 && i==block_key_modify){ // we found the value and show the key
+				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
+				snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
+				check = false;
+				break;
+			}
+      if(strcmp(kv[i].value,value)==0 && i==block_key_delete){ // we found the value and show the key
+				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
+				snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
+				check = false;
+				break;
+			}
+		}
+		if(check){
+			printf("no pair found\n");
+			snprintf(rep_client,sizeof(rep_client),"no pair found");
+		}
+	}
+	else{ // 'R' we just have the key and want the value
+		for(i=block_key_add;i<kv->used;i++){
+			if(kv[i].key==key && i==block_key_modify){ // we found the value and show the key
+				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
+				snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
+				check = false;
+				break;
+			}
+      if(kv[i].key==key && i==block_key_delete){ // we found the value and show the key
 				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
 				snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
 				check = false;
@@ -572,9 +617,9 @@ void printKV(){				//read
   			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
       }
-  		else{
-  			printf("index %d is NULL\n",i);
-  		}
+  		//else{
+  		//	printf("index %d is NULL\n",i);
+  		//}
     }
 
     pthread_mutex_lock(&readTry);
@@ -599,10 +644,12 @@ void printKV(){				//read
         printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
       }
-  		else{
-  			printf("index %d is NULL\n",i);
-  		}
+  		//else{
+  		//	printf("index %d is NULL\n",i);
+  		//}
     }
+
+    //sleep(10);
 
     pthread_mutex_lock(&rmutex);
     readcount--;
