@@ -147,20 +147,20 @@ void *multiconnect(void* socketdesc){
 
 			snprintf(rep_client,sizeof(rep_client),"request done");//if add key
 
-			int iRet;
-			struct timeval tv;
+			//int iRet;
+			//struct timeval tv;
 
-			iRet = gettimeofday (&tv, NULL); // timezone structure is obsolete
-			if (iRet == 0)
-			{
-			printf ("Seconds since epoch: %d\n",
-					(int)tv.tv_sec);
-			return 0;
-			}
-			else
-			{
-			perror ("gettimeofday");
-			}
+			//iRet = gettimeofday (&tv, NULL); // timezone structure is obsolete
+			//if (iRet == 0)
+			//{
+			//printf ("Seconds since epoch: %d\n",
+					//(int)tv.tv_sec);
+			//return 0;
+			//}
+			//else
+			//{
+			//perror ("gettimeofday");
+			//}
 			
 			processcmd(clmsg);
 
@@ -231,18 +231,18 @@ void* readcmd(void* unused){
         if(ctrlregex(cmd)==0){// check the string input
             cmd[strlen(cmd)-1] = '\0'; //in oder to delete the new line
             
-            int iRet;
-			struct timeval tv;
+            //int iRet;
+			//struct timeval tv;
 
-			iRet = gettimeofday (&tv, NULL); // timezone structure is obsolete
-			if (iRet == 0)
-			{
-				printf ("Seconds since epoch: %d\n",(int)tv.tv_sec);
-			}
-			else
-			{
-				perror ("gettimeofday");
-			}
+			//iRet = gettimeofday (&tv, NULL); // timezone structure is obsolete
+			//if (iRet == 0)
+			//{
+				//printf ("Seconds since epoch: %d\n",(int)tv.tv_sec);
+			//}
+			//else
+			//{
+				//perror ("gettimeofday");
+			//}
             
             processcmd(cmd);
         }
@@ -262,7 +262,7 @@ void processcmd(char* input){
 
 	tok = strtok(input," ");
 	mode = tok;      //première partie du string
-	printf("server recevied req :'%s'\n",mode);
+	printf("server received req :'%s'\n",mode);
 	tok = strtok(NULL, " ");   //deuxième partie du string
 	if(mode[0]=='p'){
 		printKV();
