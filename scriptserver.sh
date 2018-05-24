@@ -1,0 +1,2 @@
+echo "lauching server"
+./server 
