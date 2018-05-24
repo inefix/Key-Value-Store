@@ -605,6 +605,9 @@ void readpair(int key, char* value){			//read
 		}
 	}
 
+  block_key_modify = -1;
+  block_key_delete = -1;
+
   //=============== EXIT SECTION ==============//
   pthread_mutex_lock(&rmutex);
   readcount--;
@@ -658,6 +661,9 @@ void printKV(){				//read
   		//	printf("index %d is NULL\n",i);
   		//}
     }
+
+    block_key_modify = -1;
+    block_key_delete = -1;
 
     //sleep(10);
 
