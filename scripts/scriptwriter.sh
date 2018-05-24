@@ -1,5 +1,5 @@
 echo "creating writer"
-
+cd ..
 ./client << EOF
 p
 a test1
@@ -11,3 +11,4 @@ p
 q
 EOF
 
+sleep 8
