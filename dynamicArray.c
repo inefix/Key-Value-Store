@@ -61,7 +61,7 @@ void insertKV(int newkey, char *newvalue) {
 				memset(kv[j].value, 0, length1);
 				strncpy(kv[j].value, newvalue,length); // on insère la valeur
 				kv[j].key = newkey; // on indique aussi la clé
-				printf("KV[%d].VALUE IS: %s AND KEY IS: %d\n",j,kv[j].value,kv[j].key);
+				printf("kv[%d].value is: %s and key is: %d\n",j,kv[j].value,kv[j].key);
 				break;
 			}
 
