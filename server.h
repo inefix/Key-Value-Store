@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <regex.h>
 #include <ctype.h>
+#include <sys/time.h>
 
 
 // CONSTANTS

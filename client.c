@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/time.h>
 
 #define ServerIP "127.0.0.1"
 #define ServerPort 7777
@@ -78,7 +79,19 @@ int main(int argc, char** argv) {
 				if (recv(sock, reply, SIZE, 0)<0){
 					perror("recv failed");
 				};
+				
+				int iRet;
+				struct timeval tv;
 
+				iRet = gettimeofday (&tv, NULL); // timezone structure is obsolete
+				if (iRet == 0)
+				{
+					printf ("Seconds since epoch: %d\n",(int)tv.tv_sec);
+				}
+				else
+				{
+					perror ("gettimeofday");
+				}
 				printf("reply: %s \n", reply);
 
 				if(strcmp(strstr(reply, "is valid"), "is valid") == 0) {

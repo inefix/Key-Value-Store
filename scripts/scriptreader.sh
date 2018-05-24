@@ -3,8 +3,9 @@ cd ..
 
 ./client << EOF
 p
-r 0
-r 1
+r 1 
+r 3
+p
 q
 EOF
 sleep 8

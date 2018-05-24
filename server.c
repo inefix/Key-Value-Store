@@ -147,6 +147,21 @@ void *multiconnect(void* socketdesc){
 
 			snprintf(rep_client,sizeof(rep_client),"request done");//if add key
 
+			int iRet;
+			struct timeval tv;
+
+			iRet = gettimeofday (&tv, NULL); // timezone structure is obsolete
+			if (iRet == 0)
+			{
+			printf ("Seconds since epoch: %d\n",
+					(int)tv.tv_sec);
+			return 0;
+			}
+			else
+			{
+			perror ("gettimeofday");
+			}
+			
 			processcmd(clmsg);
 
 			byte = send(clsock, rep_client, strlen(rep_client)+1,0);
@@ -215,6 +230,20 @@ void* readcmd(void* unused){
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
         if(ctrlregex(cmd)==0){// check the string input
             cmd[strlen(cmd)-1] = '\0'; //in oder to delete the new line
+            
+            int iRet;
+			struct timeval tv;
+
+			iRet = gettimeofday (&tv, NULL); // timezone structure is obsolete
+			if (iRet == 0)
+			{
+				printf ("Seconds since epoch: %d\n",(int)tv.tv_sec);
+			}
+			else
+			{
+				perror ("gettimeofday");
+			}
+            
             processcmd(cmd);
         }
         else{
@@ -233,7 +262,7 @@ void processcmd(char* input){
 
 	tok = strtok(input," ");
 	mode = tok;      //première partie du string
-	printf("mode:'%s'\n",mode);
+	printf("server recevied req :'%s'\n",mode);
 	tok = strtok(NULL, " ");   //deuxième partie du string
 	if(mode[0]=='p'){
 		printKV();
@@ -529,7 +558,7 @@ void readpair(int key, char* value){			//read
 			if(strcmp(kv[i].value,value)==0 && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
 				snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
-				check = false;
+				//check = false;
 				break;
 			}
 		}
@@ -543,14 +572,14 @@ void readpair(int key, char* value){			//read
 			if(kv[i].key==key && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
 				snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
-				check = false;
+				//check = false;
 				break;
 			}
 		}
-		if(check){
-			printf("no pair found\n");
-			snprintf(rep_client,sizeof(rep_client),"no pair found");
-		}
+		//if(check){
+		//	printf("no pair found\n");
+		//	snprintf(rep_client,sizeof(rep_client),"no pair found");
+		//}
 	}
 
 
