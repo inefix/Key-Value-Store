@@ -233,7 +233,7 @@ void processcmd(char* input){
 
 	tok = strtok(input," ");
 	mode = tok;      //première partie du string
-	printf("mode:'%s'\n",mode);
+	printf("server recevied req :'%s'\n",mode);
 	tok = strtok(NULL, " ");   //deuxième partie du string
 	if(mode[0]=='p'){
 		printKV();
