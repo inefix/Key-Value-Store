@@ -649,13 +649,8 @@ void printKV(){				//read
       if(i==block_key_modify){
         printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
-<<<<<<< HEAD
       }/*
       if(i==block_key_delete){
-=======
-      }
-      /*if(i==block_key_delete){
->>>>>>> 9eb11926ebf3923d1ce2ffe28f706b157026ce57
         printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
       }*/
