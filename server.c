@@ -558,7 +558,7 @@ void readpair(int key, char* value){			//read
 			if(strcmp(kv[i].value,value)==0 && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
 				snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
-				check = false;
+				//check = false;
 				break;
 			}
 		}
@@ -572,14 +572,14 @@ void readpair(int key, char* value){			//read
 			if(kv[i].key==key && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
 				snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
-				check = false;
+				//check = false;
 				break;
 			}
 		}
-		if(check){
-			printf("no pair found\n");
-			snprintf(rep_client,sizeof(rep_client),"no pair found");
-		}
+		//if(check){
+		//	printf("no pair found\n");
+		//	snprintf(rep_client,sizeof(rep_client),"no pair found");
+		//}
 	}
 
 
