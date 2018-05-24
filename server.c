@@ -490,7 +490,7 @@ void deletepair(int key, char* value){		//write
 				kv[i].key=-1;
 				memset(kv[i].value, 0, length);
 				printf("réduire taille de l'array? ");
-				break;
+				//break;
 			}
 		}
 	}
