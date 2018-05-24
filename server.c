@@ -572,12 +572,12 @@ void readpair(int key, char* value){			//read
 				check = false;
 				break;
 			}
-      if(strcmp(kv[i].value,value)==0 && i==block_key_delete){ // we found the value and show the key
+      /*if(strcmp(kv[i].value,value)==0 && i==block_key_delete){ // we found the value and show the key
 				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
 				snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
 				check = false;
 				break;
-			}
+			}*/
 		}
 		if(check){
 			printf("no pair found\n");
@@ -592,12 +592,12 @@ void readpair(int key, char* value){			//read
 				check = false;
 				break;
 			}
-      if(kv[i].key==key && i==block_key_delete){ // we found the value and show the key
+      /*if(kv[i].key==key && i==block_key_delete){ // we found the value and show the key
 				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
 				snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
 				check = false;
 				break;
-			}
+			}*/
 		}
 		if(check){
 			printf("no pair found\n");
@@ -649,8 +649,13 @@ void printKV(){				//read
       if(i==block_key_modify){
         printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
+<<<<<<< HEAD
       }/*
       if(i==block_key_delete){
+=======
+      }
+      /*if(i==block_key_delete){
+>>>>>>> 9eb11926ebf3923d1ce2ffe28f706b157026ce57
         printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
       }*/
