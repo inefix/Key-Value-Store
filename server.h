@@ -36,8 +36,8 @@
 typedef struct{
     int key;
     char *value;
-    size_t used; //size_t is a type guaranteed to hold any array index
-    size_t size;
+    size_t used; //indicate where we are in the array
+    size_t size; //indicate the size of the array
 }KVstore;
 
 struct IDsock{ //on peut rajouter ici des trucs qu'on aurait besoin de passer

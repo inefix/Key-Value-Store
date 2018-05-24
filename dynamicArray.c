@@ -50,7 +50,8 @@ void insertKV(int newkey, char *newvalue) {
 			kv->size = newsize;
 		}
 	}
-	/* if the string passed is not NULL, copy it */
+
+	// if the string passed is not NULL, copy it
 	if (newvalue != NULL) {
 		size_t length = strlen(newvalue);
 
@@ -58,24 +59,18 @@ void insertKV(int newkey, char *newvalue) {
 			if(kv[j].key == -1 || kv[j].value == NULL ){
 				size_t length1 = strlen(kv[j].value);
 				kv->used++;
-				memset(kv[j].value, 0, length1);
-				strncpy(kv[j].value, newvalue,length); // on insère la valeur
-				kv[j].key = newkey; // on indique aussi la clé
-				printf("kv[%d].value is: %s and key is: %d\n",j,kv[j].value,kv[j].key);
+				memset(kv[j].value, 0, length1); //clear the memory in this index
+				strncpy(kv[j].value, newvalue,length); // insert new value
+				kv[j].key = newkey; // indicate key
 				break;
 			}
-
+			//if no holes, just add at the end of the series
 			if(j == kv->used){
 				kv->used++;
-				strncpy(kv[j].value, newvalue,length); // on insère la valeur
-				kv[j].key = newkey; // on indique aussi la clé
+				strncpy(kv[j].value, newvalue,length); // insert value
+				kv[j].key = newkey; // indicate key
 			}
 		}
-
-		/*int index = kv->used; // on ajoute un element
-		kv->used++;
-		strncpy(kv[index].value, newvalue,length); // on insère la valeur
-		kv[index].key = newkey; // on indique aussi la clé*/
 	}
 	else
 		printf("newvalue is NULL");
