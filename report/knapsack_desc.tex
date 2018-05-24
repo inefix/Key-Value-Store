@@ -1,7 +1,7 @@
 %#####################################################################
-% Author: Loïc Rosset & Jonas Epper
-% Created: 19.11.2017
-% Modified: 1.12.2017
+% Author: Jonas Epper, Ryan Siow & Andrea Rar
+% Created: 23.05.2018
+% Modified: 26.05.2018
 % Description: description projet
 %#####################################################################
 \documentclass[12pt,a4paper]{article}
@@ -21,12 +21,8 @@
 
 \usepackage{blindtext}                                % for placeholder text
 \usepackage{float}									  % for fixing figure
-%################### Preamble Start 
-%%%%%%%%%%%%%%%%%%%%
-% move title to top of page
-\setlength{\droptitle}{-10em}
 
-%%%%%%%%%%%%%%%%%%%%
+
 % setup page
 %\sloppy
 %\pagenumbering{roman}
@@ -98,10 +94,11 @@
 %\newcommand{\keywords}[1]{\begin{center}{\bfseries Keywords:} #1\end{center}}
 \newcommand{\keywords}[1]{\vskip \baselineskip \noindent{\bfseries Keywords:} #1 \vskip \baselineskip \par}
 
+
 \renewcommand\maketitle{
 \begin{center}%
-    {\huge \thetitle \vskip \baselineskip \par}%
-    {\large \theauthor \vskip \baselineskip \par}%
+    {\LARGE \thetitle \vspace \baselineskip \par}%
+    {\large \theauthor \vspace \baselineskip \par}%
 \myaddress
 \emailurl{\myemail}
 \end{center}
@@ -110,11 +107,10 @@
 %################### Preamble Stop #####################################
 
 % title setup
-\title{Key-value Store: mini-Project 2018}
+\title{\vspace{-10em}Key-value Store: Project 2018}
 \date{\today}
 \author{Andrea \textsc{Rar}, Ryan \textsc{Siow}, Jonas \textsc{Epper}}
-\address{IN.4022 Operating system\\
-University of Fribourg \\}
+\address{IN.4022 Operating System Course, University of Fribourg \\}
 \email{andrea.rar@unifr.ch, ryan.siow@unifr.ch, jonas.epper@unifr.ch}
 
 \begin{document}
@@ -122,67 +118,72 @@ University of Fribourg \\}
 \maketitle
 \thispagestyle{empty}
 
-\begin{abstract}
-\noindent Résumé
-
-\keywords{Key-valuestore, threads,...}
-
-\end{abstract}
-
-\newpage
-\renewcommand{\contentsname}{Table des matières}
-\tableofcontents
-\newpage
+\renewcommand{\contentsname}{\large Table des matières}
+\renewcommand{\baselinestretch}{0.75}\normalsize
+\tableofcontents % se fait automatiquement
 
 \section{Introduction}
-Intro...
+Tous. rester TRES COURT et CONCIS
 
-\section{titre}
+\section{Description du problème}
+Tous. décrire le problème en gros, on ira en profondeur plus tard
+
+Plusieurs problèmes devaient être traités durant ce projet. Nous avons aussi dû prendre des décisions d'implémentation qui rendait notre solution unique et si possible proche de l'efficacité optimale.\\
+La première étape était de créer une structure permettant de recevoir des paires de clés et de valeurs. Cette structure devait être dynamique, c'est-à-dire grandir à mesure que l'on ajoutait des paires afin d'utiliser le moins de mémoire possible. Cette structure devait supporter des actions telles que ajouter, modifier, lire ou supprimer des paires.\\
+De plus, il fallait gérer une communication entre le serveur et ses clients. le serveur devait être transparent pour les clients et ceux-ci devait juste pouvoir envoyer des requêtes simples et le serveur leurs retournait les résultats des requêtes. \\
+Finalement, les accès à la structure de données devait être sécurisés afin qu'aucun conflit d'occure. Il ne faudrait par exemple pas que deux clients modifie en même temps la même pair, ceci pouvant générer des comportements inattendus et imprévisibles. 
+\section{Solutions et décisions prises}
+Dans cette partie, nous allons décrire les solutions que nous avons élaboré pour résoudre chaque problème mentionné auparavant. 
+\subsection{KV store: array dynamique de struct}
+Ryan
+nombre d'entrée max? taille variable? 
+\subsection{communication server - clients}
+nombres de client max
+Andrea : renvoie des messages aux client
+Jonas tout le reste
+\subsection{lire,écrire et modifier des valeurs}
+Tous
+Regex,
+\subsection{Accès sécurisé des lecteurs/rédacteurs}
+Andrea
+qui a la priorité? read/write etc
+nombre de clients max? reader/writer nombres
+citer la page web pour le problème des lecteurs/rédacteurs
+\subsection{scripts de tests}
+Jonas
 
 italique: \textit{exemple italique}
-\subsection{soustitre}
 
-
-\begin{figure}[ht]
-	\centering
-  %\includegraphics[height=200px]{graphs/TEDAClock.png} % chemin jusqu'à l'image
-\caption{TEDA Clock}
-	\label{fig:fig4}
-\end{figure}
-
+\section{apprentissage}
+ce que nous avons appris
+Tous
 
 \section{Conclusion}
-...
+
+
+% Example image
+%\begin{figure}[ht]
+%	\centering
+%  %\includegraphics[height=200px]{graphs/TEDAClock.png} % chemin jusqu'à l'image
+%\caption{TEDA Clock}
+%	\label{fig:fig4}
+%\end{figure}
 
 %------------------- Bibliography Start -------------------------------
 \begin{thebibliography}{20}
 
+% book ressources example
 \bibitem{article} % cited with '\cite{book}'
-Ananth Murthy, Chandan Yeshwanth, Shrisha Rao.									% author (Firstname Lastname, Firstname2 Lastname2, ...)
-\textit{Distributed Approximation Algorithms for the Multiple Knapsack Problem}.	% title (italics)
-2 Février 2017.										% editor, date
+????			% author (Firstname Lastname, Firstname2 Lastname2, ...)
+\textit{titre de l'article, ref}.	% title (italics)
+Read the ....										% editor, date
 
-\bibitem{Karp} % cited with '\cite{book}'
-Richard M. Karp.									% author (Firstname Lastname, Firstname2 Lastname2, ...)
-\textit{Reducibility Among Combinatorial Problems}.	% title (italics)
-R.E. Miller et J. W. Thatcher, 1972.										% editor, date
-
-\bibitem{Cook} % cited with '\cite{book}'
-Stephen Cook.									% author (Firstname Lastname, Firstname2 Lastname2, ...)
-\textit{The Complexity of Theorem-Proving Procedures}.	% title (italics)
-Conference Record of Third Annual ACM Symposium on Theory of Computing (STOC), 1971.										% editor, date
-
-\bibitem{Crypto} % cited with '\cite{book}'
-Ralph C. Merkle, Martin E. Hellman.									% author (Firstname Lastname, Firstname2 Lastname2, ...)
-\textit{Hiding information and signatures in trapdoor knapsacks}.	% title (italics)
-IEEE Transaction on Information Theory, 1978.
-
-% web source
-\bibitem{PNP}
-Thomas Messias.								% author (sometimes not available)
-\textit{P = NP ou P =/= NP, le problème de maths à un million de dollars}.					    % title (italics)
-\url{http://www.slate.fr/story/109569/probleme-million-dollars},			% url
-Last visited: 17.12.2017.									% date
+% web source example
+\bibitem{dynamique}
+???			% author (sometimes not available)
+\textit{faire un tableau dynamique en C}.					    % title (italics)
+\url{http://www....},	% url
+Last visited: ....								% date
 \end{thebibliography}
 %------------------- Bibliography End -------------------------------
 
@@ -196,36 +197,8 @@ Last visited: 17.12.2017.									% date
 %\renewcommand{\thesection}{Appendix \Alph{section}}
 \renewcommand{\thesubsection}{\Alph{section}.\arabic{subsection}}
 
-\clearpage	
-
-\section{Code source} \label{app:sourceCode}
-
-\subsection{Phase d'initialisation}
-Exemple sous titre
-
-\begin{figure}[H]
-%\lstinputlisting[firstline=17, lastline=50]{../code/greedy.erl}
-\caption{Phase d'initialisation.}
-\label{fig:initalisation}
-\end{figure}
-
-\section{User Manual}
-Pour un guide d'utilisation des codes, voir le fichier ....., en annexe.
-
-
-%\begin{figure}
-%\begin{lstlisting}
-%// constrain speed to +/- MAX_SPEED
-%double bounded_speed(double speed) { 
-%  if (speed > MAX_SPEED) return MAX_SPEED;
-%  else if (speed < -MAX_SPEED) return -MAX_SPEED;
-%  else return speed;
-%}
-%\end{lstlisting}
-%\caption{Listing within \LaTeX.}
-%\label{fig:listing2}
-%\end{figure}
-
+\section{Manuel d'utilisateur} \label{app:annexe}
+Le fichier README vous explique de manière détaillée comment compiler et exécuter le programme.
 
 
 %################### Appendix End #####################################
