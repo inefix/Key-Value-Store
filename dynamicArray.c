@@ -53,11 +53,29 @@ void insertKV(int newkey, char *newvalue) {
 	/* if the string passed is not NULL, copy it */
 	if (newvalue != NULL) {
 		size_t length = strlen(newvalue);
-		//array->value[array->used] = malloc(1 + length);
-		int index = kv->used; // on ajoute un element
+
+		for(int j = 0; j<=kv->used; j++){
+			if(kv[j].key == -1 || kv[j].value == NULL ){
+				size_t length1 = strlen(kv[j].value);
+				kv->used++;
+				memset(kv[j].value, 0, length1);
+				strncpy(kv[j].value, newvalue,length); // on insère la valeur
+				kv[j].key = newkey; // on indique aussi la clé
+				printf("KV[%d].VALUE IS: %s AND KEY IS: %d\n",j,kv[j].value,kv[j].key);
+				break;
+			}
+
+			if(j == kv->used){
+				kv->used++;
+				strncpy(kv[j].value, newvalue,length); // on insère la valeur
+				kv[j].key = newkey; // on indique aussi la clé
+			}
+		}
+
+		/*int index = kv->used; // on ajoute un element
 		kv->used++;
 		strncpy(kv[index].value, newvalue,length); // on insère la valeur
-		kv[index].key = newkey; // on indique aussi la clé
+		kv[index].key = newkey; // on indique aussi la clé*/
 	}
 	else
 		printf("newvalue is NULL");

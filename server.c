@@ -649,11 +649,11 @@ void printKV(){				//read
       if(i==block_key_modify){
         printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
-      }
+      }/*
       if(i==block_key_delete){
         printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
-      }
+      }*/
   		//else{
   		//	printf("index %d is NULL\n",i);
   		//}
