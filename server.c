@@ -341,6 +341,7 @@ void processcmd(char* input){
 // adds a pair based on key or value
 void addpair(int newkey, char* newvalue){		//write
 
+  //=============== ENTRY SECTION ==============//
 	pthread_mutex_lock(&wmutex);
 	writecount++;
   if (writecount == 1){
@@ -348,6 +349,7 @@ void addpair(int newkey, char* newvalue){		//write
   }
   pthread_mutex_unlock(&wmutex);
 
+  //=============== CRITICAL SECTION ==============//
   pthread_mutex_lock(&resource);
 
 	int i,j,possiblekey;
@@ -390,9 +392,9 @@ void addpair(int newkey, char* newvalue){		//write
 		}
 
 	}
-
   pthread_mutex_unlock(&resource);
 
+  //=============== EXIT SECTION ==============//
 	pthread_mutex_lock(&wmutex);
   writecount--;
   if (writecount == 0){
@@ -404,6 +406,7 @@ void addpair(int newkey, char* newvalue){		//write
 
 void modifyPair(int key, char* value, char* value2){		//write
 
+  //=============== ENTRY SECTION ==============//
   pthread_mutex_lock(&wmutex);
 	writecount++;
   if (writecount == 1){
@@ -411,6 +414,7 @@ void modifyPair(int key, char* value, char* value2){		//write
   }
   pthread_mutex_unlock(&wmutex);
 
+  //=============== CRITICAL SECTION ==============//
   pthread_mutex_lock(&resource);
 
   int i;
@@ -447,9 +451,9 @@ void modifyPair(int key, char* value, char* value2){		//write
     printf("Value not found!\n");
     snprintf(rep_client,sizeof(rep_client),"Value not found!");
   }
-
   pthread_mutex_unlock(&resource);
 
+  //=============== EXIT SECTION ==============//
 	pthread_mutex_lock(&wmutex);
   writecount--;
   if (writecount == 0){
@@ -461,6 +465,7 @@ void modifyPair(int key, char* value, char* value2){		//write
 
 void deletepair(int key, char* value){		//write
 
+  //=============== ENTRY SECTION ==============//
   pthread_mutex_lock(&wmutex);
 	writecount++;
   if (writecount == 1){
@@ -468,6 +473,7 @@ void deletepair(int key, char* value){		//write
   }
   pthread_mutex_unlock(&wmutex);
 
+  //=============== CRITICAL SECTION ==============//
   pthread_mutex_lock(&resource);
 
 	int i;
@@ -498,9 +504,9 @@ void deletepair(int key, char* value){		//write
 			}
 		}
 	}
-
   pthread_mutex_unlock(&resource);
 
+  //=============== EXIT SECTION ==============//
 	pthread_mutex_lock(&wmutex);
   writecount--;
   if (writecount == 0){
@@ -512,6 +518,7 @@ void deletepair(int key, char* value){		//write
 
 void readpair(int key, char* value){			//read
 
+  //=============== ENTRY SECTION ==============//
   pthread_mutex_lock(&readTry);
 	pthread_mutex_lock(&rmutex);
   readcount++;
@@ -521,6 +528,7 @@ void readpair(int key, char* value){			//read
 	pthread_mutex_unlock(&rmutex);
   pthread_mutex_unlock(&readTry);
 
+  //=============== CRITICAL SECTION ==============// (reading is performed)
 	int i;
 	bool check = true;
 	if(key==0){// 'RV' we just have the value and want to read the key
@@ -553,6 +561,7 @@ void readpair(int key, char* value){			//read
 		}
 	}
 
+  //=============== EXIT SECTION ==============//
   pthread_mutex_lock(&rmutex);
   readcount--;
   if (readcount == 0){
@@ -577,6 +586,7 @@ void printKV(){				//read
   		}
     }
 
+    //=============== ENTRY SECTION ==============//
     pthread_mutex_lock(&readTry);
     pthread_mutex_lock(&rmutex);
     readcount++;
@@ -586,6 +596,7 @@ void printKV(){				//read
     pthread_mutex_unlock(&rmutex);
     pthread_mutex_unlock(&readTry);
 
+    //=============== CRITICAL SECTION ==============// (reading is performed)
     for(i=block_key_add;i<kvsize;i++){
   		if(kv[i].key!=-1 && i!=block_key_modify && i!=block_key_delete){
   			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
@@ -604,6 +615,7 @@ void printKV(){				//read
   		}
     }
 
+    //=============== EXIT SECTION ==============//
     pthread_mutex_lock(&rmutex);
     readcount--;
     if (readcount == 0){
