@@ -207,8 +207,18 @@ nombres de client max
 Andrea : renvoie des messages aux client
 Jonas tout le reste
 \subsection{lire,écrire et modifier des valeurs}
-Tous
-Regex,
+Les fonctions permettant de manipuler le KV store grâce aux commandes sont:
+\begin{lstlisting}
+void addpair(int newkey, char* newvalue);
+void deletepair(int key, char* value);
+void modifyPair(int key, char* value1, char* value2);
+void readpair(int key, char* value);
+void printKV();
+\end{lstlisting}
+Les trois premières fonctions sont de type "write" et les deux dernières de type "read". En effet, il n'est pas permit d'ajouter, supprimer ou de modifier la même pair par peur d'avoir des comportement imprévisible et ingérable. En revanche, il est tout à fait possible de lire en même temps.\\
+
+Regex\\
+
 \subsection{Accès sécurisé des lecteurs/rédacteurs}
 Andrea
 qui a la priorité? read/write etc
@@ -220,8 +230,11 @@ Jonas
 italique: \textit{exemple italique}
 
 \section{apprentissage}
-ce que nous avons appris
-Tous
+\textbf{Andrea:}\\
+
+\textbf{Jonas:}\\
+
+\textbf{Ryan:} N'ayant jamais fait de tableau dynamique auparavant, j'ai rencontré plusieurs problèmes lors de la construction de la structure ainsi que de la dynamicité du tableau; spécialement lors de la suppression d'un élément, laissant ainsi un trou dans le tableau. Néanmoins je crois avoir accumulé une certaine expérience non négligeable dans ce domaine. En outre, il est difficile de parfois comprendre ce qu'un autre membre du groupe a codé, cela implique d'avoir une structure de travail avec lequel il faut suivre prudemment.  
 
 \section{Conclusion}
 

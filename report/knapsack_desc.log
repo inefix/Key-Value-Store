@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2017.2.26)  25 MAY 2018 17:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2017.2.26)  25 MAY 2018 18:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1169,23 +1169,49 @@ Underfull \hbox (badness 10000) in paragraph at lines 141--146
 
  []
 
-[2] [3] 
+[2] [3]
+Underfull \hbox (badness 10000) in paragraph at lines 218--219
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 220--221
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 233--234
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 235--236
+
+ []
+
+
+Overfull \hbox (12.41783pt too wide) in paragraph at lines 237--238
+\OT1/cmr/m/n/10.95 probl^^Remes lors de la con-struc-tion de la struc-ture ains
+i que de la dy-nam-icit^^Se du tableau; sp^^Secialement
+ []
+
+
 AED: lastpage setting LastPage
 [4]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 270.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 270.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 283.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 283.
  (./knapsack_desc.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 270.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 270.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 283.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 283.
 Package rerunfilecheck Info: File `knapsack_desc.out' has not changed.
 (rerunfilecheck)             Checksum: 571CA7E12C1560056E9B49AC6569BB94;740.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 270.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 283.
  ) 
 Here is how much of TeX's memory you used:
- 21533 strings out of 493014
- 399100 string characters out of 6133351
+ 21554 strings out of 493014
+ 399370 string characters out of 6133351
  615238 words of memory out of 5000000
- 24649 multiletter control sequences out of 15000+600000
+ 24664 multiletter control sequences out of 15000+600000
  11520 words of font info for 43 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  48i,11n,66p,738b,1150s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1199,10 +1225,10 @@ local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/loc
 al/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/
 texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/t
 exlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on knapsack_desc.pdf (4 pages, 143684 bytes).
+Output written on knapsack_desc.pdf (4 pages, 146670 bytes).
 PDF statistics:
- 184 PDF objects out of 1000 (max. 8388607)
- 166 compressed objects within 2 object streams
- 55 named destinations out of 1000 (max. 500000)
+ 191 PDF objects out of 1000 (max. 8388607)
+ 173 compressed objects within 2 object streams
+ 61 named destinations out of 1000 (max. 500000)
  101 words of extra memory for PDF output out of 10000 (max. 10000000)
 
