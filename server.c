@@ -161,7 +161,7 @@ void *multiconnect(void* socketdesc){
 			//{
 			//perror ("gettimeofday");
 			//}
-			
+
 			processcmd(clmsg);
 
 			byte = send(clsock, rep_client, strlen(rep_client)+1,0);
@@ -230,7 +230,7 @@ void* readcmd(void* unused){
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
         if(ctrlregex(cmd)==0){// check the string input
             cmd[strlen(cmd)-1] = '\0'; //in oder to delete the new line
-            
+
             //int iRet;
 			//struct timeval tv;
 
@@ -243,7 +243,7 @@ void* readcmd(void* unused){
 			//{
 				//perror ("gettimeofday");
 			//}
-            
+
             processcmd(cmd);
         }
         else{
@@ -302,7 +302,7 @@ void processcmd(char* input){
 			if(isdigit(tok[0])==0){
 				strcpy(value,tok);
 				printf("searching key of: %s\n",value);
-				readpair(0,value);
+				readpair(-1,value);
 			}else{
 				puts("error on input");
 			}
@@ -320,7 +320,7 @@ void processcmd(char* input){
 			if(isdigit(tok[0])==0){
 				strcpy(value,tok);
 				printf("delete value: %s\n",value);
-				deletepair(0,value);
+				deletepair(-1,value);
 			}else{
 				puts("error on input");
 			}
@@ -343,7 +343,7 @@ void processcmd(char* input){
 				if(tok != NULL){
 					strcpy(value2,tok);
 					printf("modify value of %s with value: %s\n",value,value2);
-					modifyPair(0, value, value2);
+					modifyPair(-1, value, value2);
 				}
 			}else{
 				puts("error on input");
@@ -453,7 +453,7 @@ void modifyPair(int key, char* value, char* value2){		//write
   size_t length1 = strlen(value);
   size_t length2 = strlen(value2);
   int counter = 0;
-  if(key == 0){
+  if(key == -1){
     for(i=0; i<kv->size; i++){
       if(strcmp(kv[i].value, value) == 0){
         block_key_modify = i;
@@ -510,7 +510,7 @@ void deletepair(int key, char* value){		//write
 
 	int i;
 	size_t length = strlen(value);
-	if(key==0){// we just have the value
+	if(key==-1){// we just have the value
 		for(i=0;i<kv->size;i++){
 			if(strcmp(kv[i].value,value) == 0){
         block_key_delete = i;
@@ -552,27 +552,27 @@ void readpair(int key, char* value){			//read
 
 	int i;
 	bool check = true;
-	if(key==0){// 'RV' we just have the value and want to read the key
-		printf("kv size: '%zu'\n",kv->size);
+	if(key==-1){// 'RV' we just have the value and want to read the key
+		//printf("kv size: '%zu'\n",kv->size);
 		for(i=0; i<block_key_add; i++){
 			if(strcmp(kv[i].value,value)==0 && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
 				snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
-				//check = false;
+				check = false;
 				break;
 			}
 		}
-		if(check){
-			printf("no pair found\n");
-			snprintf(rep_client,sizeof(rep_client),"no pair found");
-		}
+		//if(check){
+		//	printf("no pair found\n");
+		//	snprintf(rep_client,sizeof(rep_client),"no pair found");
+		//}
 	}
 	else{ // 'R' we just have the key and want the value
 		for(i=0;i<block_key_add;i++){
 			if(kv[i].key==key && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
 				snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
-				//check = false;
+				check = false;
 				break;
 			}
 		}
@@ -582,7 +582,7 @@ void readpair(int key, char* value){			//read
 		//}
 	}
 
-
+  //=============== ENTRY SECTION ==============//
   pthread_mutex_lock(&readTry);
 	pthread_mutex_lock(&rmutex);
   readcount++;
@@ -592,8 +592,12 @@ void readpair(int key, char* value){			//read
 	pthread_mutex_unlock(&rmutex);
   pthread_mutex_unlock(&readTry);
 
-  if(key==0){// 'RV' we just have the value and want to read the key
-		printf("kv size: '%zu'\n",kv->size);
+  //=============== CRITICAL SECTION ==============// (reading is performed)
+  if(key==-1){// 'RV' we just have the value and want to read the key
+		//printf("kv size: '%zu'\n",kv->size);
+    //printf("block_key_add : %d\n", block_key_add);
+    //printf("block_key_modify : %d\n", block_key_modify);
+    //printf("block_key_delete : %d\n", block_key_delete);
 		for(i=block_key_add; i<kv->used; i++){
 			if(strcmp(kv[i].value,value)==0 && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
@@ -603,7 +607,7 @@ void readpair(int key, char* value){			//read
 			}
 		}
     for(i=0; i<kv->used; i++){    //when the value is modifier during the search
-			if(strcmp(kv[i].value,value)==0 && i==block_key_modify && i!=block_key_delete){ // we found the value and show the key
+			if(i==block_key_modify){ // we found the value and show the key
 				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
 				snprintf(rep_client,sizeof(rep_client),"value '%s' has the key '%d'",kv[i].value, kv[i].key);
 				check = false;
@@ -616,6 +620,9 @@ void readpair(int key, char* value){			//read
 		}
 	}
 	else{ // 'R' we just have the key and want the value
+    //printf("block_key_add : %d\n", block_key_add);
+    //printf("block_key_modify : %d\n", block_key_modify);
+    //printf("block_key_delete : %d\n", block_key_delete);
 		for(i=block_key_add;i<kv->used;i++){
 			if(kv[i].key==key && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
@@ -625,7 +632,7 @@ void readpair(int key, char* value){			//read
 			}
 		}
     for(i=0;i<kv->used;i++){    //when the key is modifier during the search
-			if(kv[i].key==key && i==block_key_modify && i!=block_key_delete){ // we found the value and show the key
+			if(i==block_key_modify){ // we found the value and show the key
 				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
 				snprintf(rep_client,sizeof(rep_client),"the key '%d' has value '%s'",kv[i].key, kv[i].value);
 				check = false;
