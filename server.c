@@ -646,11 +646,15 @@ void readpair(int key, char* value){			//read
 void printKV(){				//read
 
     int i;
+    bool check = true;
     snprintf(rep_client,sizeof(rep_client),"printing KV");
     for(i=0;i<block_key_add;i++){
   		if(kv[i].key!=-1 && i!=block_key_modify && i!=block_key_delete){
   			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
+      }
+      else{
+        check = false;
       }
     }
 
@@ -670,6 +674,9 @@ void printKV(){				//read
             printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
             snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
       }
+      else{
+        check = false;
+      }
     }
 
     for(i=block_key_add;i<kv->used;i++){
@@ -677,6 +684,13 @@ void printKV(){				//read
   			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
       }
+      else{
+        check = false;
+      }
+    }
+
+    if(check==true){
+      printf("there are no values in the Key-Value Store\n");
     }
 
 
