@@ -692,6 +692,7 @@ void printKV(){				//read
 
     if(check==true){
       printf("there are no values in the Key-Value Store\n");
+      snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nthere are no values in the Key-Value Store");
     }
 
 
