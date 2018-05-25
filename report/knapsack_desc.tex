@@ -4,11 +4,11 @@
 % Modified: 26.05.2018
 % Description: description projet
 %#####################################################################
-\documentclass[12pt,a4paper]{article}
+\documentclass[11pt,a4paper]{article}
 
 \usepackage[head=14pt,left=1in,right=1in, bottom=1in]{geometry} % to modify geometry
 \usepackage[utf8]{inputenc}                           % to allow utf-8 encoding input e.g. ö é ä etc.
-\usepackage[french]{babel}			                  % other options: frenchb,german
+\usepackage[english]{babel}			                  % other options: frenchb,german
 \usepackage[pdftex]{graphicx}                         % to include graphics
 \usepackage{amsmath}                                  % for maths functions
 \usepackage{amsfonts}                                 % for maths fonts
@@ -18,12 +18,26 @@
 \usepackage{caption}                                  % for fancy captions
 \usepackage{listings}                                 % to include listings
 \usepackage{color}                                    % for custom colors
-
+\usepackage{float}
+\usepackage{enumitem}
 \usepackage{blindtext}                                % for placeholder text
-\usepackage{float}									  % for fixing figure
+
+\usepackage{pgf}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+%\usepackage[latin1]{inputenc}
 
 
-% setup page
+%################### Preamble Start #####################################
+
+
+%%%%%%%%%%%%%%%%%%%%
+% move title to top of page
+\setlength{\droptitle}{-10em}
+
+
+%%%%%%%%%%%%%%%%%%%%
+%\setup page
 %\sloppy
 %\pagenumbering{roman}
 %\pagestyle{plain}
@@ -39,6 +53,7 @@
 \fancyfoot[L]{\footnotesize\emailurl{\myemail}}
 \fancyhead[L]{\thetitle}
 \fancyhead[R]{\theauthor}
+
 
 % remove additional space between tables and their captions
 %\captionsetup[table]{skip=0pt}
@@ -61,20 +76,17 @@
   tabsize=4, 
   numbers=left,
   numberstyle=\tiny\color{codegray},
-  stepnumber=1,
+  stepnumber=2,
   xleftmargin=\parindent,
-  language=Erlang,
+  language=C,
   showstringspaces=false,
-  basicstyle=\fontsize{9}{11}\selectfont\ttfamily,
+  basicstyle=\ttfamily,
   %basicstyle=\tiny,
   backgroundcolor=\color{backcolour},   
   commentstyle=\color{codegreen},
   keywordstyle=\color{codepurple},
   stringstyle=\color{blue},
   identifierstyle=\color{black},
-  extendedchars=true,
-  inputencoding=utf8,
-  literate={á}{{\'a}}1 {à}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1 {è}{{\'e}}1 {ê}{{\'e}}1 {ç}{{\'c}}1 
 }
 
 \lstset{escapechar=@,style=customc} % set default language
@@ -134,9 +146,54 @@ De plus, il fallait gérer une communication entre le serveur et ses clients. le
 Finalement, les accès à la structure de données devait être sécurisés afin qu'aucun conflit d'occure. Il ne faudrait par exemple pas que deux clients modifie en même temps la même pair, ceci pouvant générer des comportements inattendus et imprévisibles. 
 \section{Solutions et décisions prises}
 Dans cette partie, nous allons décrire les solutions que nous avons élaboré pour résoudre chaque problème mentionné auparavant. 
+
+\newpage
 \subsection{KV store: array dynamique de struct}
-Ryan
-nombre d'entrée max? taille variable? 
+Nous avons opté pour ce projet, de construire un tableau redimensionnable. Les valeurs ainsi que les clés sont ajoutées les unes après les autres dans le tableau. Lorsque les élément atteignent la taille maximale du tableau qui lui est initialement attribuée, le tableau est redimensionné à deux fois sa taille initiale, et ainsi de suite.\\
+Les fonctions pouvant manipuler le tableau permettent d'ajouter, supprimer, modifier et  lire les éléments de ce dernier. Lorsque un élément est supprimé du tableau, il laisse un trou qui peut être complété par la prochaine valeur ajoutée, au lieu que cette dernière s'ajoute à la fin du tableau. Cela permet d'optimiser l'espace (trou complété) en n'allouant le moins possible de mémoire.\\
+Voici la structure du tableau:
+
+\begin{lstlisting}
+typedef struct{
+    int key; 
+    char *value;
+    size_t used; //indicate where we are in the array
+    size_t size; //indicate the size of the array
+}KVstore;
+\end{lstlisting}
+
+Ce tableau dynamique comporte 3 fonctions permettant d'initialiser, d'ajouter des éléments ainsi que de libérer la mémoire allouée. \\
+Bien que ces fonctions méritent d'être étudiées plus en détail, seule une description de "insertKV()" est donnée. En effet, cette fonction est la plus intéressante car c'est dans celle-ci que l'optimisation de l'espace alloué est faite.\\
+Tout d'abord, la fonction redimensionne le tableau si celui-ci en a besoin  grâce à la méthode realloc(). La valeur "newvalue" alors passé en argument, si elle n'est pas nulle,  pourra être insérée dans le tableau, soit dans un espace libre s'il y en a, soit à la fin de la série d'éléments déjà présents. Voici un extrait de code explicite:
+
+\begin{lstlisting}
+if (newvalue != NULL) {
+	size_t length = strlen(newvalue);
+	//check if there are holes, if yes add in the hole
+	for(int j = 0; j<=kv->used; j++){
+		if(kv[j].key == -1 || kv[j].value == NULL ){
+			size_t length1 = strlen(kv[j].value);
+			kv->used++;
+			//clear the memory in this index
+			memset(kv[j].value, 0, length1); 
+			// insert new value
+			strncpy(kv[j].value, newvalue,length); 
+			kv[j].key = newkey; // indicate key
+			break;
+		}
+		//if no holes, just add at the end of the series
+		if(j == kv->used){
+			kv->used++;
+			strncpy(kv[j].value, newvalue,length); 
+			kv[j].key = newkey; // indicate key
+		}
+	}
+}
+\end{lstlisting}
+
+Le tableau redimensionable a été choisit pour sa simplicité d'implémentation. Toutefois, tel qu'il est implémenté dans ce code, ce tableau comporte un inconvénient: il n'est pas de possibilité de réduire la mémoire alloué (la taille du tableau exacte) pour le tableau si les éléments sont supprimés. Les éléments sont ajouté dans les trous créés par les éléments supprimés afin de pallier au problème et optimiser l'utilisation de la mémoire. Il est aussi déconseillé d'allouer la mémoire à nouveau lorsque la taille du tableau est réduite, car une copie de ce dernier doit être faite à chaque processus de réduction. Des pertes d'éléments peuvent en être la conséquence.\\
+Une meilleure implémentation aurait été une liste lié (linked list), ainsi, le problème de dimensionnement lors d'une suppression d'élément disparaît.
+
 \subsection{communication server - clients}
 nombres de client max
 Andrea : renvoie des messages aux client

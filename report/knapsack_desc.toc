@@ -1,12 +1,12 @@
-\select@language {french}
+\select@language {english}
 \contentsline {section}{\numberline {1}Introduction}{1}{section.1}
 \contentsline {section}{\numberline {2}Description du probl\IeC {\`e}me}{1}{section.2}
 \contentsline {section}{\numberline {3}Solutions et d\IeC {\'e}cisions prises}{1}{section.3}
 \contentsline {subsection}{\numberline {3.1}KV store: array dynamique de struct}{2}{subsection.3.1}
-\contentsline {subsection}{\numberline {3.2}communication server - clients}{2}{subsection.3.2}
-\contentsline {subsection}{\numberline {3.3}lire,\IeC {\'e}crire et modifier des valeurs}{2}{subsection.3.3}
-\contentsline {subsection}{\numberline {3.4}Acc\IeC {\`e}s s\IeC {\'e}curis\IeC {\'e} des lecteurs/r\IeC {\'e}dacteurs}{2}{subsection.3.4}
-\contentsline {subsection}{\numberline {3.5}scripts de tests}{2}{subsection.3.5}
-\contentsline {section}{\numberline {4}apprentissage}{2}{section.4}
-\contentsline {section}{\numberline {5}Conclusion}{2}{section.5}
-\contentsline {section}{\numberline {A}Manuel d'utilisateur}{2}{appendix.A}
+\contentsline {subsection}{\numberline {3.2}communication server - clients}{3}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}lire,\IeC {\'e}crire et modifier des valeurs}{3}{subsection.3.3}
+\contentsline {subsection}{\numberline {3.4}Acc\IeC {\`e}s s\IeC {\'e}curis\IeC {\'e} des lecteurs/r\IeC {\'e}dacteurs}{3}{subsection.3.4}
+\contentsline {subsection}{\numberline {3.5}scripts de tests}{3}{subsection.3.5}
+\contentsline {section}{\numberline {4}apprentissage}{3}{section.4}
+\contentsline {section}{\numberline {5}Conclusion}{3}{section.5}
+\contentsline {section}{\numberline {A}Manuel d'utilisateur}{3}{appendix.A}
