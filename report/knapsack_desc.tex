@@ -145,7 +145,15 @@ La deuxième étape se concentre sur la gestion de la communication entre le ser
 Finalement, les accès à la structure de donnée doit être sécurisé afin qu'aucun conflit ne surgisse. Par exemple, il est interdit que deux clients puissent modifier en même temps la même pair, ceci pouvant générer des comportements inattendus et imprévisibles.\\
 
 \section{Solutions et décisions prises}
-Dans cette partie, nous allons décrire les solutions que nous avons élaboré pour résoudre chaque problème mentionné auparavant. 
+Dans cette partie, les solutions élaborées pour résoudre chaque problème mentionné auparavant sont décrites:
+
+\begin{enumerate}
+\item Structure KV store (Ryan)
+\item Communication serveur-client (Andrea, Jonas)
+\item Fonctions: lire, écrire, modifier, supprimer  et Regex (Tous)
+\item Accès sécurisé des "readers"/"writers" (Andrea)
+\item Script de test (Jonas)
+\end{enumerate}
 
 \newpage
 \subsection{KV store: array dynamique de struct}
