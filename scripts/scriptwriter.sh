@@ -10,7 +10,6 @@ m 1 test7
 d 2
 p
 q
-
 EOF
 
 sleep 8
