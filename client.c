@@ -46,8 +46,8 @@ int main(int argc, char** argv) {
 		printf("'m key new_value' to modify a value with a certain key\n");
 		printf("'mv old_vale new_value' to modify a old_value with a new_value\n");
 		printf("'p' to print all the entries in the Key Value Store\n");
-	
-	
+
+
 		while(1)
 		{
 			memset(msg, 0, SIZE);
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 				if (recv(sock, reply, SIZE, 0)<0){
 					perror("recv failed");
 				};
-				
+
 				//int iRet;
 				//struct timeval tv;
 

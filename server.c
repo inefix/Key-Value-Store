@@ -143,7 +143,8 @@ void *multiconnect(void* socketdesc){
 			//client side input processing
 			printf("client %i said a valid string: %s\n",persID->id, clmsg);
 			snprintf(reply,sizeof(reply),"client %d, your message is valid", persID->id);//response to client
-			byte = send(clsock, reply, strlen(reply)+1,0);
+      printf("clsock : %d\n", clsock);
+      byte = send(clsock, reply, strlen(reply)+1,0);
 
 			snprintf(rep_client,sizeof(rep_client),"request done");//if add key
 
@@ -164,9 +165,17 @@ void *multiconnect(void* socketdesc){
 
 			processcmd(clmsg);
 
+      printf("Server is sending response\n");
+
+      printf("%ld\n", strlen(rep_client));
+      printf("%s\n", rep_client);
+      printf("clsock : %d\n", clsock);
+
 			byte = send(clsock, rep_client, strlen(rep_client)+1,0);
 			if(byte == -1) perror("Error on Recv");
 			else if(byte == 0) printf("Connection is close\n");
+
+      printf("Server have send response\n");
 
 		}
 		else{
