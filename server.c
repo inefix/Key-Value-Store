@@ -469,10 +469,11 @@ void modifyPair(int key, char* value, char* value2){		//write
   else{ // we just have the key
 		for(i=0;i<kv->size;i++){
 			if(kv[i].key == key){
+        size_t length3 = strlen(kv[i].value);
         block_key_modify = i;
 				printf("Modifying key %d having value %s \n",kv[i].key, kv[i].value);
 				snprintf(rep_client,sizeof(rep_client),"Modifying key %d having value %s",kv[i].key, kv[i].value);
-				memset(kv[i].value, 0, length1);
+				memset(kv[i].value, 0, length3);
 				strncpy(kv[i].value, value2,length2);
 				counter++;
 				break;
