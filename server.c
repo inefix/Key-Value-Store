@@ -562,10 +562,6 @@ void readpair(int key, char* value){			//read
 				break;
 			}
 		}
-		//if(check){
-		//	printf("no pair found\n");
-		//	snprintf(rep_client,sizeof(rep_client),"no pair found");
-		//}
 	}
 	else{ // 'R' we just have the key and want the value
 		for(i=0;i<block_key_add;i++){
@@ -576,10 +572,6 @@ void readpair(int key, char* value){			//read
 				break;
 			}
 		}
-		//if(check){
-		//	printf("no pair found\n");
-		//	snprintf(rep_client,sizeof(rep_client),"no pair found");
-		//}
 	}
 
   //=============== ENTRY SECTION ==============//
@@ -594,10 +586,6 @@ void readpair(int key, char* value){			//read
 
   //=============== CRITICAL SECTION ==============// (reading is performed)
   if(key==-1){// 'RV' we just have the value and want to read the key
-		//printf("kv size: '%zu'\n",kv->size);
-    //printf("block_key_add : %d\n", block_key_add);
-    //printf("block_key_modify : %d\n", block_key_modify);
-    //printf("block_key_delete : %d\n", block_key_delete);
 		for(i=block_key_add; i<kv->used; i++){
 			if(strcmp(kv[i].value,value)==0 && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("value '%s' has the key '%d'\n",kv[i].value, kv[i].key);
@@ -620,9 +608,6 @@ void readpair(int key, char* value){			//read
 		}
 	}
 	else{ // 'R' we just have the key and want the value
-    //printf("block_key_add : %d\n", block_key_add);
-    //printf("block_key_modify : %d\n", block_key_modify);
-    //printf("block_key_delete : %d\n", block_key_delete);
 		for(i=block_key_add;i<kv->used;i++){
 			if(kv[i].key==key && i!=block_key_modify && i!=block_key_delete){ // we found the value and show the key
 				printf("the key '%d' has value '%s' \n",kv[i].key, kv[i].value);
@@ -667,9 +652,6 @@ void printKV(){				//read
   			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
       }
-  		//else{
-  		//	printf("index %d is NULL\n",i);
-  		//}
     }
 
     //=============== ENTRY SECTION ==============//
@@ -695,17 +677,6 @@ void printKV(){				//read
   			printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
         snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
       }
-      /*if(i==block_key_modify){
-        printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
-        snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
-      }
-      if(i==block_key_delete){
-        printf("kv[%d].value is: %s and key is: %d\n",i,kv[i].value,kv[i].key);
-        snprintf(rep_client+strlen(rep_client),sizeof(rep_client)-strlen(rep_client),"\nkv[%d].value is: %s and key is: %d",i,kv[i].value,kv[i].key);
-      }*/
-  		//else{
-  		//	printf("index %d is NULL\n",i);
-  		//}
     }
 
 
