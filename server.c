@@ -151,21 +151,6 @@ void *multiconnect(void* socketdesc){
 
 			snprintf(rep_client,sizeof(rep_client),"request done");//if add key
 
-			//int iRet;
-			//struct timeval tv;
-
-			//iRet = gettimeofday (&tv, NULL); // timezone structure is obsolete
-			//if (iRet == 0)
-			//{
-			//printf ("Seconds since epoch: %d\n",
-					//(int)tv.tv_sec);
-			//return 0;
-			//}
-			//else
-			//{
-			//perror ("gettimeofday");
-			//}
-
 			processcmd(clmsg);
 
       printf("Server is sending response\n");
@@ -242,19 +227,6 @@ void* readcmd(void* unused){
         fgets(cmd,MSGSIZE,stdin); // read command from CLI
         if(ctrlregex(cmd)==0){// check the string input
             cmd[strlen(cmd)-1] = '\0'; //in oder to delete the new line
-
-            //int iRet;
-			//struct timeval tv;
-
-			//iRet = gettimeofday (&tv, NULL); // timezone structure is obsolete
-			//if (iRet == 0)
-			//{
-				//printf ("Seconds since epoch: %d\n",(int)tv.tv_sec);
-			//}
-			//else
-			//{
-				//perror ("gettimeofday");
-			//}
 
             processcmd(cmd);
         }

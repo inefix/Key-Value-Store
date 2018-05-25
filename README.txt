@@ -1,3 +1,20 @@
+TODO: expliquer comment compiler et éxecuter dans plusieurs terminaux 
+expliquer 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Le Key-Value Store implémenté permet d’ajouter, supprimer et modifier des entrées. La structure de message acceptée par le serveur est la suivante:
 
 

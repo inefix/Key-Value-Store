@@ -80,18 +80,6 @@ int main(int argc, char** argv) {
 					perror("recv failed");
 				};
 
-				//int iRet;
-				//struct timeval tv;
-
-				//iRet = gettimeofday (&tv, NULL); // timezone structure is obsolete
-				//if (iRet == 0)
-				//{
-					//printf ("Seconds since epoch: %d\n",(int)tv.tv_sec);
-				//}
-				//else
-				//{
-					//perror ("gettimeofday");
-				//}
 				printf("reply: %s \n", reply);
 
 				if(strcmp(strstr(reply, "is valid"), "is valid") == 0) {
