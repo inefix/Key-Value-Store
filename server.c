@@ -11,10 +11,10 @@ char rep_client[MSGSIZE];
 bool running;// tenté d'avoir une var globale pour arrêter le serveur
 
 int readcount, writecount;
-pthread_mutex_t rmutex;// = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t wmutex;
-pthread_mutex_t readTry;
-pthread_mutex_t resource;
+static pthread_mutex_t rmutex;// = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t wmutex;
+static pthread_mutex_t readTry;
+static pthread_mutex_t resource;
 
 int block_key_add;
 int block_key_modify;
