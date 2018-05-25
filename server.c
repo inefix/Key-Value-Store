@@ -10,6 +10,8 @@ KVstore *kv; // our main KV store array
 char rep_client[MSGSIZE];
 bool running;// tenté d'avoir une var globale pour arrêter le serveur
 
+int sleep_prog;
+
 int readcount, writecount;
 static pthread_mutex_t rmutex;// = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t wmutex;
@@ -23,6 +25,7 @@ int block_key_delete;
 // main launching the socket server and distributing the thread to handle several clients
 int main(int argc, char *argv[])
 {
+    sleep_prog = 1;
 
     int socketdesc, clsock;
     int *nwsock;
@@ -431,7 +434,10 @@ void addpair(int newkey, char* newvalue){		//write
 
 	}
 
-  //sleep(10);
+  if(sleep_prog==1){
+    sleep(3);
+  }
+
 
   pthread_mutex_unlock(&resource);
 
@@ -493,6 +499,11 @@ void modifyPair(int key, char* value, char* value2){		//write
     printf("Value not found!\n");
     snprintf(rep_client,sizeof(rep_client),"Value not found!");
   }
+
+  if(sleep_prog==1){
+    sleep(3);
+  }
+
   pthread_mutex_unlock(&resource);
 
   //=============== EXIT SECTION ==============//
@@ -546,6 +557,11 @@ void deletepair(int key, char* value){		//write
 			}
 		}
 	}
+
+  if(sleep_prog==1){
+    sleep(3);
+  }
+
   pthread_mutex_unlock(&resource);
 
   //=============== EXIT SECTION ==============//
