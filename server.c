@@ -518,8 +518,8 @@ void deletepair(int key, char* value){		//write
 				snprintf(rep_client,sizeof(rep_client),"deleting - %s - having the key %d",kv[i].value, kv[i].key);
 				kv[i].key=-1;
 				memset(kv[i].value, 0, length);
-				printf("réduire taille de l'array? ");
-				//break;
+				//printf("réduire taille de l'array? ");
+				break;
 			}
 		}
 	}
@@ -531,7 +531,7 @@ void deletepair(int key, char* value){		//write
 				snprintf(rep_client,sizeof(rep_client),"deleting key %d having value %s",kv[i].key, kv[i].value);
 				kv[i].key=-1;
 				memset(kv[i].value, 0, length);
-				printf("réduire taille de l'array? ");
+				//printf("réduire taille de l'array? ");
 				break;
 			}
 		}
