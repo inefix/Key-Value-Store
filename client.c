@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
                 //Get reply from server
                 if (recv(sock, reply, SIZE, 0) < 0) {
                     perror("recv failed");
-                };
+                }
 
                 printf("reply: %s \n", reply);
 

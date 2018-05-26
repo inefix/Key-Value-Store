@@ -153,7 +153,7 @@ void *multiconnect(void* socketdesc) {
 
             processcmd(clmsg);
 
-            printf("Server is sending response... ");
+            printf("Server is sending response... \n");
 
             //printf("%ld\n", strlen(rep_client));
             //printf("%s\n", rep_client);
@@ -174,7 +174,7 @@ void *multiconnect(void* socketdesc) {
             byte = send(clsock, reply, strlen(reply) + 1, 0);
             if (byte == -1)
                 perror("Error on Recv");
-            else if (byte == 0)
+            else if (byte == 0) 
                 printf("Connection is close\n");
         }
         memset(reply, 0, MSGSIZE);
