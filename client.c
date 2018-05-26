@@ -33,8 +33,8 @@ int main(int argc, char** argv) {
     memset(&(srv.sin_zero), '\0', 8);
 
     // Connect to server
-    if (connect(sock, (struct sockaddr *) &srv, sizeof (struct sockaddr)) == -1){
-      perror("Error on Connect");
+    if (connect(sock, (struct sockaddr *) &srv, sizeof (struct sockaddr)) == -1) {
+        perror("Error on Connect");
     } else {
         puts("Connected");
 
@@ -84,15 +84,15 @@ int main(int argc, char** argv) {
 
                 printf("reply: %s \n", reply);
 
-                if(strstr(reply, "is valid") != NULL){
-                  //Get reply from server
-                  printf("waiting for reply\n");
-                  if (recv(sock, reply, SIZE, 0) < 0) {
-                      perror("recv failed");
-                  };
-                  printf("reply 2: %s \n", reply);
+                if (strstr(reply, "is valid") != NULL) {
+                    //Get reply from server
+                    printf("waiting for reply\n");
+                    if (recv(sock, reply, SIZE, 0) < 0) {
+                        perror("recv failed");
+                    };
+                    printf("reply 2: %s \n", reply);
                 } else {
-                  printf("don't expect any second reply\n");
+                    printf("don't expect any second reply\n");
                 }
 
             }

@@ -6,10 +6,10 @@
 #include "headers/dynamicArray.h"
 
 KVstore *kv; // our main KV store array
-char rep_client[MSGSIZE];   // the second response sent to the client
+char rep_client[MSGSIZE]; // the second response sent to the client
 bool running; // tenté d'avoir une var globale pour arrêter le serveur
 
-int sleep_prog;   //put some sleep to show that the mutex work correctly
+int sleep_prog; //put some sleep to show that the mutex work correctly
 
 int readcount, writecount;
 static pthread_mutex_t rmutex; // = PTHREAD_MUTEX_INITIALIZER;
@@ -17,7 +17,7 @@ static pthread_mutex_t wmutex;
 static pthread_mutex_t readTry;
 static pthread_mutex_t resource;
 
-int block_key_add;    //index of the key added
+int block_key_add; //index of the key added
 int block_key_modify; //index of the key modified
 int block_key_delete; //index of the key deleted
 
@@ -25,7 +25,7 @@ int block_key_delete; //index of the key deleted
 
 int main(int argc, char *argv[]) {
 
-    sleep_prog = 0;     //0 for off and 1 for on
+    sleep_prog = 0; //0 for off and 1 for on
 
     int socketdesc, clsock;
     int *nwsock;
@@ -158,7 +158,7 @@ void *multiconnect(void* socketdesc) {
         clmsg[strlen(clmsg) - 1] = '\0'; //in oder to delete the new line
 
         // check regex and react
-        if (ctrlregex(clmsg) == 0 && clmsg[0]!='s' && clmsg[0]!='q') {
+        if (ctrlregex(clmsg) == 0 && clmsg[0] != 's' && clmsg[0] != 'q') {
             //client side input processing
             printf("client %i said a valid string: %s\n", persID->id, clmsg);
             snprintf(reply, sizeof (reply), "client %d, your message is valid", persID->id); //response to client
@@ -166,7 +166,7 @@ void *multiconnect(void* socketdesc) {
 
             snprintf(rep_client, sizeof (rep_client), "request done"); //if add key
 
-            processcmd(clmsg);    //analyse the message of the client
+            processcmd(clmsg); //analyse the message of the client
 
             printf("Server is sending response... \n");
 
@@ -174,7 +174,7 @@ void *multiconnect(void* socketdesc) {
             //printf("%s\n", rep_client);
             //printf("clsock : %d\n", clsock);
 
-            usleep(10000);   //in microseconds    --> sinon le server est trop rapide et le client ne reçoit pas le message
+            usleep(10000); //in microseconds    --> sinon le server est trop rapide et le client ne reçoit pas le message
 
             byte = send(clsock, rep_client, strlen(rep_client) + 1, 0);
             if (byte == -1) perror("Error on Recv");
@@ -195,7 +195,7 @@ void *multiconnect(void* socketdesc) {
         memset(clmsg, 0, MSGSIZE);
     }
     if (bytesread == 0) {
-        printf("client %i disconnected",persID->id);
+        printf("client %i disconnected", persID->id);
     } else if (bytesread == -1) {
         perror("recv failed");
     }
@@ -271,7 +271,7 @@ void processcmd(char* input) {
         running = false;
         printf("server shut down\n");
     } else if (mode[0] == 's') {
-        sleep_prog=1;
+        sleep_prog = 1;
         printf("mutex with sleep from now on\n");
     } else if (tok != NULL) {
         if (strcmp(mode, "a") == 0) {
