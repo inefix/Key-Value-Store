@@ -6,10 +6,10 @@
 #include "headers/dynamicArray.h"
 
 KVstore *kv; // our main KV store array
-char rep_client[MSGSIZE];
+char rep_client[MSGSIZE];   // the second response sent to the client
 bool running; // tenté d'avoir une var globale pour arrêter le serveur
 
-int sleep_prog;
+int sleep_prog;   //put some sleep to show that the mutex work correctly
 
 int readcount, writecount;
 static pthread_mutex_t rmutex; // = PTHREAD_MUTEX_INITIALIZER;
@@ -17,14 +17,15 @@ static pthread_mutex_t wmutex;
 static pthread_mutex_t readTry;
 static pthread_mutex_t resource;
 
-int block_key_add;
-int block_key_modify;
-int block_key_delete;
+int block_key_add;    //index of the key added
+int block_key_modify; //index of the key modified
+int block_key_delete; //index of the key deleted
 
 // main launching the socket server and distributing the thread to handle several clients
 
 int main(int argc, char *argv[]) {
-    sleep_prog = 0;
+
+    sleep_prog = 0;     //0 for off and 1 for on
 
     int socketdesc, clsock;
     int *nwsock;
@@ -73,6 +74,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    //mutex init
     if (pthread_mutex_init(&rmutex, NULL) != 0) {
         printf("\n mutex init failed\n");
         return 1;
@@ -90,6 +92,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    //description of the commands
     printf("\n");
     printf("'a vale' to add a value\n");
     printf("'ak key vale' to add a value with a key\n");

@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
 
         printf("\n");
 
-        //comm with srv
+        ////description of the commands
         printf("'a vale' to add a value\n");
         printf("'ak key vale' to add a value with a key\n");
         printf("'r key' to read a value with a certain key\n");
