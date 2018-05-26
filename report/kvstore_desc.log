@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2018.5.25)  26 MAY 2018 18:35
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2018.5.25)  26 MAY 2018 18:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1208,10 +1208,10 @@ amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 ti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.p
 fb>
-Output written on kvstore_desc.pdf (7 pages, 185196 bytes).
+Output written on kvstore_desc.pdf (7 pages, 185283 bytes).
 PDF statistics:
- 252 PDF objects out of 1000 (max. 8388607)
- 228 compressed objects within 3 object streams
+ 253 PDF objects out of 1000 (max. 8388607)
+ 229 compressed objects within 3 object streams
  82 named destinations out of 1000 (max. 500000)
  101 words of extra memory for PDF output out of 10000 (max. 10000000)
 
