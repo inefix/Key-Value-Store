@@ -158,7 +158,7 @@ void *multiconnect(void* socketdesc){
       printf("%ld\n", strlen(rep_client));
       printf("%s\n", rep_client);
       printf("clsock : %d\n", clsock);
-
+	sleep(0.1);
 			byte = send(clsock, rep_client, strlen(rep_client)+1,0);
 			if(byte == -1) perror("Error on Recv");
 			else if(byte == 0) printf("Connection is close\n");

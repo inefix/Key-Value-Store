@@ -60,6 +60,9 @@ int main(int argc, char** argv) {
 			fgets(msg, SIZE+1, stdin); //lire tout le string
 			// quel que soit le string on l'envoie au serveur, sinon on doit contrôler plusieurs fois que c'est correct...
 			if(msg[0] == 'q'){
+				snprintf(text,sizeof(text),"%s",msg);
+				printf("sending string %s",text);
+				printf("closing connection");
 				close(sock);//interrompre la connection
 				return 0;
 			}
