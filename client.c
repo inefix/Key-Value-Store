@@ -1,3 +1,7 @@
+/*
+ * Client code of the KVstore
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -29,9 +33,9 @@ int main(int argc, char** argv) {
     memset(&(srv.sin_zero), '\0', 8);
 
     // Connect to server
-    if (connect(sock, (struct sockaddr *) &srv, sizeof (struct sockaddr)) == -1)
-        perror("Error on Connect");
-    else {
+    if (connect(sock, (struct sockaddr *) &srv, sizeof (struct sockaddr)) == -1){
+      perror("Error on Connect");
+    } else {
         puts("Connected");
 
         printf("\n");
@@ -65,16 +69,13 @@ int main(int argc, char** argv) {
                 close(sock); //interrompre la connection
                 return 0;
             } else {
-                //TODO récupérer l'ID client perso
                 snprintf(text, sizeof (text), "%s", msg);
                 printf("sending string %s", text);
 
                 //Send message
                 byte = send(sock, text, strlen(text) + 1, 0);
-                if (byte == -1)
-                    perror("sending from client failed");
-                else if (byte == 0)
-                    printf("Connection've been closed");
+                if (byte == -1) perror("sending from client failed");
+                else if (byte == 0) printf("Connection've been closed");
 
                 //Get reply from server
                 if (recv(sock, reply, SIZE, 0) < 0) {
@@ -93,7 +94,7 @@ int main(int argc, char** argv) {
                 } else {
                   printf("don't expect any second reply\n");
                 }
-                
+
             }
             printf("\n");
         }

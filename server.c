@@ -1,6 +1,5 @@
 /*
  * Server code of the KVstore
- * Description of the program:
  */
 
 #include "headers/server.h"
