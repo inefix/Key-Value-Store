@@ -2,11 +2,11 @@
 \contentsline {section}{\numberline {1}Introduction}{2}{section.1}
 \contentsline {section}{\numberline {2}Description du probl\IeC {\`e}me}{2}{section.2}
 \contentsline {section}{\numberline {3}Solutions et d\IeC {\'e}cisions prises}{2}{section.3}
-\contentsline {subsection}{\numberline {3.1}KV store: array dynamique de struct}{2}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.1}KV store: array dynamique de structs}{2}{subsection.3.1}
 \contentsline {subsection}{\numberline {3.2}Communication server - clients}{3}{subsection.3.2}
 \contentsline {subsection}{\numberline {3.3}Lire, \IeC {\'e}crire et modifier des valeurs}{4}{subsection.3.3}
 \contentsline {subsection}{\numberline {3.4}Acc\IeC {\`e}s s\IeC {\'e}curis\IeC {\'e} des lecteurs/r\IeC {\'e}dacteurs \cite {Mutex}}{5}{subsection.3.4}
 \contentsline {subsection}{\numberline {3.5}Scripts de tests}{5}{subsection.3.5}
 \contentsline {section}{\numberline {4}Apprentissage}{6}{section.4}
 \contentsline {section}{\numberline {5}Conclusion}{6}{section.5}
-\contentsline {section}{\numberline {A}Manuel d'utilisateur}{6}{appendix.A}
+\contentsline {section}{\numberline {A}Manuel d'utilisateur}{7}{appendix.A}

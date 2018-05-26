@@ -1,7 +1,7 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [1][-]{section.2}{Description du probl\350me}{}% 2
 \BOOKMARK [1][-]{section.3}{Solutions et d\351cisions prises}{}% 3
-\BOOKMARK [2][-]{subsection.3.1}{KV store: array dynamique de struct}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.1}{KV store: array dynamique de structs}{section.3}% 4
 \BOOKMARK [2][-]{subsection.3.2}{Communication server - clients}{section.3}% 5
 \BOOKMARK [2][-]{subsection.3.3}{Lire, \351crire et modifier des valeurs}{section.3}% 6
 \BOOKMARK [2][-]{subsection.3.4}{Acc\350s s\351curis\351 des lecteurs/r\351dacteurs Mutex}{section.3}% 7
