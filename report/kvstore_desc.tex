@@ -135,7 +135,7 @@
 \tableofcontents % se fait automatiquement
 \newpage
 \section{Introduction}
-Ce mini-projet a pour but d'implémenter un stockage clé-valeure avec des accès simultanés via TCP. Ce stockage utilise un tableau associatif comme modèle. Dans ce dernier, les données sont représentées comme une collection de pairs tel que chaque clé est unique dans la liste. L'utilisation de sémaphore ou de mutex étudié en cours permet de pallier au problème de "race condition". 
+Ce mini-projet a pour but d'implémenter un stockage clé-valeure avec des accès simultanés via TCP. Ce type de donnée est appelé Key-Value Store (KV). Le stockage utilise un tableau associatif comme modèle. Dans ce dernier, les données sont représentées comme une collection de pairs tel que chaque clé est unique dans la liste. L'utilisation de sémaphore ou de mutex étudié en cours permet de pallier au problème de "race condition". 
 
 \section{Description du problème}
 Plusieurs problèmes doivent être traités durant ce projet. Ce dernier doit permettre d'écrire les clés avec les valeurs via TCP sockets. Lors du processus de lecture, il doit être possible de lire les valeurs via TCP sockets en fournissant la clé (un message d'erreur s'affiche si la clé entrée n'existe pas). Le programme doit utiliser des threads multiples et un accès simultané et sûr doit être garantit aux "readers" et "writers". Enfin, un script permettant un test automatique doit être fournit pour faciliter la tâche de révision du code.\\
@@ -202,11 +202,15 @@ if (newvalue != NULL) {
 Le tableau redimensionable a été choisit pour sa simplicité d'implémentation. Toutefois, tel qu'il est implémenté dans ce code, ce tableau comporte un inconvénient: il n'est pas de possibilité de réduire la mémoire alloué (la taille du tableau exacte) pour le tableau si les éléments sont supprimés. Les éléments sont ajouté dans les trous créés par les éléments supprimés afin de pallier au problème et optimiser l'utilisation de la mémoire. Il est aussi déconseillé d'allouer la mémoire à nouveau lorsque la taille du tableau est réduite, car une copie de ce dernier doit être faite à chaque processus de réduction. Des pertes d'éléments peuvent en être la conséquence.\\
 Une meilleure implémentation aurait été une liste lié (linked list), ainsi, le problème de dimensionnement lors d'une suppression d'élément disparaît.
 
-\subsection{communication server - clients}
+\subsection{Communication server - clients}
 nombres de client max
 Andrea : renvoie des messages aux client
 Jonas tout le reste
-\subsection{lire,écrire et modifier des valeurs}
+
+Une fois que la commande a été traitée par le serveur, ce dernier affiche le résultat dans sa propre fenêtre et de plus envoie la réponse au client. Afin d'envoyer la réponse au client, chaque fonction traitant la commande modifie un string global se trouvant dans le serveur. Ainsi une fois que la commande a été entièrement traitée, le string est envoyé en une seule fois au client afin de maximiser les performances. En effet l'envoie de messages est plus lent que la modification d'un string global et le client reçoit ainsi qu'une seule réponse contenant l'intégralité.
+\subsection{Lire, écrire et modifier des valeurs}
+Afin de vérifier qu'une commande reçue par le serveur (qu'elle soit envoyée par le client ou écrite directement dans la fenêtre du serveur) corresponde à la structure décrite dans le fichier README.txt, l'utilisation de regex s'est imposée. Si la commande ne correspond pas au regex, elle est tout simplement rejetée. L'utilisateur est informé que sa requête n'est pas valide et il peut en insérer une autre.
+
 Les fonctions permettant de manipuler le KV store grâce aux commandes sont:
 \begin{lstlisting}
 void addpair(int newkey, char* newvalue);
@@ -217,13 +221,25 @@ void printKV();
 \end{lstlisting}
 Les trois premières fonctions sont de type "write" et les deux dernières de type "read". En effet, il n'est pas permit d'ajouter, supprimer ou de modifier la même pair par peur d'avoir des comportement imprévisible et ingérable. En revanche, il est tout à fait possible de lire en même temps.\\
 
-Regex\\
 
 \subsection{Accès sécurisé des lecteurs/rédacteurs}
-Andrea
-qui a la priorité? read/write etc
-nombre de clients max? reader/writer nombres
-citer la page web pour le problème des lecteurs/rédacteurs
+Lorsqu'un client veut écrire (writer) dans le Key-Value Store, aucun autre client ne peut écrire en même temps. Cependant, des clients voulant lire (reader) les données stockées, peuvent le faire mais ne peuvent cependant pas lire la donnée qui est sur le point d'être insérée, modifiée ou supprimée. Cette dernière est affiché une fois que la modification est terminée. Lorsque plusieurs clients veulent lire en même temps le Key-Value Store, rien de spécial n'est effectué étant donné qu'aucun ne modifie les entrées. Ainsi, un nombre indéfini de clients peut lire le Key-Value Store en même temps.
+
+Afin de réaliser les fonctionnalités cités plus haut, la tableau est divisé en 2 parties principales, la partie qui n'est pas modifiée actuellement et la partie modifiée en ce moment. La deuxième partie est donc protégé par des mutex afin d'éviter d'être lu lorsqu'un client est en train de la modifier. Afin de délimiter cette seconde partie, il est nécessaire de prendre en compte les index dans le tableau où une clé est ajoutée, modifiée ou supprimée. Ainsi, cette seconde partie est protégée par des mutex. 
+
+La solution implémentée utilise 4 mutex différents: rmutex, wmutex, readTry et resource. Ceux-ci sont utilisés dans 3 sections: Entry Section, Critical Section (section où les opérations critiques sont réalisées) et Exit Section. Avant d'entrer dans la Critical Section, chaque client doit entrer dans l'Entry Section. Cependant, il peut y avoir qu'un seul client dans l'Entry Section à la fois. Ceci est fait pour éviter les race condition (ex: deux readers incrémentent le readcount au même moment, et les deux essayent de bloquer la ressource, provoquant le bloquage d'un reader).
+
+De plus, les mutex sont implémenté de façon à ce que les clients en écriture aient la priorité. Explication: si le reader R1 bloque l'accès au writter W et que R2 arrive, il ne doit pas pouvoir passer devant W sinon ce serait injuste et ce dernier mourra. Ainsi, une contrainte est ajoutée afin qu'aucun writer, une fois ajouté à la queue, ne doive attendre plus qu'absolument nécessaire. 
+
+Cette contrainte est réalisée en obligeant chaque reader à bloquer et relacher le semaphore readtry individuellement. Le writer au contraire ne doit pas le bloquer individuellement. Seulement le premier writer bloque le readtry et ensuite tous les writers ultérieure peuvent simplement accéder à la resource quand elle est libérée par le writer précédent. Le dernier writer doit relacher le semaphore readtry afin d'ouvrir la possibilité aux readrers d'essayer d'écrire. 
+
+De l'autre côté, si un reader a bloqué le semaphore readtry, ceci va indiquer à tous les writers potentiels qu'il y a un reader dans la section d'entrée. Ainsi, le writer va attendre que le reader relâche le readtry et ensuite le writer bloquera immédiatement le readtry.
+
+Le semaphore resource peut être bloquer par le reader ou le writer. Ils peuvent le faire uniquement après avoir bloqué le semaphore readtry, ce qui peut être fait uniquement par l'un d'entre eux à la fois.
+
+Rmutex et wmutex permettent d'éviter les race conditions pour les reader et les writers pendant qu'ils sont dans la section d'entrée et de sortie.
+
+Problèmes de cette solution: dans certains rares cas, elle peut résulter en une "starvation" des readers étant donné qu'ils n'ont pas la priorité. Afin de palier à ce problème, il aurait fallu que l'opération de bloquage des ressources partagées se termine toujours après un certain temps donné. Ainsi il aurait été necessaire de stocker les readers et les writers dans une queue (FIFO) et obliger les semaphore à maintenir cet ordre.
 \subsection{scripts de tests}
 Jonas
 
@@ -252,13 +268,12 @@ italique: \textit{exemple italique}
 
 % book ressources example
 \bibitem{article} % cited with '\cite{book}'
-????			% author (Firstname Lastname, Firstname2 Lastname2, ...)
-\textit{titre de l'article, ref}.	% title (italics)
-Read the ....										% editor, date
+\textit{Mutex}.	% title (italics)
+\url{https://en.wikipedia.org/wiki/Readers\%E2\%80\%93writers_problem}
 
 % web source example
 \bibitem{dynamique}% author (sometimes not available)
-\textit{faire un tableau dynamique en C}.					    % title (italics)
+\textit{Faire un tableau dynamique en C}.					    % title (italics)
 \url{https://stackoverflow.com/questions/3536153/c-dynamically-growing-array?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa},	% url
 Last visited: 16.04.2018							% date
 \end{thebibliography}
