@@ -119,7 +119,7 @@
 %################### Preamble Stop #####################################
 
 % title setup
-\title{\vspace{-10em}Key-value Store: Project 2018}
+\title{\vspace{-10em}Key-Value Store: Project 2018}
 \date{\today}
 \author{Andrea \textsc{Rar}, Ryan \textsc{Siow}, Jonas \textsc{Epper}}
 \address{IN.4022 Operating System Course, University of Fribourg \\}
@@ -135,14 +135,14 @@
 \tableofcontents % se fait automatiquement
 \newpage
 \section{Introduction}
-Ce mini-projet a pour but d'implémenter un stockage clé-valeure avec des accès simultanés via TCP. Ce type de donnée est appelé Key-Value Store (KV). Le stockage utilise un tableau associatif comme modèle. Dans ce dernier, les données sont représentées comme une collection de pairs tel que chaque clé est unique dans la liste. L'utilisation de sémaphore ou de mutex étudié en cours permet de pallier au problème de "race condition". 
+Ce projet a pour but d'implémenter un stockage clé-valeur avec des accès simultanés via TCP. Ce type de donnée est appelé Key-Value Store (KV). Le stockage utilise un tableau associatif comme modèle. Dans ce dernier, les données sont représentées comme une collection de pairs tel que chaque clé est unique dans la liste. L'utilisation de sémaphore ou de mutex étudiée en cours permet de pallier au problème de "race condition". 
 
 \section{Description du problème}
-Plusieurs problèmes doivent être traités durant ce projet. Ce dernier doit permettre d'écrire les clés avec les valeurs via TCP sockets. Lors du processus de lecture, il doit être possible de lire les valeurs via TCP sockets en fournissant la clé (un message d'erreur s'affiche si la clé entrée n'existe pas). Le programme doit utiliser des threads multiples et un accès simultané et sûr doit être garantit aux "readers" et "writers". Enfin, un script permettant un test automatique doit être fournit pour faciliter la tâche de révision du code.\\
-Durant ce projet, diverses décisions d'implémentation ont dû être prise pour rendre la solution unique et proche de l'efficacité optimale.\\
-La première étape consiste à créer une structure permettant de recevoir des paires de clés et de valeurs. Cette dernière doit être dynamique, c-à-d grandir à mesure que des paires clé-valeurs sont ajouté dans le but d'utiliser le moins de mémoire possible. En outre, cette structure doit supporter des actions telles qu'ajouter, modifier, lire ou supprimer des paires.\\
+Plusieurs problèmes doivent être traités durant ce projet. Ce dernier doit permettre d'écrire les clés avec les valeurs via TCP sockets. Lors du processus de lecture, il doit être possible de lire les valeurs via TCP sockets en fournissant la clé (un message d'erreur s'affiche si la clé entrée n'existe pas). Le programme doit utiliser des threads multiples et un accès simultané doit être garantit aux "readers" et "writers". Enfin, des scripts permettant des tests automatiques doivent être fournis afin de faciliter la tâche de révision du code.\\
+Durant ce projet, diverses décisions d'implémentation ont dû être prises pour rendre la solution unique et proche de l'efficacité optimale.\\
+La première étape consiste à créer une structure permettant de recevoir des paires de clés et de valeurs. Cette dernière doit être dynamique, c'est-à-dire grandir à mesure que des paires clé-valeurs sont ajoutées dans le but d'utiliser le moins de mémoire possible. En outre, cette structure doit supporter des actions telles qu'ajouter, modifier, lire ou supprimer des paires.\\
 La deuxième étape se concentre sur la gestion de la communication entre le serveur et ses clients. Le serveur doit être transparent pour les clients, et ceux-ci doivent pouvoir envoyer des requêtes simples au serveur qui se charge de retourner les résultats.\\
-Finalement, les accès à la structure de donnée doit être sécurisé afin qu'aucun conflit ne surgisse. Par exemple, il est interdit que deux clients puissent modifier en même temps la même pair, ceci pouvant générer des comportements inattendus et imprévisibles.\\
+Finalement, les accès à la structure de donnée doivent être sécurisés afin qu'aucun conflit ne surgisse. Par exemple, il est interdit que deux clients puissent modifier en même temps la même pair, ceci pouvant générer des comportements inattendus et imprévisibles.
 
 \section{Solutions et décisions prises}
 Dans cette partie, les solutions élaborées pour résoudre chaque problème mentionné auparavant sont décrites.
@@ -156,7 +156,7 @@ Dans cette partie, les solutions élaborées pour résoudre chaque problème men
 \end{enumerate}
 
 \subsection{KV store: array dynamique de struct}
-Nous avons opté pour ce projet, de construire un tableau redimensionnable. Les valeurs ainsi que les clés sont ajoutées les unes après les autres dans le tableau. Lorsque les élément atteignent la taille maximale du tableau qui lui est initialement attribuée, le tableau est redimensionné à deux fois sa taille initiale, et ainsi de suite.\\
+Pour ce projet, nous avons opté pour la construction d'un tableau redimensionnable. Les valeurs ainsi que les clés sont ajoutées les unes après les autres dans le tableau. Lorsque les élément atteignent la taille maximale du tableau qui lui est initialement attribuée, le tableau est redimensionné à deux fois sa taille initiale, et ainsi de suite.\\
 Les fonctions pouvant manipuler le tableau permettent d'ajouter, supprimer, modifier et  lire les éléments de ce dernier. Lorsque un élément est supprimé du tableau, il laisse un trou qui peut être complété par la prochaine valeur ajoutée, au lieu que cette dernière s'ajoute à la fin du tableau. Cela permet d'optimiser l'espace (trou complété) en n'allouant le moins possible de mémoire.\\
 Voici la structure du tableau:
 
@@ -261,7 +261,7 @@ Rmutex et wmutex permettent d'éviter les race conditions pour les reader et les
 
 Problèmes de cette solution: dans certains rares cas, elle peut résulter en une "starvation" des readers étant donné qu'ils n'ont pas la priorité. Afin de palier à ce problème, il aurait fallu que l'opération de bloquage des ressources partagées se termine toujours après un certain temps donné. Ainsi il aurait été necessaire de stocker les readers et les writers dans une queue (FIFO) et obliger les semaphore à maintenir cet ordre.
 
-\subsection{Scripts de tests}
+\subsection{scripts de tests}
 Afin de pouvoir tester les différents accès automatiquement, nous avons ajouté plusieurs scripts \textit{.sh} dans le dossier /scripts. Le fichier README.txt indique comment lancer ces scripts. Ils fonctionnent de la manière suivante: les programmes sont d'abord nettoyé puis compilé puis le serveur est lancé dans un nouveau terminal et un client fictif ajoute des valeurs arbitraires au KV store afin que les lecteurs puissent lire des valeurs. Ensuite, selon le script que l'on a choisit, cela lance des lecteurs ou des rédacteurs dans un ordre précis afin de montrer par exemple que des lecteurs peuvent continuer à lire des parties du KV store malgré la présence de rédacteurs dans la partie critiques. \\
 Ces scripts s'occupe de lancer des petits scripts qui eux lance le serveur ou le client. Enfin, les petits scripts envoie des entrés d'utilisateur automatiquement au client ce qui enverra des requêtes au serveur. 
 \begin{lstlisting}
