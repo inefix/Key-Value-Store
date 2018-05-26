@@ -155,7 +155,6 @@ Dans cette partie, les solutions élaborées pour résoudre chaque problème men
 \item Script de test (Jonas)
 \end{enumerate}
 
-\newpage
 \subsection{KV store: array dynamique de struct}
 Nous avons opté pour ce projet, de construire un tableau redimensionnable. Les valeurs ainsi que les clés sont ajoutées les unes après les autres dans le tableau. Lorsque les élément atteignent la taille maximale du tableau qui lui est initialement attribuée, le tableau est redimensionné à deux fois sa taille initiale, et ainsi de suite.\\
 Les fonctions pouvant manipuler le tableau permettent d'ajouter, supprimer, modifier et  lire les éléments de ce dernier. Lorsque un élément est supprimé du tableau, il laisse un trou qui peut être complété par la prochaine valeur ajoutée, au lieu que cette dernière s'ajoute à la fin du tableau. Cela permet d'optimiser l'espace (trou complété) en n'allouant le moins possible de mémoire.\\
@@ -203,10 +202,22 @@ Le tableau redimensionable a été choisit pour sa simplicité d'implémentation
 Une meilleure implémentation aurait été une liste lié (linked list), ainsi, le problème de dimensionnement lors d'une suppression d'élément disparaît.
 
 \subsection{Communication server - clients}
-nombres de client max
-Andrea : renvoie des messages aux client
-Jonas tout le reste
-
+La communication entre le serveur et le client a été résolue par une liaison TCP utilisant les sockets \cite{TCP}. Ceux-ci sont initialisés dans le serveur et utilisent les librairies \textit{sys/socket.h} et \textit{arpa/inet.h}
+\begin{lstlisting}
+	// Creating socket
+	socketdesc = socket(AF_INET, SOCK_STREAM, 0);
+    if (socketdesc == -1)
+        perror("Error on Socket");
+    // Editting Server socket
+    srv.sin_family = AF_INET;
+    srv.sin_port = htons(PORT);
+    ...
+    // et ainsi de suite...
+    // ensuite, pour accepter un client et etablir une connection:
+    clsock = accept(socketdesc, (struct sockaddr *) &clt, (socklen_t*) & structsize))
+\end{lstlisting}
+l'envoi et la réception de message entre le serveur et ses clients se fait avec de simple commandes \textit{recv} et \textit{send} qui doivent savoir sur quelle liaison il faut recevoir ou envoyer des messages ainsi que le message et sa taille. Etant donné que la fonction \textit{accept} est bloquante, nous avons distribué les différentes connections sur des \textit{pthreads} afin qu'ils gèrent chacun la communication avec un seul client et que le serveur ne soit pas bloqué. Un thread a également été ajouté afin de recevoir les entrées du côté du serveur. Ce dernier thread servait essentiellement à tester rapidement les fonctionnalités ainsi que de pouvoir arrêter le serveur.\\
+Du côté du client, celui-ci n'a en principe besoin que de ce connecter au serveur par la commande \textit{connect} et dès qu'il reçoit confirmation du serveur, peut commencer à envoyer ses requêtes. Le serveur arrive à recevoir des connections de plus de 50 clients. Nous n'avons pas trouvé pertinent d'essayer un nombre supérieur mais sommes persuadés que le serveur arrive à supporter beaucoup de clients.\\
 Une fois que la commande a été traitée par le serveur, ce dernier affiche le résultat dans sa propre fenêtre et de plus envoie la réponse au client. Afin d'envoyer la réponse au client, chaque fonction traitant la commande modifie un string global se trouvant dans le serveur. Ainsi une fois que la commande a été entièrement traitée, le string est envoyé en une seule fois au client afin de maximiser les performances. En effet l'envoie de messages est plus lent que la modification d'un string global et le client reçoit ainsi qu'une seule réponse contenant l'intégralité.
 \subsection{Lire, écrire et modifier des valeurs}
 Afin de vérifier qu'une commande reçue par le serveur (qu'elle soit envoyée par le client ou écrite directement dans la fenêtre du serveur) corresponde à la structure décrite dans le fichier README.txt, l'utilisation de regex s'est imposée. Si la commande ne correspond pas au regex, elle est tout simplement rejetée. L'utilisateur est informé que sa requête n'est pas valide et il peut en insérer une autre.
@@ -240,16 +251,29 @@ Le semaphore resource peut être bloquer par le reader ou le writer. Ils peuvent
 Rmutex et wmutex permettent d'éviter les race conditions pour les reader et les writers pendant qu'ils sont dans la section d'entrée et de sortie.
 
 Problèmes de cette solution: dans certains rares cas, elle peut résulter en une "starvation" des readers étant donné qu'ils n'ont pas la priorité. Afin de palier à ce problème, il aurait fallu que l'opération de bloquage des ressources partagées se termine toujours après un certain temps donné. Ainsi il aurait été necessaire de stocker les readers et les writers dans une queue (FIFO) et obliger les semaphore à maintenir cet ordre.
-\subsection{scripts de tests}
-Jonas
 
-italique: \textit{exemple italique}
+\subsection{scripts de tests}
+Afin de pouvoir tester les différents accès automatiquement, nous avons ajouté plusieurs scripts \textit{.sh} dans le dossier /scripts. Le fichier runscript.txt indique comment lancer ces scripts. Ils fonctionnent de la manière suivante: les programmes sont d'abord nettoyé puis compilé puis le serveur est lancé dans un nouveau terminal et un client fictif ajoute des valeurs arbitraires au KV store afin que les lecteurs puissent lire des valeurs. Ensuite, selon le script que l'on a choisit, cela lance des lecteurs ou des rédacteurs dans un ordre précis afin de montrer par exemple que des lecteurs peuvent continuer à lire des parties du KV store malgré la présence de rédacteurs dans la partie critiques. \\
+Ces scripts s'occupe de lancer des petits scripts qui eux lance le serveur ou le client. Enfin, les petits scripts envoie des entrés d'utilisateur automatiquement au client ce qui enverra des requêtes au serveur. 
+\begin{lstlisting}
+./client << EOF # servant a feed automatiquement les programmes lances
+a test6
+m 1 test7 # les commandes 
+d 2
+...
+EOF # indique la fin des inputs au programme
+\end{lstlisting}
+Afin de lancer ces scripts dans une nouvelle fenêtre, il fallait aussi utiliser une commande qui peut varier selon le système d'exploitation (exemple ici pour Linux Ubuntu):
+\begin{lstlisting}
+gnome-terminal -x sh -c "./scriptserver.sh" 
+\end{lstlisting}
+l'option -x permet d'exécuter dans un nouveau terminal les commandes indiquées qui suivent. Ici \textit{sh} permet d'exécuter le script qui suit et l'option -c permet d'indiquer que le script se trouve dans un string.
 
 \section{apprentissage}
 \textbf{Andrea:}\\
 
 \textbf{Jonas:}\\
-
+Je n'étais pas du tout à l'aise avec les connections en TCP via des sockets, j'ai donc énormément appris concernant le fonctionnement pour ce genre de connection. Les threads ne sont pas évidents à gérer non plus car il m'était plus difficile de comprendre comment cela fonctionnait, cela restait très asbtrait pour moi au début. Finalement, je m'attendais à ce qu'écrire des scripts en bash soit plus difficile mais cela n'a finalement pas pris autant de temps que prévu. Ayant déjà suivi énormément de cours qui traitaient de matières proches tels que les systèmes concurrents en Erlang, je n'ai pas eu trop de peine non plus à acquérir les différents concepts. Finalement, ce qui rendait parfois ce projet difficile était qu'à 3, nous ne savions parfois pas d'où provenait une erreur et c'était donc dur de régler certains bugs. Il faut parfois rester simple au début et être sûr que cela fonctionne avant de passer plus loin et implémenter des choses moins importantes ce qui est parfois frustrant car on veut avancer rapidement dans le projet.\\
 \textbf{Ryan:} N'ayant jamais fait de tableau dynamique auparavant, j'ai rencontré plusieurs problèmes lors de la construction de la structure ainsi que de la dynamicité du tableau; spécialement lors de la suppression d'un élément, laissant ainsi un trou dans le tableau. Néanmoins je crois avoir accumulé une certaine expérience non négligeable dans ce domaine. En outre, il est difficile de parfois comprendre ce qu'un autre membre du groupe a codé, cela implique d'avoir une structure de travail avec lequel il faut suivre prudemment.  
 
 \section{Conclusion}
@@ -275,6 +299,11 @@ italique: \textit{exemple italique}
 \bibitem{dynamique}% author (sometimes not available)
 \textit{Faire un tableau dynamique en C}.					    % title (italics)
 \url{https://stackoverflow.com/questions/3536153/c-dynamically-growing-array?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa},	% url
+Last visited: 16.04.2018							% date
+\bibitem{TCP}% author (sometimes not available)
+\textit{liaison TCP via des sockets en C}.					    % title 
+Silver Moon
+\url{https://www.binarytides.com/server-client-example-c-sockets-linux/},	% url
 Last visited: 16.04.2018							% date
 \end{thebibliography}
 %------------------- Bibliography End -------------------------------
