@@ -1,3 +1,4 @@
+# a reader and a writer comes in when reader is reading
 cd ..
 echo "cleaning"
 make clean
@@ -7,9 +8,10 @@ cd scripts
 echo "launching the scripts"
 
 gnome-terminal -x sh -c "./scriptserver.sh"
-sleep 1 # let the server start
+gnome-terminal -x sh -c "./fillkv.sh"
+sleep 5 # let the server start
 gnome-terminal -x sh -c "./scriptreader.sh"
-sleep 2
+sleep 1
 gnome-terminal -x sh -c "./scriptwriter.sh"
 sleep 10
 cd ..

@@ -1,4 +1,5 @@
 echo "lauching server"
 cd ..
-./server 
-sleep 8
+./server
+
+sleep 15

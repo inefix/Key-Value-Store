@@ -147,7 +147,6 @@ void *multiconnect(void* socketdesc) {
             //client side input processing
             printf("client %i said a valid string: %s\n", persID->id, clmsg);
             snprintf(reply, sizeof (reply), "client %d, your message is valid", persID->id); //response to client
-            printf("clsock : %d\n", clsock);
             byte = send(clsock, reply, strlen(reply) + 1, 0);
 
             snprintf(rep_client, sizeof (rep_client), "request done"); //if add key
@@ -182,7 +181,7 @@ void *multiconnect(void* socketdesc) {
         memset(clmsg, 0, MSGSIZE);
     }
     if (bytesread == 0) {
-        puts("client disconnected");
+        printf("client %i disconnected",persID->id);
     } else if (bytesread == -1) {
         perror("recv failed");
     }

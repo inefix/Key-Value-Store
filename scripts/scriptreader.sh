@@ -3,8 +3,8 @@ cd ..
 
 ./client << EOF
 p
-r 1 
-r 3
+r 1
+r 2
 p
 q
 p
