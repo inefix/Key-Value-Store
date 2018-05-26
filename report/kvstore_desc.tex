@@ -145,7 +145,7 @@ La deuxième étape se concentre sur la gestion de la communication entre le ser
 Finalement, les accès à la structure de donnée doit être sécurisé afin qu'aucun conflit ne surgisse. Par exemple, il est interdit que deux clients puissent modifier en même temps la même pair, ceci pouvant générer des comportements inattendus et imprévisibles.\\
 
 \section{Solutions et décisions prises}
-Dans cette partie, les solutions élaborées pour résoudre chaque problème mentionné auparavant sont décrites:
+Dans cette partie, les solutions élaborées pour résoudre chaque problème mentionné auparavant sont décrites.
 
 \begin{enumerate}
 \item Structure KV store (Ryan)
@@ -237,10 +237,12 @@ Les trois premières fonctions sont de type "write" et les deux dernières de ty
 \item "addPair" permet d'ajouter une valeur avec une clé spécifique, ou alors d'ajouter une valeur avec une clé générée si celle-ci n'est pas spécifiée.
 \item "deletePair" permet de supprimer une valeur (ou plusieurs fois les mêmes valeurs identiques) ainsi que la/leurs clé(s), ou alors de supprimer une valeur spécifique si la clé est mentionnée.
 \item "modifyPair" permet de modifier une valeur (ou plusieurs fois les mêmes valeurs identiques), ou alors de modifier une valeur spécifique si la clé est mentionnée.
+\item "readpair" permet de lire une entrée dans le Key-Value Store autant bien si elle reçoit une valeur ou une clé. Elle parcourt l'intégralité du tableau à la recherche de l'entrée désirée. Le parcourt se fait en deux parties délimitées par les mutex. En effet, la partie protégée par les mutex doit tenir compte des entrées ajoutées, modifiées et supprimées au même moment.
+\item "printKV" fonctionne exactement sur le même principe que la fonction readpair à la différence qu'elle affiche l'intégralité du Key-Value Store et non pas qu'une entrée désirée.
 \end{itemize}
 
 
-\subsection{Accès sécurisé des lecteurs/rédacteurs}
+\subsection{Accès sécurisé des lecteurs/rédacteurs \cite{Mutex}}
 Lorsqu'un client veut écrire (writer) dans le Key-Value Store, aucun autre client ne peut écrire en même temps. Cependant, des clients voulant lire (reader) les données stockées, peuvent le faire mais ne peuvent cependant pas lire la donnée qui est sur le point d'être insérée, modifiée ou supprimée. Cette dernière est affiché une fois que la modification est terminée. Lorsque plusieurs clients veulent lire en même temps le Key-Value Store, rien de spécial n'est effectué étant donné qu'aucun ne modifie les entrées. Ainsi, un nombre indéfini de clients peut lire le Key-Value Store en même temps.
 
 Afin de réaliser les fonctionnalités cités plus haut, la tableau est divisé en 2 parties principales, la partie qui n'est pas modifiée actuellement et la partie modifiée en ce moment. La deuxième partie est donc protégé par des mutex afin d'éviter d'être lu lorsqu'un client est en train de la modifier. Afin de délimiter cette seconde partie, il est nécessaire de prendre en compte les index dans le tableau où une clé est ajoutée, modifiée ou supprimée. Ainsi, cette seconde partie est protégée par des mutex. 
@@ -259,7 +261,7 @@ Rmutex et wmutex permettent d'éviter les race conditions pour les reader et les
 
 Problèmes de cette solution: dans certains rares cas, elle peut résulter en une "starvation" des readers étant donné qu'ils n'ont pas la priorité. Afin de palier à ce problème, il aurait fallu que l'opération de bloquage des ressources partagées se termine toujours après un certain temps donné. Ainsi il aurait été necessaire de stocker les readers et les writers dans une queue (FIFO) et obliger les semaphore à maintenir cet ordre.
 
-\subsection{scripts de tests}
+\subsection{Scripts de tests}
 Afin de pouvoir tester les différents accès automatiquement, nous avons ajouté plusieurs scripts \textit{.sh} dans le dossier /scripts. Le fichier README.txt indique comment lancer ces scripts. Ils fonctionnent de la manière suivante: les programmes sont d'abord nettoyé puis compilé puis le serveur est lancé dans un nouveau terminal et un client fictif ajoute des valeurs arbitraires au KV store afin que les lecteurs puissent lire des valeurs. Ensuite, selon le script que l'on a choisit, cela lance des lecteurs ou des rédacteurs dans un ordre précis afin de montrer par exemple que des lecteurs peuvent continuer à lire des parties du KV store malgré la présence de rédacteurs dans la partie critiques. \\
 Ces scripts s'occupe de lancer des petits scripts qui eux lance le serveur ou le client. Enfin, les petits scripts envoie des entrés d'utilisateur automatiquement au client ce qui enverra des requêtes au serveur. 
 \begin{lstlisting}
@@ -277,10 +279,8 @@ gnome-terminal -x sh -c "./scriptserver.sh"
 l'option -x permet d'exécuter dans un nouveau terminal les commandes indiquées qui suivent. Ici \textit{sh} permet d'exécuter le script qui suit et l'option -c permet d'indiquer que le script se trouve dans un string.
 
 \section{apprentissage}
-\textbf{Andrea:}\\
-
-\textbf{Jonas:}\\
-Je n'étais pas du tout à l'aise avec les connections en TCP via des sockets, j'ai donc énormément appris concernant le fonctionnement pour ce genre de connection. Les threads ne sont pas évidents à gérer non plus car il m'était plus difficile de comprendre comment cela fonctionnait, cela restait très asbtrait pour moi au début. Finalement, je m'attendais à ce qu'écrire des scripts en bash soit plus difficile mais cela n'a finalement pas pris autant de temps que prévu. Ayant déjà suivi énormément de cours qui traitaient de matières proches tels que les systèmes concurrents en Erlang, je n'ai pas eu trop de peine non plus à acquérir les différents concepts. Finalement, ce qui rendait parfois ce projet difficile était qu'à 3, nous ne savions parfois pas d'où provenait une erreur et c'était donc dur de régler certains bugs. Il faut parfois rester simple au début et être sûr que cela fonctionne avant de passer plus loin et implémenter des choses moins importantes ce qui est parfois frustrant car on veut avancer rapidement dans le projet.\\
+\textbf{Andrea:} N'ayant aucune connaissance concernant les semaphores et les mutex avant ce cours, j'ai du énormément m'informer à ce sujet. Ensuite, il a fallut décider d'une stratégie adéquate au sein de l'équipe pour l'implémentation des accès sécurisés entre readers et writers. Cette partie a causé quelques soucis notamment au niveau de la séparation du tableau en deux parties. Afin de mener à bien l'intégralité du projet il a été important d'avoir une bonne communication au sein de l'équipe et une bonne répartition des tâches.\\
+\textbf{Jonas:} Je n'étais pas du tout à l'aise avec les connections en TCP via des sockets, j'ai donc énormément appris concernant le fonctionnement pour ce genre de connection. Les threads ne sont pas évidents à gérer non plus car il m'était plus difficile de comprendre comment cela fonctionnait, cela restait très asbtrait pour moi au début. Finalement, je m'attendais à ce qu'écrire des scripts en bash soit plus difficile mais cela n'a finalement pas pris autant de temps que prévu. Ayant déjà suivi énormément de cours qui traitaient de matières proches tels que les systèmes concurrents en Erlang, je n'ai pas eu trop de peine non plus à acquérir les différents concepts. Finalement, ce qui rendait parfois ce projet difficile était qu'à 3, nous ne savions parfois pas d'où provenait une erreur et c'était donc dur de régler certains bugs. Il faut parfois rester simple au début et être sûr que cela fonctionne avant de passer plus loin et implémenter des choses moins importantes ce qui est parfois frustrant car on veut avancer rapidement dans le projet.\\
 \textbf{Ryan:} N'ayant jamais fait de tableau dynamique auparavant, j'ai rencontré plusieurs problèmes lors de la construction de la structure ainsi que de la dynamicité du tableau; spécialement lors de la suppression d'un élément, laissant ainsi un trou dans le tableau. Néanmoins je crois avoir accumulé une certaine expérience non négligeable dans ce domaine. En outre, il est difficile de parfois comprendre ce qu'un autre membre du groupe a codé, cela implique d'avoir une structure de travail avec lequel il faut suivre prudemment.  
 
 \section{Conclusion}
@@ -298,7 +298,7 @@ Je n'étais pas du tout à l'aise avec les connections en TCP via des sockets, j
 \begin{thebibliography}{20}
 
 % book ressources example
-\bibitem{article} % cited with '\cite{book}'
+\bibitem{Mutex} % cited with '\cite{book}'
 \textit{Mutex}.	% title (italics)
 \url{https://en.wikipedia.org/wiki/Readers\%E2\%80\%93writers_problem}
 
@@ -307,8 +307,9 @@ Je n'étais pas du tout à l'aise avec les connections en TCP via des sockets, j
 \textit{Faire un tableau dynamique en C}.					    % title (italics)
 \url{https://stackoverflow.com/questions/3536153/c-dynamically-growing-array?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa},	% url
 Last visited: 16.04.2018							% date
+
 \bibitem{TCP}% author (sometimes not available)
-\textit{liaison TCP via des sockets en C}.					    % title 
+\textit{Liaison TCP via des sockets en C}.					    % title 
 Silver Moon
 \url{https://www.binarytides.com/server-client-example-c-sockets-linux/},	% url
 Last visited: 16.04.2018							% date
