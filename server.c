@@ -143,7 +143,7 @@ void *multiconnect(void* socketdesc) {
         clmsg[strlen(clmsg) - 1] = '\0'; //in oder to delete the new line
 
         // check regex and react
-        if (ctrlregex(clmsg) == 0) {
+        if (ctrlregex(clmsg) == 0 && clmsg[0]!='s' && clmsg[0]!='q') {
             //client side input processing
             printf("client %i said a valid string: %s\n", persID->id, clmsg);
             snprintf(reply, sizeof (reply), "client %d, your message is valid", persID->id); //response to client
