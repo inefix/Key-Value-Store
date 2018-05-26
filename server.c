@@ -164,7 +164,7 @@ void *multiconnect(void* socketdesc) {
             byte = send(clsock, rep_client, strlen(rep_client) + 1, 0);
             if (byte == -1) perror("Error on Recv");
             else if (byte == 0) printf("Connection is close\n");
-			
+
             printf("Server have sent response\n");
 
         } else {
@@ -174,7 +174,7 @@ void *multiconnect(void* socketdesc) {
             byte = send(clsock, reply, strlen(reply) + 1, 0);
             if (byte == -1)
                 perror("Error on Recv");
-            else if (byte == 0) 
+            else if (byte == 0)
                 printf("Connection is close\n");
         }
         memset(reply, 0, MSGSIZE);
@@ -450,7 +450,6 @@ void modifyPair(int key, char* value, char* value2) { //write
                 memset(kv[i].value, 0, length1);
                 strncpy(kv[i].value, value2, length2);
                 counter++;
-                break;
             }
         }
     } else { // we just have the key
@@ -511,7 +510,6 @@ void deletepair(int key, char* value) { //write
                 kv[i].key = -1;
                 memset(kv[i].value, 0, length);
                 //printf("réduire taille de l'array? ");
-                break;
             }
         }
     } else { // we just have the key
