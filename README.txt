@@ -20,10 +20,12 @@ Dans ce dernier, les données sont représentées comme une collection de pairs 
 L'utilisation de sémaphore ou de mutex étudié en cours permet de pallier au problème de "race condition".
 
 
+
 PREREQUISTES
 ------------
 
 Afin d'exécuter ce programme, vous avez besoin d'un compilateur C (tel que gcc par exemple) sur votre machine
+
 
 
 INSTALLATION
@@ -69,7 +71,6 @@ Aucune configuration spécifique n'est nécessaire.
 RUNNING THE TESTS
 -----------------
 
-
 5 fichiers test peuvent être lancés à l'aide des commandes suivantes dans le terminal
 
   $ ./readerreader.sh
@@ -81,5 +82,14 @@ RUNNING THE TESTS
 Le comportement de chaque script est décrit dans ces derniers, les noms étant assez explicites de base. Ces scripts compilent et exécutent les programmes automatiquement en une seule commande.
 Concernant le dernier script, il permet de lancer une multitude de clients lecteurs en même temps afin de tester le serveur (reglé à 50 en ce moment).
 
- 
 
+
+MAINTAINERS
+-----------
+
+Ce projet a été réalisé pour le cours IN.4022 Operating Systems [SP 18] à l'Université de Fribourg.
+Les personnes ayant travaillé dessus sont:
+
+  • Jonas Epper, jonas.epper@unifr.ch
+  • Ryan Siow, ryan.siow@unifr.ch
+  • Andrea Rar, andrea.rar@unifr.ch
