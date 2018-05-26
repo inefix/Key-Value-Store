@@ -7,6 +7,5 @@ r 1
 r 2
 p
 q
-p
 EOF
 sleep 8
