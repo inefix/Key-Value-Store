@@ -83,17 +83,17 @@ int main(int argc, char** argv) {
 
                 printf("reply: %s \n", reply);
 
-                if (strcmp(strstr(reply, "is valid"), "is valid") == 0) {
-                    //Get reply from server
-                    printf("waiting for reply\n");
-                    if (recv(sock, reply, SIZE, 0) < 0) {
-                        perror("recv failed");
-                    };
-                    printf("reply 2: %s \n", reply);
+                if(strstr(reply, "is valid") != NULL){
+                  //Get reply from server
+                  printf("waiting for reply\n");
+                  if (recv(sock, reply, SIZE, 0) < 0) {
+                      perror("recv failed");
+                  };
+                  printf("reply 2: %s \n", reply);
                 } else {
-                    printf("don't expect any second reply\n");
+                  printf("don't expect any second reply\n");
                 }
-
+                
             }
             printf("\n");
         }
