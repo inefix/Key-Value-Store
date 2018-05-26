@@ -91,6 +91,19 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    printf("\n");
+    printf("'a vale' to add a value\n");
+    printf("'ak key vale' to add a value with a key\n");
+    printf("'r key' to read a value with a certain key\n");
+    printf("'rv vale' to read a key with a certain value\n");
+    printf("'d key' to delete a value with a certain key\n");
+    printf("'dv vale' to delete a key with a certain value\n");
+    printf("'m key new_value' to modify a value with a certain key\n");
+    printf("'mv old_vale new_value' to modify a old_value with a new_value\n");
+    printf("'p' to print all the entries in the Key Value Store\n");
+    printf("\n");
+
+
     int i = 1; //counter for clients
     struct IDsock *client;
     // Accept  TODO =>accept est bloquant, trouver une solution pour arrêter le serveur proprement
@@ -166,6 +179,7 @@ void *multiconnect(void* socketdesc) {
             else if (byte == 0) printf("Connection is close\n");
 
             printf("Server have sent response\n");
+            printf("\n");
 
         } else {
             printf("client %i said a not valid string: %s\n", persID->id, clmsg);
@@ -230,6 +244,7 @@ void* readcmd(void* unused) {
             cmd[strlen(cmd) - 1] = '\0'; //in oder to delete the new line
 
             processcmd(cmd);
+            printf("\n");
         } else {
             printdefault();
         }
