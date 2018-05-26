@@ -1,6 +1,3 @@
-TODO: expliquer comment compiler et éxecuter dans plusieurs terminaux
-expliquer
-
 CONTENTS OF THIS FILE
 ---------------------
 
