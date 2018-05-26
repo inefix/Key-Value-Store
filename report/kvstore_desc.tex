@@ -135,7 +135,7 @@
 \tableofcontents % se fait automatiquement
 \newpage
 \section{Introduction}
-Ce projet a pour but d'implémenter un stockage clé-valeur avec des accès simultanés via TCP. Ce type de donnée est appelé Key-Value Store (KV). Le stockage utilise un tableau associatif comme modèle. Dans ce dernier, les données sont représentées comme une collection de pairs tel que chaque clé est unique dans la liste. L'utilisation de sémaphore ou de mutex étudiée en cours permet de pallier au problème de "race condition". 
+Ce projet a pour but d'implémenter un stockage clé-valeur avec des accès simultanés via TCP. Ce type de donnée est appelé Key-Value Store (KV Store). Le stockage utilise un tableau associatif comme modèle. Dans ce dernier, les données sont représentées comme une collection de pairs tel que chaque clé est unique dans la liste. L'utilisation de sémaphore ou de mutex étudiée en cours permet de pallier au problème de "race condition". 
 
 \section{Description du problème}
 Plusieurs problèmes doivent être traités durant ce projet. Ce dernier doit permettre d'écrire les clés avec les valeurs via TCP sockets. Lors du processus de lecture, il doit être possible de lire les valeurs via TCP sockets en fournissant la clé (un message d'erreur s'affiche si la clé entrée n'existe pas). Le programme doit utiliser des threads multiples et un accès simultané doit être garantit aux "readers" et "writers". Enfin, des scripts permettant des tests automatiques doivent être fournis afin de faciliter la tâche de révision du code.\\
@@ -156,8 +156,8 @@ Dans cette partie, les solutions élaborées pour résoudre chaque problème men
 \end{enumerate}
 
 \subsection{KV store: array dynamique de struct}
-Pour ce projet, nous avons opté pour la construction d'un tableau redimensionnable. Les valeurs ainsi que les clés sont ajoutées les unes après les autres dans le tableau. Lorsque les élément atteignent la taille maximale du tableau qui lui est initialement attribuée, le tableau est redimensionné à deux fois sa taille initiale, et ainsi de suite.\\
-Les fonctions pouvant manipuler le tableau permettent d'ajouter, supprimer, modifier et  lire les éléments de ce dernier. Lorsque un élément est supprimé du tableau, il laisse un trou qui peut être complété par la prochaine valeur ajoutée, au lieu que cette dernière s'ajoute à la fin du tableau. Cela permet d'optimiser l'espace (trou complété) en n'allouant le moins possible de mémoire.\\
+Pour ce projet, nous avons opté pour la construction d'un tableau redimensionnable. Les valeurs ainsi que les clés sont ajoutées les unes après les autres dans le tableau. Lorsque les éléments atteignent la taille maximale du tableau qui lui est initialement attribuée, le tableau est redimensionné à deux fois sa taille initiale, et ainsi de suite.\\
+Les fonctions pouvant manipuler le tableau permettent d'ajouter, supprimer, modifier et  lire les éléments de ce dernier. Lorsque un élément est supprimé du tableau, il laisse un trou qui peut être complété par la prochaine valeur ajoutée, au lieu que cette dernière s'ajoute à la fin du tableau. Cela permet d'optimiser l'espace (trou complété) en allouant le moins possible de mémoire.\\
 Voici la structure du tableau:
 
 \begin{lstlisting}
@@ -169,9 +169,9 @@ typedef struct{
 }KVstore;
 \end{lstlisting}
 
-Ce tableau dynamique comporte 3 fonctions permettant d'initialiser, d'ajouter des éléments ainsi que de libérer la mémoire allouée. \\
-Bien que ces fonctions méritent d'être étudiées plus en détail, seule une description de "insertKV()" est donnée. En effet, cette fonction est la plus intéressante car c'est dans celle-ci que l'optimisation de l'espace alloué est faite.\\
-Tout d'abord, la fonction redimensionne le tableau si celui-ci en a besoin  grâce à la méthode realloc(). La valeur "newvalue" alors passé en argument, si elle n'est pas nulle,  pourra être insérée dans le tableau, soit dans un espace libre s'il y en a, soit à la fin de la série d'éléments déjà présents. Voici un extrait de code explicite:
+Ce tableau dynamique comporte 3 fonctions permettant d'initialiser, ajouter des éléments ainsi que de libérer la mémoire allouée. \\
+Bien que ces fonctions méritent d'être étudiées plus en détail, seule une description de "insertKV()" est donnée. En effet, cette fonction est la plus intéressante car c'est dans celle-ci que l'optimisation de l'espace alloué est réalisée.\\
+Tout d'abord, la fonction redimensionne le tableau si celui-ci en a besoin  grâce à la méthode realloc(). La valeur "newvalue" alors passée en argument, si elle n'est pas nulle,  pourra être insérée dans le tableau, soit dans un espace libre s'il y en a, soit à la fin de la série d'éléments déjà présents. Voici un extrait de code explicite:
 
 \begin{lstlisting}
 if (newvalue != NULL) {
@@ -199,11 +199,11 @@ if (newvalue != NULL) {
 \end{lstlisting}
 
 Le tableau redimensionable a été choisit pour sa simplicité d'implémentation. Les tableaux dynamiques bénéficient de nombreux avantages des tableaux, notamment la bonne localisation de la référence et l'utilisation du cache de données, la compacité (faible utilisation de la mémoire) et l'accès aléatoire. Ils ont généralement seulement une petite surcharge supplémentaire fixe pour stocker des informations sur la taille et la capacité. Cela rend les tableaux dynamiques un outil attrayant pour créer des structures de données compatibles avec le cache.\\
-Toutefois, tel qu'il est implémenté dans ce code, ce tableau comporte un inconvénient: il n'est pas de possibilité de réduire la mémoire alloué (la taille du tableau exacte) pour le tableau si les éléments sont supprimés. Les éléments sont ajouté dans les trous créés par les éléments supprimés afin de pallier au problème et optimiser l'utilisation de la mémoire. Il est aussi déconseillé d'allouer la mémoire à nouveau lorsque la taille du tableau est réduite, car une copie de ce dernier doit être faite à chaque processus de réduction. Des pertes d'éléments peuvent en être la conséquence.\\
-Une meilleure implémentation aurait été une liste lié (linked list), ainsi, le problème de dimensionnement lors d'une suppression d'élément disparaît. Par rapport aux listes chaînées, les tableaux dynamiques ont une indexation plus rapide (temps constant $O(1)$ par rapport au temps linéaire $O(n)$). Cependant, les tableaux dynamiques nécessitent un temps linéaire pour insérer ou supprimer à un emplacement arbitraire, car tous les éléments suivants doivent être déplacés, tandis que les listes chaînées peuvent le faire à un instant constant (temps de recherche + $O(1)$).
+Toutefois, tel qu'il est implémenté dans ce code, ce tableau comporte un inconvénient: il n'est pas de possibilité de réduire la mémoire allouée (la taille du tableau exacte) pour le tableau si les éléments sont supprimés. Les éléments sont ajoutés dans les trous créés par les éléments supprimés afin de pallier au problème et optimiser l'utilisation de la mémoire. Il est aussi déconseillé d'allouer la mémoire à nouveau lorsque la taille du tableau est réduite, car une copie de ce dernier doit être faite à chaque processus de réduction. Des pertes d'éléments peuvent en être la conséquence.\\
+Une meilleure implémentation aurait été une liste liée (linked list), ainsi, le problème de redimensionnement lors d'une suppression d'élément disparaît. Par rapport aux listes chaînées, les tableaux dynamiques ont une indexation plus rapide (temps constant $O(1)$ par rapport au temps linéaire $O(n)$). Cependant, les tableaux dynamiques nécessitent un temps linéaire pour insérer ou supprimer à un emplacement arbitraire, car tous les éléments suivants doivent être déplacés, tandis que les listes chaînées peuvent le faire à un instant constant (temps de recherche + $O(1)$).
 
 \subsection{Communication server - clients}
-La communication entre le serveur et le client a été résolue par une liaison TCP utilisant les sockets \cite{TCP}. Ceux-ci sont initialisés dans le serveur et utilisent les librairies \textit{sys/socket.h} et \textit{arpa/inet.h}
+La communication entre le serveur et le client a été résolue par une liaison TCP utilisant les sockets \cite{TCP}. Ceux-ci sont initialisés dans le serveur et utilisent les librairies \textit{sys/socket.h} et \textit{arpa/inet.h}.
 \begin{lstlisting}
 	// Creating socket
 	socketdesc = socket(AF_INET, SOCK_STREAM, 0);
@@ -217,13 +217,14 @@ La communication entre le serveur et le client a été résolue par une liaison 
     // ensuite, pour accepter un client et etablir une connection:
     clsock = accept(socketdesc, (struct sockaddr *) &clt, (socklen_t*) & structsize))
 \end{lstlisting}
-l'envoi et la réception de message entre le serveur et ses clients se fait avec de simple commandes \textit{recv} et \textit{send} qui doivent savoir sur quelle liaison il faut recevoir ou envoyer des messages ainsi que le message et sa taille. Etant donné que la fonction \textit{accept} est bloquante, nous avons distribué les différentes connections sur des \textit{pthreads} afin qu'ils gèrent chacun la communication avec un seul client et que le serveur ne soit pas bloqué. Un thread a également été ajouté afin de recevoir les entrées du côté du serveur. Ce dernier thread servait essentiellement à tester rapidement les fonctionnalités ainsi que de pouvoir arrêter le serveur.\\
-Du côté du client, celui-ci n'a en principe besoin que de ce connecter au serveur par la commande \textit{connect} et dès qu'il reçoit confirmation du serveur, peut commencer à envoyer ses requêtes. Le serveur arrive à recevoir des connections de plus de 50 clients. Nous n'avons pas trouvé pertinent d'essayer un nombre supérieur mais sommes persuadés que le serveur arrive à supporter beaucoup de clients.\\
-Une fois que la commande a été traitée par le serveur, ce dernier affiche le résultat dans sa propre fenêtre et de plus envoie la réponse au client. Afin d'envoyer la réponse au client, chaque fonction traitant la commande modifie un string global se trouvant dans le serveur. Ainsi une fois que la commande a été entièrement traitée, le string est envoyé en une seule fois au client afin de maximiser les performances. En effet l'envoie de messages est plus lent que la modification d'un string global et le client reçoit ainsi qu'une seule réponse contenant l'intégralité.
+L'envoi et la réception de messages entre le serveur et ses clients se fait avec de simples commandes \textit{recv} et \textit{send} qui doivent savoir sur quelle liaison recevoir ou envoyer les messages ainsi que le message et sa taille. Étant donné que la fonction \textit{accept} est bloquante, nous avons distribué les différentes connections sur des \textit{pthreads} afin que chacun gèrent la communication avec un seul client et que le serveur ne soit pas bloqué. Un thread a également été ajouté afin de recevoir les entrées du côté du serveur. Ce dernier thread servait essentiellement à tester rapidement les fonctionnalités ainsi que de pouvoir arrêter le serveur.\\
+Du côté du client, celui-ci n'a en principe besoin que de ce connecter au serveur par la commande \textit{connect} et dès qu'il reçoit confirmation du serveur,il  peut commencer à envoyer ses requêtes. Le serveur arrive à recevoir des connections de plus de 50 clients. Nous n'avons pas trouvé pertinent d'essayer un nombre supérieur mais sommes persuadés que le serveur arrive à supporter beaucoup de clients.\\
+Une fois que la commande a été traitée par le serveur, ce dernier affiche le résultat dans sa propre fenêtre et de plus envoie la réponse au client. Afin d'envoyer la réponse au client, chaque fonction traitant la commande modifie un string global se trouvant dans le serveur. Ainsi une fois que la commande a été entièrement traitée, le string est envoyé en une seule fois au client afin de maximiser les performances. En effet l'envoie de messages est plus lent que la modification d'un string global et le client reçoit ainsi qu'un seul message contenant l'intégralité de la réponse.
+
 \subsection{Lire, écrire et modifier des valeurs}
 Afin de vérifier qu'une commande reçue par le serveur (qu'elle soit envoyée par le client ou écrite directement dans la fenêtre du serveur) corresponde à la structure décrite dans le fichier README.txt, l'utilisation de regex s'est imposée. Si la commande ne correspond pas au regex, elle est tout simplement rejetée. L'utilisateur est informé que sa requête n'est pas valide et il peut en insérer une autre.
 
-Les fonctions permettant de manipuler le KV store grâce aux commandes sont:
+Les fonctions permettant de manipuler le KV Store grâce aux commandes sont les suivantes:
 \begin{lstlisting}
 void addpair(int newkey, char* newvalue);
 void deletepair(int key, char* value);
@@ -231,7 +232,7 @@ void modifyPair(int key, char* value1, char* value2);
 void readpair(int key, char* value);
 void printKV();
 \end{lstlisting}
-Les trois premières fonctions sont de type "write" et les deux dernières de type "read". En effet, il n'est pas permit d'ajouter, supprimer ou de modifier la même pair par peur d'avoir des comportement imprévisible et ingérable. En revanche, il est tout à fait possible de lire en même temps.\\
+Les trois premières fonctions sont de type "write" et les deux dernières de type "read". Il n'est pas permit d'ajouter, supprimer ou de modifier la même pair par peur d'avoir des comportement imprévisible et ingérable. En revanche, il est tout à fait possible de lire en même temps.\\
 
 \begin{itemize}
 \item "addPair" permet d'ajouter une valeur avec une clé spécifique, ou alors d'ajouter une valeur avec une clé générée si celle-ci n'est pas spécifiée.
