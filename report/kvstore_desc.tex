@@ -254,7 +254,7 @@ Le semaphore "resource" peut être bloqué par le reader ou le writer. Ils peuve
 
 Problème de cette solution: dans certains rares cas, elle peut résulter en une "starvation" des readers étant donné qu'ils n'ont pas la priorité. Afin de palier à ce problème, il aurait fallu que l'opération de bloquage des ressources partagées se termine toujours après un certain temps donné. Ainsi il aurait été nécessaire de stocker les readers et les writers dans une queue (FIFO) et obliger les semaphore à maintenir cet ordre.
 
-\subsection{scripts de tests}
+\subsection{Scripts de tests}
 Afin de pouvoir tester les différents accès automatiquement, nous avons ajouté plusieurs scripts \textit{.sh} dans le dossier /scripts. Le fichier README.txt indique comment lancer ces scripts. Ils fonctionnent de la manière suivante: les programmes sont d'abord nettoyés et compilés puis le serveur est lancé dans un nouveau terminal et un client fictif ajoute des valeurs arbitraires au KV Store afin que les lecteurs puissent lire des valeurs. Ensuite, selon le script que l'on a choisit, cela lance des lecteurs ou des rédacteurs dans un ordre précis afin de montrer par exemple que des lecteurs peuvent continuer à lire des parties du KV Store malgré la présence de rédacteurs dans la partie critiques. \\
 Ces scripts s'occupent de lancer des petits scripts qui eux lancent le serveur ou le client. Enfin, les petits scripts envoient des entrés d'utilisateur automatiquement aux clients ce qui enverra des requêtes au serveur. 
 \begin{lstlisting}
@@ -271,13 +271,13 @@ gnome-terminal -x sh -c "./scriptserver.sh"
 \end{lstlisting}
 l'option -x permet d'exécuter dans un nouveau terminal les commandes indiquées qui suivent. Ici \textit{sh} permet d'exécuter le script qui suit et l'option -c permet d'indiquer que le script se trouve dans un string.
 
-\section{apprentissage}
+\section{Apprentissage}
 \textbf{Andrea:} N'ayant aucune connaissance concernant les semaphores et les mutex avant ce cours, j'ai du énormément m'informer à ce sujet. Ensuite, il a fallut décider d'une stratégie adéquate au sein de l'équipe pour l'implémentation des accès sécurisés entre readers et writers. Cette partie a causé quelques soucis notamment au niveau de la séparation du tableau en deux parties. Afin de mener à bien l'intégralité du projet il a été important d'avoir une bonne communication au sein de l'équipe et une bonne répartition des tâches. J'ajouterais que le projet est fort intéressant à réaliser et très divertissant.\\
 \textbf{Jonas:} Je n'étais pas du tout à l'aise avec les connections en TCP via des sockets, j'ai donc énormément appris concernant le fonctionnement pour ce genre de connections. Les threads ne sont pas évidents à gérer non plus car il m'était plus difficile de comprendre leur fonctionnement, cela restait très abstrait pour moi au début. Finalement, je m'attendais à ce qu'écrire des scripts en bash soit plus difficile mais cela n'a finalement pas pris autant de temps que prévu. Ayant déjà suivi énormément de cours qui traitaient des matières proches tels que les systèmes concurrents en Erlang, je n'ai pas eu trop de peine non plus à acquérir les différents concepts. Finalement, ce qui rendait parfois ce projet difficile était qu'à 3, nous ne savions parfois pas d'où provenait une erreur et c'était donc difficile de régler certains bugs. Il faut parfois rester simple au début et être sûr que cela fonctionne avant de passer plus loin et implémenter des choses moins importantes ce qui est parfois frustrant car on veut avancer rapidement dans le projet.\\
 \textbf{Ryan:} N'ayant jamais fait de tableau dynamique auparavant, j'ai rencontré plusieurs problèmes lors de la construction de la structure ainsi que lors de l'implémentation de la dynamicité du tableau; spécialement lors de la suppression d'un élément, laissant ainsi un trou dans le tableau. Néanmoins je crois avoir accumulé une certaine expérience non négligeable dans ce domaine. En outre, il est difficile de parfois comprendre ce qu'un autre membre du groupe a codé, cela implique d'avoir une structure de travail qu'il faut suivre prudemment.  
 
 \section{Conclusion}
-
+La solution présentée ainsi que le code répondent à la consigne, c'est-à-dire aux 5 fonctionnalités minimales. En outre, les décisions d'implémentation concernant la priorité des "readers"/"writters", de la structure de donnée ainsi que des accès simultanés semblent efficaces et optimisés dans leur forme, bien que ces solutions ne soient des plus idéales. 
 
 % Example image
 %\begin{figure}[ht]
