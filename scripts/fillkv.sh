@@ -7,5 +7,6 @@ a test3
 a test4
 a test5
 p
+s
 q
 EOF

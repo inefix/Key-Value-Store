@@ -25,7 +25,7 @@ int block_key_delete;
 // main launching the socket server and distributing the thread to handle several clients
 
 int main(int argc, char *argv[]) {
-    sleep_prog = 1;
+    sleep_prog = 0;
 
     int socketdesc, clsock;
     int *nwsock;
@@ -198,7 +198,7 @@ void *multiconnect(void* socketdesc) {
 int ctrlregex(char* msg) {
     int err, match;
     regex_t preg;
-    const char *str_regex = "(^[ad] .+)|(^ak [[:digit:]]+ .+)|(^r [[:digit:]]+)|(^rv .+)|(^dv .+)|(^m [[:digit:]]+ .+)|(^mv .+ .+)|^p|^q";
+    const char *str_regex = "(^[ad] .+)|(^ak [[:digit:]]+ .+)|(^r [[:digit:]]+)|(^rv .+)|(^dv .+)|(^m [[:digit:]]+ .+)|(^mv .+ .+)|^p|^q|^s";
     //structure of a msg: REGEX controlling this
     //a msg     --> add the msg and generate a key
     //ak 111 msg    --> add the msg at key 111
@@ -254,6 +254,9 @@ void processcmd(char* input) {
     } else if (mode[0] == 'q') {
         running = false;
         printf("server shut down\n");
+    } else if (mode[0] == 's') {
+        sleep_prog=1;
+        printf("mutex with sleep from now on\n");
     } else if (tok != NULL) {
         if (strcmp(mode, "a") == 0) {
             puts("add via value");
