@@ -1,12 +1,11 @@
 echo "creating writer"
-cd ..
+cd ../..
 ./client << EOF
-a test
-a test2
-a test3
-a test4
-a test5
 p
-s
+a test6
+m 1 test7
+d 2
+p
 q
 EOF
+sleep 8

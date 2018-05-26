@@ -1,5 +1,5 @@
 echo "creating reader"
-cd ..
+cd ../..
 
 ./client << EOF
 p

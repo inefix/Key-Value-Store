@@ -4,7 +4,7 @@ echo "cleaning"
 make clean
 echo "compiling"
 make
-cd scripts
+cd scripts/helper
 echo "launching the scripts"
 gnome-terminal -x sh -c "./scriptserver.sh"
 gnome-terminal -x sh -c "./fillkv.sh"
