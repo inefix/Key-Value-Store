@@ -237,6 +237,8 @@ Les trois premières fonctions sont de type "write" et les deux dernières de ty
 \item "addPair" permet d'ajouter une valeur avec une clé spécifique, ou alors d'ajouter une valeur avec une clé générée si celle-ci n'est pas spécifiée.
 \item "deletePair" permet de supprimer une valeur (ou plusieurs fois les mêmes valeurs identiques) ainsi que la/leurs clé(s), ou alors de supprimer une valeur spécifique si la clé est mentionnée.
 \item "modifyPair" permet de modifier une valeur (ou plusieurs fois les mêmes valeurs identiques), ou alors de modifier une valeur spécifique si la clé est mentionnée.
+\item "readpair" permet de lire une entrée dans le Key-Value Store autant bien si elle reçoit une valeur ou une clé. Elle parcourt l'intégralité du tableau à la recherche de l'entrée désirée. Le parcourt se fait en deux parties délimitées par les mutex. En effet, la partie protégée par les mutex doit tenir compte des entrées ajoutées, modifiées et supprimées au même moment.
+\item "printKV" fonctionne exactement sur le même principe que la fonction readpair à la différence qu'elle affiche l'intégralité du Key-Value Store et non pas qu'une entrée désirée.
 \end{itemize}
 
 
@@ -259,7 +261,7 @@ Rmutex et wmutex permettent d'éviter les race conditions pour les reader et les
 
 Problèmes de cette solution: dans certains rares cas, elle peut résulter en une "starvation" des readers étant donné qu'ils n'ont pas la priorité. Afin de palier à ce problème, il aurait fallu que l'opération de bloquage des ressources partagées se termine toujours après un certain temps donné. Ainsi il aurait été necessaire de stocker les readers et les writers dans une queue (FIFO) et obliger les semaphore à maintenir cet ordre.
 
-\subsection{scripts de tests}
+\subsection{Scripts de tests}
 Afin de pouvoir tester les différents accès automatiquement, nous avons ajouté plusieurs scripts \textit{.sh} dans le dossier /scripts. Le fichier README.txt indique comment lancer ces scripts. Ils fonctionnent de la manière suivante: les programmes sont d'abord nettoyé puis compilé puis le serveur est lancé dans un nouveau terminal et un client fictif ajoute des valeurs arbitraires au KV store afin que les lecteurs puissent lire des valeurs. Ensuite, selon le script que l'on a choisit, cela lance des lecteurs ou des rédacteurs dans un ordre précis afin de montrer par exemple que des lecteurs peuvent continuer à lire des parties du KV store malgré la présence de rédacteurs dans la partie critiques. \\
 Ces scripts s'occupe de lancer des petits scripts qui eux lance le serveur ou le client. Enfin, les petits scripts envoie des entrés d'utilisateur automatiquement au client ce qui enverra des requêtes au serveur. 
 \begin{lstlisting}
