@@ -198,8 +198,9 @@ if (newvalue != NULL) {
 }
 \end{lstlisting}
 
-Le tableau redimensionable a été choisit pour sa simplicité d'implémentation. Toutefois, tel qu'il est implémenté dans ce code, ce tableau comporte un inconvénient: il n'est pas de possibilité de réduire la mémoire alloué (la taille du tableau exacte) pour le tableau si les éléments sont supprimés. Les éléments sont ajouté dans les trous créés par les éléments supprimés afin de pallier au problème et optimiser l'utilisation de la mémoire. Il est aussi déconseillé d'allouer la mémoire à nouveau lorsque la taille du tableau est réduite, car une copie de ce dernier doit être faite à chaque processus de réduction. Des pertes d'éléments peuvent en être la conséquence.\\
-Une meilleure implémentation aurait été une liste lié (linked list), ainsi, le problème de dimensionnement lors d'une suppression d'élément disparaît.
+Le tableau redimensionable a été choisit pour sa simplicité d'implémentation. Les tableaux dynamiques bénéficient de nombreux avantages des tableaux, notamment la bonne localisation de la référence et l'utilisation du cache de données, la compacité (faible utilisation de la mémoire) et l'accès aléatoire. Ils ont généralement seulement une petite surcharge supplémentaire fixe pour stocker des informations sur la taille et la capacité. Cela rend les tableaux dynamiques un outil attrayant pour créer des structures de données compatibles avec le cache.\\
+Toutefois, tel qu'il est implémenté dans ce code, ce tableau comporte un inconvénient: il n'est pas de possibilité de réduire la mémoire alloué (la taille du tableau exacte) pour le tableau si les éléments sont supprimés. Les éléments sont ajouté dans les trous créés par les éléments supprimés afin de pallier au problème et optimiser l'utilisation de la mémoire. Il est aussi déconseillé d'allouer la mémoire à nouveau lorsque la taille du tableau est réduite, car une copie de ce dernier doit être faite à chaque processus de réduction. Des pertes d'éléments peuvent en être la conséquence.\\
+Une meilleure implémentation aurait été une liste lié (linked list), ainsi, le problème de dimensionnement lors d'une suppression d'élément disparaît. Par rapport aux listes chaînées, les tableaux dynamiques ont une indexation plus rapide (temps constant $O(1)$ par rapport au temps linéaire $O(n)$). Cependant, les tableaux dynamiques nécessitent un temps linéaire pour insérer ou supprimer à un emplacement arbitraire, car tous les éléments suivants doivent être déplacés, tandis que les listes chaînées peuvent le faire à un instant constant (temps de recherche + $O(1)$).
 
 \subsection{Communication server - clients}
 La communication entre le serveur et le client a été résolue par une liaison TCP utilisant les sockets \cite{TCP}. Ceux-ci sont initialisés dans le serveur et utilisent les librairies \textit{sys/socket.h} et \textit{arpa/inet.h}
@@ -231,6 +232,12 @@ void readpair(int key, char* value);
 void printKV();
 \end{lstlisting}
 Les trois premières fonctions sont de type "write" et les deux dernières de type "read". En effet, il n'est pas permit d'ajouter, supprimer ou de modifier la même pair par peur d'avoir des comportement imprévisible et ingérable. En revanche, il est tout à fait possible de lire en même temps.\\
+
+\begin{itemize}
+\item "addPair" permet d'ajouter une valeur avec une clé spécifique, ou alors d'ajouter une valeur avec une clé générée si celle-ci n'est pas spécifiée.
+\item "deletePair" permet de supprimer une valeur (ou plusieurs fois les mêmes valeurs identiques) ainsi que la/leurs clé(s), ou alors de supprimer une valeur spécifique si la clé est mentionnée.
+\item "modifyPair" permet de modifier une valeur (ou plusieurs fois les mêmes valeurs identiques), ou alors de modifier une valeur spécifique si la clé est mentionnée.
+\end{itemize}
 
 
 \subsection{Accès sécurisé des lecteurs/rédacteurs}
