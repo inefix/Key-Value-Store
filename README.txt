@@ -72,14 +72,17 @@ Aucune configuration spécifique n'est nécessaire.
 RUNNING THE TESTS
 -----------------
 
-Quatre fichiers test peuvent être lancés à l'aide des commandes suivantes dans le terminal
 
-  $ ./test1.sh
-  $ ./test2.sh
-  $ ./test3.sh
-  $ ./test4.sh
+5 fichiers test peuvent être lancés à l'aide des commandes suivantes dans le terminal
 
-Le test1 permet d'afficher....
-Le test2 permet d'afficher....
-Le test3 permet d'afficher....
-Le test4 permet d'afficher....
+  $ ./readerreader.sh
+  $ ./readerwriter.sh
+  $ ./writerwriter.sh
+  $ ./writerreader.sh
+  $ ./readernombre.sh
+
+Le comportement de chaque script est décrit dans ces derniers, les noms étant assez explicites de base. Ces scripts compilent et exécutent les programmes automatiquement en une seule commande.
+Concernant le dernier script, il permet de lancer une multitude de clients lecteurs en même temps afin de tester le serveur (reglé à 50 en ce moment).
+
+ 
+
