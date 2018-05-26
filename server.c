@@ -166,7 +166,7 @@ void *multiconnect(void* socketdesc) {
 
             snprintf(rep_client, sizeof (rep_client), "request done"); //if add key
 
-            processcmd(clmsg);
+            processcmd(clmsg);    //analyse the message of the client
 
             printf("Server is sending response... \n");
 
@@ -174,7 +174,7 @@ void *multiconnect(void* socketdesc) {
             //printf("%s\n", rep_client);
             //printf("clsock : %d\n", clsock);
 
-            usleep(10000);   //in microseconds
+            usleep(10000);   //in microseconds    --> sinon le server est trop rapide et le client ne reçoit pas le message
 
             byte = send(clsock, rep_client, strlen(rep_client) + 1, 0);
             if (byte == -1) perror("Error on Recv");
@@ -188,10 +188,8 @@ void *multiconnect(void* socketdesc) {
             //send message to the client
             snprintf(reply, sizeof (reply), "client %d, your message is not valid! Try again", persID->id); //response to client
             byte = send(clsock, reply, strlen(reply) + 1, 0);
-            if (byte == -1)
-                perror("Error on Recv");
-            else if (byte == 0)
-                printf("Connection is close\n");
+            if (byte == -1) perror("Error on Recv");
+            else if (byte == 0) printf("Connection is close\n");
         }
         memset(reply, 0, MSGSIZE);
         memset(clmsg, 0, MSGSIZE);
@@ -246,6 +244,7 @@ void* readcmd(void* unused) {
             cmd[strlen(cmd) - 1] = '\0'; //in oder to delete the new line
 
             processcmd(cmd);
+
             printf("\n");
         } else {
             printdefault();
