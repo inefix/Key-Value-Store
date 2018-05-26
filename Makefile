@@ -30,8 +30,8 @@ client.o :  client.c
 #-----------------------------------------------
 # Server
 #-----------------------------------------------
-server.o : server.c server.h
+server.o : server.c headers/server.h
 	gcc -pthread -Wall -c server.c
 
-dynamicArray.o : dynamicArray.c dynamicArray.h
+dynamicArray.o : dynamicArray.c headers/dynamicArray.h
 	gcc -pthread -Wall -c dynamicArray.c

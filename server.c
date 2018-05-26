@@ -3,8 +3,8 @@
  * Description of the program:
  */
 
-#include "server.h"
-#include "dynamicArray.h"
+#include "headers/server.h"
+#include "headers/dynamicArray.h"
 
 KVstore *kv; // our main KV store array
 char rep_client[MSGSIZE];
@@ -153,7 +153,7 @@ void *multiconnect(void* socketdesc) {
 
             processcmd(clmsg);
 
-            printf("Server is sending response\n");
+            printf("Server is sending response... ");
 
             //printf("%ld\n", strlen(rep_client));
             //printf("%s\n", rep_client);
@@ -164,8 +164,8 @@ void *multiconnect(void* socketdesc) {
             byte = send(clsock, rep_client, strlen(rep_client) + 1, 0);
             if (byte == -1) perror("Error on Recv");
             else if (byte == 0) printf("Connection is close\n");
-
-            //printf("Server have send response\n");
+			
+            printf("Server have sent response\n");
 
         } else {
             printf("client %i said a not valid string: %s\n", persID->id, clmsg);

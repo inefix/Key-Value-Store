@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#include "server.h"
-#include "dynamicArray.h"
+#include "headers/server.h"
+#include "headers/dynamicArray.h"
 
 extern KVstore *kv; // our main KV store array
 extern char rep_client[MSGSIZE];
