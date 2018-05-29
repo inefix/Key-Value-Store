@@ -195,7 +195,7 @@ void *multiconnect(void* socketdesc) {
         memset(clmsg, 0, MSGSIZE);
     }
     if (bytesread == 0) {
-        printf("client %i disconnected", persID->id);
+        printf("client %i disconnected\n", persID->id);
     } else if (bytesread == -1) {
         perror("recv failed");
     }
