@@ -12,7 +12,7 @@ sleep 5 # let the server start
 gnome-terminal -x sh -c "./scriptreader.sh"
 gnome-terminal -x sh -c "./scriptreader.sh"
 sleep 10
-cd ..
+cd ../..
 echo "cleaning"
 make clean
 echo "script terminated correctly"

@@ -14,7 +14,7 @@ gnome-terminal -x sh -c "./scriptwriter.sh"
 sleep 2
 gnome-terminal -x sh -c "./scriptwriter.sh"
 sleep 10
-cd ..
+cd ../..
 echo "cleaning"
 make clean
 echo "script terminated correctly"

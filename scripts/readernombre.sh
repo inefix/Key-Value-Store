@@ -16,7 +16,7 @@ do
 	sleep 0.1
 done
 sleep 10
-cd ..
+cd ../..
 echo "cleaning"
 make clean
 echo "script terminated correctly"

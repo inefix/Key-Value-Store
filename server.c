@@ -158,7 +158,7 @@ void *multiconnect(void* socketdesc) {
         clmsg[strlen(clmsg) - 1] = '\0'; //in oder to delete the new line
 
         // check regex and react
-        if (ctrlregex(clmsg) == 0 && clmsg[0] != 's' && clmsg[0] != 'q') {
+        if (ctrlregex(clmsg) == 0 || clmsg[0] != 's') {
             //client side input processing
             printf("client %i said a valid string: %s\n", persID->id, clmsg);
             snprintf(reply, sizeof (reply), "client %d, your message is valid", persID->id); //response to client
@@ -270,9 +270,15 @@ void processcmd(char* input) {
     } else if (mode[0] == 'q') {
         running = false;
         printf("server shut down\n");
-    } else if (mode[0] == 's') {
-        sleep_prog = 1;
-        printf("mutex with sleep from now on\n");
+    } else if (mode[0] == 's') {// switch secure mode on or off with timer
+		if(sleep_prog==0){
+			sleep_prog = 1;
+			printf("mutex with sleep ON\n");
+		}
+		else{
+			sleep_prog = 0;
+			printf("mutex with sleep OFF\n");
+        }
     } else if (tok != NULL) {
         if (strcmp(mode, "a") == 0) {
             puts("add via value");
