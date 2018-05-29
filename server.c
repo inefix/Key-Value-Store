@@ -425,7 +425,7 @@ void addpair(int newkey, char* newvalue) { //write
     }
 
     if (sleep_prog == 1) {
-        sleep(3);
+        sleep(SLEEPLENG);
     }
 
 
@@ -488,7 +488,7 @@ void modifyPair(int key, char* value, char* value2) { //write
     }
 
     if (sleep_prog == 1) {
-        sleep(3);
+        sleep(SLEEPLENG);
     }
 
     pthread_mutex_unlock(&resource);
@@ -543,7 +543,7 @@ void deletepair(int key, char* value) { //write
     }
 
     if (sleep_prog == 1) {
-        sleep(3);
+        sleep(SLEEPLENG);
     }
 
     pthread_mutex_unlock(&resource);

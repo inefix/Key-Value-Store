@@ -31,6 +31,7 @@
 #define MSGSIZE 1024
 #define STORESIZE 1000 // modify later for dynamic size
 #define VALUESIZE 50
+#define SLEEPLENG 5
 
 
 // Key value storage.
