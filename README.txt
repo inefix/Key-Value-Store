@@ -24,7 +24,7 @@ L'utilisation de sémaphore ou de mutex étudié en cours permet de pallier au p
 PREREQUISTES
 ------------
 
-Afin d'exécuter ce programme, vous avez besoin d'un compilateur C (tel que gcc par exemple) sur votre machine
+Afin d'exécuter ce programme, vous avez besoin d'un compilateur C (tel que gcc par exemple) sur votre machine. Les scripts ne fonctionnent que sous les systèmes Unix (quelques petites modifications permettraient de les faire fonctionner sous MAC ou Windows)
 
 
 
